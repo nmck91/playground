@@ -569,27 +569,149 @@
         }
 
         @media (max-width: 768px) {
+          .container {
+            padding: var(--space-8);
+          }
+
           .child-grid {
             grid-template-columns: 1fr;
           }
-          
+
+          .header h1 {
+            font-size: var(--font-size-2xl);
+            margin-bottom: var(--space-4);
+          }
+
+          .week-display {
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--space-12);
+          }
+
+          .section {
+            margin-bottom: var(--space-16);
+          }
+
+          .section-header {
+            padding: var(--space-12);
+          }
+
+          .section-header h2 {
+            font-size: var(--font-size-lg);
+          }
+
+          .section-content {
+            padding: var(--space-12);
+          }
+
+          .child-card {
+            padding: var(--space-12);
+          }
+
+          .child-name {
+            font-size: var(--font-size-base);
+          }
+
+          .child-total {
+            font-size: var(--font-size-base);
+          }
+
           .habit-row {
-            grid-template-columns: 1fr repeat(7, 30px);
+            grid-template-columns: 1fr repeat(7, 28px);
+            gap: var(--space-2);
+            padding: var(--space-6);
           }
-          
+
           .days-header {
-            grid-template-columns: 1fr repeat(7, 30px);
+            grid-template-columns: 1fr repeat(7, 28px);
+            gap: var(--space-2);
           }
-          
+
+          .day-label {
+            font-size: 10px;
+          }
+
+          .habit-name {
+            font-size: 11px;
+            line-height: 1.2;
+          }
+
           .star-btn {
-            width: 28px;
-            height: 28px;
-            font-size: 20px;
+            width: 24px;
+            height: 24px;
+            font-size: 18px;
           }
-          
+
           .controls {
             flex-direction: column;
-            align-items: center;
+            align-items: stretch;
+            gap: var(--space-8);
+          }
+
+          .btn {
+            width: 100%;
+            padding: var(--space-12) var(--space-16);
+          }
+
+          .progress-text {
+            font-size: 10px;
+          }
+
+          .rewards-modal {
+            max-height: 90vh;
+            margin: var(--space-8);
+          }
+
+          .rewards-header,
+          .settings-content {
+            padding: var(--space-12);
+          }
+
+          .rewards-content {
+            padding: var(--space-12);
+          }
+
+          .rewards-section {
+            margin-bottom: var(--space-16);
+          }
+
+          .rewards-section h3 {
+            font-size: var(--font-size-base);
+          }
+
+          .reward-item {
+            padding: var(--space-8);
+            font-size: var(--font-size-sm);
+          }
+
+          .reward-name {
+            font-size: var(--font-size-sm);
+          }
+        }
+
+        @media (max-width: 480px) {
+          .habit-row {
+            grid-template-columns: 1fr repeat(7, 24px);
+            gap: var(--space-1);
+            padding: var(--space-4);
+          }
+
+          .days-header {
+            grid-template-columns: 1fr repeat(7, 24px);
+            gap: var(--space-1);
+          }
+
+          .day-label {
+            font-size: 9px;
+          }
+
+          .habit-name {
+            font-size: 10px;
+          }
+
+          .star-btn {
+            width: 20px;
+            height: 20px;
+            font-size: 16px;
           }
         }
     </style>
