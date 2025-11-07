@@ -1,0 +1,97 @@
+<div class="calendar-container">
+  <div class="calendar-header">
+    <h1 class="calendar-title">Family Calendar</h1>
+    <div class="calendar-controls">
+      <button (click)="previousMonth()" class="btn btn-nav" aria-label="Previous month">
+        &#8249;
+      </button>
+      <span class="current-month">{{ currentMonth() }} {{ currentYear() }}</span>
+      <button (click)="nextMonth()" class="btn btn-nav" aria-label="Next month">
+        &#8250;
+      </button>
+      <button (click)="goToToday()" class="btn btn-today">Today</button>
+    </div>
+  </div>
+
+  <div class="calendar-grid">
+    <!-- Day headers -->
+    <div class="day-header" *ngFor="let day of dayNames">
+      {{ day }}
+    </div>
+
+    <!-- Calendar days -->
+    <div
+      *ngFor="let day of calendarDays()"
+      class="calendar-day"
+      [class.other-month]="!day.isCurrentMonth"
+      [class.today]="isToday(day.date)"
+      [class.selected]="isSelected(day.date)"
+      (click)="day.date && selectDate(day.date)"
+    >
+      <div class="day-number" *ngIf="day.date">
+        {{ day.date.getDate() }}
+      </div>
+      <div class="day-events" *ngIf="day.events.length > 0">
+        <div
+          *ngFor="let event of day.events.slice(0, 3)"
+          class="event-indicator"
+          [style.background-color]="getEventColor(event)"
+          [title]="event.title"
+        >
+          <span class="event-title">{{ event.title }}</span>
+        </div>
+        <div *ngIf="day.events.length > 3" class="more-events">
+          +{{ day.events.length - 3 }} more
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Selected date details -->
+  <div *ngIf="selectedDate()" class="selected-date-panel">
+    <h3>{{ selectedDate()!.toDateString() }}</h3>
+    <div class="selected-date-events">
+      <div *ngIf="getEventsForDate(selectedDate()!).length === 0" class="no-events">
+        No events scheduled
+      </div>
+      <div
+        *ngFor="let event of getEventsForDate(selectedDate()!)"
+        class="event-card"
+        [style.border-left-color]="getEventColor(event)"
+      >
+        <div class="event-card-content">
+          <div class="event-info">
+            <h4>{{ event.title }}</h4>
+            <p *ngIf="event.description">{{ event.description }}</p>
+            <div class="event-meta">
+              <span class="event-time">
+                {{ event.startDate | date:'shortTime' }} - {{ event.endDate | date:'shortTime' }}
+              </span>
+              <span class="event-category">{{ event.category }}</span>
+              <span *ngIf="event.isRecurring" class="event-recurring" title="Recurring event">🔁</span>
+              <span *ngIf="event.location" class="event-location" title="{{ event.location }}">📍 {{ event.location }}</span>
+            </div>
+          </div>
+          <div class="event-actions">
+            <button
+              class="btn-icon btn-edit"
+              (click)="onEditEvent(event, $event)"
+              title="Edit event"
+              aria-label="Edit event"
+            >
+              ✏️
+            </button>
+            <button
+              class="btn-icon btn-delete"
+              (click)="onDeleteEvent(event.id, $event)"
+              title="Delete event"
+              aria-label="Delete event"
+            >
+              🗑️
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
