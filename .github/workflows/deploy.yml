@@ -1,12 +1,22 @@
-name: Deploy to Vercel
+name: Deploy Reward Chart to Vercel
 
 on:
   push:
     branches:
       - main
+    paths:
+      - 'apps/reward-chart/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vercel.json'
   pull_request:
     branches:
       - main
+    paths:
+      - 'apps/reward-chart/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'vercel.json'
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
