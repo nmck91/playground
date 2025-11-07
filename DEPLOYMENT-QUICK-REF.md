@@ -7,10 +7,18 @@
 ## 🚀 How Deployments Work
 
 ```
-Push to main → GitHub Actions builds with Nx → Deploys to Vercel
+Push to main → CI runs (lint/test/build/e2e) → CI passes ✅ → Deploys to Vercel
 ```
 
-**Important:** Deployments happen automatically when you push changes to `main` branch.
+**Important:** Deployments happen automatically only after CI passes successfully.
+
+### Workflow Sequence
+1. **CI Workflow** runs first (lint, test, build, e2e for all apps)
+2. **Deployment Workflows** trigger only if CI succeeds
+3. **Path Filtering** checks if app-specific files changed
+4. **Deploy** happens only for apps with relevant changes
+
+**Safety:** If CI fails, deployments are automatically blocked.
 
 ---
 
@@ -18,10 +26,10 @@ Push to main → GitHub Actions builds with Nx → Deploys to Vercel
 
 | App | Workflow File | Deploys When |
 |-----|---------------|--------------|
-| **Reward Chart** | `.github/workflows/deploy.yml` | Changes to `apps/reward-chart/**` |
-| **Family Calendar** | `.github/workflows/deploy-family-calendar.yml` | Changes to `apps/family-calendar/**` |
+| **Reward Chart** | `.github/workflows/deploy-reward-chart.yml` | Changes to `apps/reward-chart/**` AND CI passes |
+| **Family Calendar** | `.github/workflows/deploy-family-calendar.yml` | Changes to `apps/family-calendar/**` AND CI passes |
 
-**Note:** Changes to `package.json`, `package-lock.json`, or `nx.json` trigger ALL app deployments.
+**Note:** Changes to `package.json`, `package-lock.json`, or `nx.json` can trigger deployments for multiple apps, but only after CI passes.
 
 ---
 
@@ -64,19 +72,43 @@ gh run list --limit 5
 ### Issue: "My changes didn't trigger a deployment"
 
 **Check:**
-1. Did you push to `main` branch?
-2. Are your changes in `apps/{app-name}/**` path?
-3. Check GitHub Actions tab for workflow runs
+1. Did CI pass? (Deployments only run after CI succeeds)
+2. Did you push to `main` branch?
+3. Are your changes in `apps/{app-name}/**` path?
+4. Check GitHub Actions tab → Look for both CI and deployment workflows
 
 **Fix:**
 ```bash
 # Verify branch
 git branch --show-current  # Should say "main"
 
-# Trigger deployment manually if needed
-git commit --allow-empty -m "Trigger deployment"
-git push
+# Check CI status
+# Go to: https://github.com/nmck91/playground/actions
+# Look for the "CI" workflow - it must show ✅
+
+# If CI failed, fix the errors first, then push
+# If CI passed but no deployment, check path filtering
+git diff HEAD~1 --name-only  # Shows what changed
 ```
+
+### Issue: "CI passed but deployment didn't run"
+
+**Cause:** Your changes didn't affect the app's files
+
+**Check:**
+```bash
+# See what files changed
+git diff HEAD~1 --name-only
+
+# Deployment triggers when these change:
+# - apps/reward-chart/** (for reward-chart)
+# - apps/family-calendar/** (for family-calendar)
+# - package.json
+# - package-lock.json
+# - nx.json
+```
+
+**Fix:** This is expected behavior. Deployments only run when relevant files change.
 
 ### Issue: "The provided path does not exist" during deployment
 
@@ -123,26 +155,70 @@ Before pushing to main:
 - [ ] Run `npx nx lint {app}` - No linting errors
 - [ ] Run `npx nx test {app}` - All tests pass
 - [ ] Run `npx nx build {app} --configuration=production` - Build succeeds
+- [ ] Run `npx nx e2e {app}-e2e` - E2E tests pass
 - [ ] Test the built app locally (see commands above)
 - [ ] Check bundle size warnings (should be under 500kb)
+
+**Note:** CI runs all these checks automatically. If any fail, deployment is blocked.
 
 ---
 
 ## 📊 Understanding the Workflow
 
-Each deployment follows these exact steps:
+### Complete Flow
 
-```yaml
-1. Checkout code               # Get latest from GitHub
-2. Setup Node.js v20           # Install Node with npm cache
-3. npm ci                      # Install dependencies (fast)
-4. nx build {app} --prod       # Nx builds the app
-5. Install Vercel CLI          # Get deployment tool
-6. Create vercel.json          # Configure SPA routing
-7. vercel deploy --prod        # Upload to Vercel
+```
+┌─────────────────────────────────────────────────────────┐
+│  1. Push to main                                        │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+                  ▼
+┌─────────────────────────────────────────────────────────┐
+│  2. CI Workflow Runs (2-5 min)                          │
+│     • Checkout code                                     │
+│     • Install dependencies                              │
+│     • Run lint for all apps                             │
+│     • Run tests for all apps                            │
+│     • Run builds for all apps                           │
+│     • Run e2e tests for all apps                        │
+└─────────────────┬───────────────────────────────────────┘
+                  │
+         ┌────────┴────────┐
+         │                 │
+     CI Failed ❌      CI Passed ✅
+         │                 │
+    STOP HERE             │
+  No deployment           │
+                          ▼
+         ┌────────────────────────────────┐
+         │ 3. Check Changed Files         │
+         │    (Path Filter)               │
+         └────┬──────────────────┬────────┘
+              │                  │
+    reward-chart changed   family-calendar changed
+              │                  │
+              ▼                  ▼
+    ┌─────────────────┐   ┌──────────────────┐
+    │ 4a. Deploy      │   │ 4b. Deploy       │
+    │ Reward Chart    │   │ Family Calendar  │
+    │ (1-2 min)       │   │ (1-2 min)        │
+    └─────────────────┘   └──────────────────┘
 ```
 
-**Time:** Usually 2-4 minutes total
+### Deployment Steps (after CI passes)
+
+```yaml
+1. Check changed files         # Skip if app unchanged
+2. Checkout code               # Get latest from GitHub
+3. Setup Node.js v20           # Install Node with npm cache
+4. npm ci                      # Install dependencies
+5. nx build {app} --prod       # Nx builds the app
+6. Install Vercel CLI          # Get deployment tool
+7. Create vercel.json          # Configure SPA routing
+8. vercel deploy --prod        # Upload to Vercel
+```
+
+**Total Time:** Usually 3-7 minutes (CI + deployment)
 
 ---
 
