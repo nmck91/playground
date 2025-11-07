@@ -1,0 +1,29 @@
+<div class="child-card" [ngClass]="person.className">
+  <div class="child-header">
+    <div class="child-name">{{ person.name }}</div>
+    <div class="child-total">{{ totalStars }} ⭐</div>
+  </div>
+
+  <div class="days-header">
+    <div></div>
+    <div class="day-label" *ngFor="let day of days">{{ day }}</div>
+  </div>
+
+  <div class="habits-grid">
+    <div class="habit-row" *ngFor="let habit of habits; let habitIndex = index; trackBy: trackByIndex">
+      <div class="habit-name" [innerHTML]="habit"></div>
+      <button
+        class="star-btn"
+        [ngClass]="isStarFilled(habitIndex, dayIndex) ? 'filled' : 'empty'"
+        *ngFor="let day of days; let dayIndex = index; trackBy: trackByIndex"
+        (click)="onStarClick(habitIndex, dayIndex)">
+        {{ isStarFilled(habitIndex, dayIndex) ? '★' : '☆' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-fill" [style.width.%]="progressPercent"></div>
+  </div>
+  <div class="progress-text">{{ totalStars }} / {{ nextMilestone }} stars to next reward</div>
+</div>

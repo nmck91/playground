@@ -1,10 +1,71 @@
-<!-- Redirect to prototype -->
-<script>
-  window.location.href = '/index.html';
-</script>
+<div class="container" *ngIf="chartData$ | async as chartData">
+  <app-header
+    [weekDisplay]="weekDisplay"
+    (showRewards)="onShowRewards()"
+    (showSettings)="onShowSettings()"
+    (newWeek)="onNewWeek()">
+  </app-header>
 
-<div style="text-align: center; padding: 50px; font-family: sans-serif;">
-  <h1>🌟 Loading Family Reward Chart...</h1>
-  <p>Redirecting to the reward chart...</p>
-  <p>If you're not redirected, <a href="/index.html">click here</a></p>
+  <!-- Kids Chart Section -->
+  <div class="section">
+    <div class="section-header">
+      <h2>👶 Kids' Chart</h2>
+    </div>
+    <div class="section-content">
+      <div class="child-grid">
+        <app-child-card
+          *ngFor="let child of chartData.children; let i = index"
+          [person]="child"
+          [personIndex]="i"
+          [section]="'kids'"
+          [habits]="chartData.kidsHabits"
+          [days]="chartData.days"
+          [starsData]="chartData.kidsStars"
+          [totalStars]="calculateTotalStars('kids', i)"
+          [nextMilestone]="getNextMilestone(calculateTotalStars('kids', i), false)"
+          (starToggled)="onStarToggled($event)">
+        </app-child-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Parents Chart Section -->
+  <div class="section">
+    <div class="section-header">
+      <h2>👨‍👩‍👧‍👦 Rate Mum & Dad!</h2>
+      <button class="toggle-btn" (click)="toggleParentsSection()">📊</button>
+    </div>
+    <div class="section-content" [class.hidden]="!chartData.parentsVisible">
+      <div class="child-grid">
+        <app-child-card
+          *ngFor="let parent of chartData.parents; let i = index"
+          [person]="parent"
+          [personIndex]="i"
+          [section]="'parents'"
+          [habits]="chartData.parentHabits"
+          [days]="chartData.days"
+          [starsData]="chartData.parentsStars"
+          [totalStars]="calculateTotalStars('parents', i)"
+          [nextMilestone]="getNextMilestone(calculateTotalStars('parents', i), true)"
+          (starToggled)="onStarToggled($event)">
+        </app-child-card>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rewards Modal -->
+  <app-rewards-modal
+    [visible]="showRewardsModal"
+    [kidsRewards]="chartData.kidsRewards"
+    [parentsRewards]="chartData.parentsRewards"
+    (close)="onCloseRewards()">
+  </app-rewards-modal>
+
+  <!-- Settings Modal -->
+  <app-settings-modal
+    [visible]="showSettingsModal"
+    [childrenNames]="getChildrenNames(chartData)"
+    (close)="onCloseSettings()"
+    (save)="onSaveSettings($event)">
+  </app-settings-modal>
 </div>

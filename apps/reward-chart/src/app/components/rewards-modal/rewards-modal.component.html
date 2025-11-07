@@ -1,0 +1,35 @@
+<div
+  class="rewards-overlay"
+  [class.visible]="visible"
+  (click)="onOverlayClick($event)">
+  <div class="rewards-modal" (click)="$event.stopPropagation()">
+    <div class="rewards-header">
+      <h2>🎁 Reward Menu</h2>
+      <button class="close-btn" (click)="onClose()">&times;</button>
+    </div>
+    <div class="rewards-content">
+      <div class="rewards-section">
+        <h3>🧒 Kids' Rewards</h3>
+        <div class="rewards-grid">
+          <div class="reward-item" *ngFor="let reward of kidsRewards; trackBy: trackByIndex">
+            <div class="reward-info">
+              <div class="reward-name" [innerHTML]="reward.name"></div>
+            </div>
+            <div class="reward-stars">{{ reward.stars }} ⭐</div>
+          </div>
+        </div>
+      </div>
+      <div class="rewards-section">
+        <h3>👨‍👩‍👧‍👦 Parents' Rewards</h3>
+        <div class="rewards-grid">
+          <div class="reward-item" *ngFor="let reward of parentsRewards; trackBy: trackByIndex">
+            <div class="reward-info">
+              <div class="reward-name" [innerHTML]="reward.name"></div>
+            </div>
+            <div class="reward-stars">{{ reward.stars }} ⭐</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

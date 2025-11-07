@@ -1,0 +1,127 @@
+.rewards-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-16);
+}
+
+.rewards-overlay.visible {
+  display: flex;
+}
+
+.rewards-modal {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  max-width: 800px;
+  width: 100%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.rewards-header {
+  padding: var(--space-16);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rewards-content {
+  padding: var(--space-16);
+}
+
+.rewards-section {
+  margin-bottom: var(--space-24);
+}
+
+.rewards-section h3 {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  margin-bottom: var(--space-12);
+  color: var(--color-primary);
+}
+
+.rewards-grid {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.reward-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-12);
+  background: var(--color-bg-1);
+  border-radius: var(--radius-base);
+  border-left: 4px solid var(--color-primary);
+}
+
+.reward-info {
+  flex: 1;
+}
+
+.reward-name {
+  font-weight: var(--font-weight-medium);
+  margin-bottom: var(--space-4);
+}
+
+.reward-stars {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: var(--font-size-xl);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+}
+
+.close-btn:hover {
+  background: var(--color-secondary);
+  color: var(--color-text);
+}
+
+@media (max-width: 768px) {
+  .rewards-modal {
+    max-height: 90vh;
+    margin: var(--space-8);
+  }
+
+  .rewards-header,
+  .rewards-content {
+    padding: var(--space-12);
+  }
+
+  .rewards-section {
+    margin-bottom: var(--space-16);
+  }
+
+  .rewards-section h3 {
+    font-size: var(--font-size-base);
+  }
+
+  .reward-item {
+    padding: var(--space-8);
+    font-size: var(--font-size-sm);
+  }
+
+  .reward-name {
+    font-size: var(--font-size-sm);
+  }
+}
