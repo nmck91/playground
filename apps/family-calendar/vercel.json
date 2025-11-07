@@ -4,5 +4,11 @@
   "buildCommand": "npx nx build family-calendar --configuration=production",
   "outputDirectory": "dist/apps/family-calendar/browser",
   "framework": null,
-  "installCommand": "npm ci"
+  "installCommand": "npm ci",
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
 }
