@@ -46,17 +46,19 @@ jobs:
           cat > dist/apps/family-calendar/browser/vercel.json << 'EOF'
           {
             "version": 2,
-            "routes": [
+            "rewrites": [
               {
-                "src": "/(.*)",
-                "dest": "/index.html"
+                "source": "/(.*)",
+                "destination": "/index.html"
               }
             ]
           }
           EOF
 
       - name: Deploy to Vercel
-        run: vercel deploy dist/apps/family-calendar/browser --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
+        run: |
+          cd dist/apps/family-calendar/browser
+          vercel --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
