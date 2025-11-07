@@ -58,14 +58,14 @@
     [visible]="showRewardsModal"
     [kidsRewards]="chartData.kidsRewards"
     [parentsRewards]="chartData.parentsRewards"
-    (close)="onCloseRewards()">
+    (closeModal)="onCloseRewards()">
   </app-rewards-modal>
 
   <!-- Settings Modal -->
   <app-settings-modal
     [visible]="showSettingsModal"
     [childrenNames]="getChildrenNames(chartData)"
-    (close)="onCloseSettings()"
-    (save)="onSaveSettings($event)">
+    (closeModal)="onCloseSettings()"
+    (saveSettings)="onSaveSettings($event)">
   </app-settings-modal>
 </div>

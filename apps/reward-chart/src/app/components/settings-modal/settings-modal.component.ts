@@ -12,8 +12,8 @@ import { FormsModule } from '@angular/forms';
 export class SettingsModalComponent implements OnChanges {
   @Input() visible = false;
   @Input() childrenNames: string[] = [];
-  @Output() close = new EventEmitter<void>();
-  @Output() save = new EventEmitter<string[]>();
+  @Output() closeModal = new EventEmitter<void>();
+  @Output() saveSettings = new EventEmitter<string[]>();
 
   child1Name = '';
   child2Name = '';
@@ -28,11 +28,11 @@ export class SettingsModalComponent implements OnChanges {
   }
 
   onClose(): void {
-    this.close.emit();
+    this.closeModal.emit();
   }
 
   onSave(): void {
-    this.save.emit([this.child1Name, this.child2Name, this.child3Name]);
+    this.saveSettings.emit([this.child1Name, this.child2Name, this.child3Name]);
     this.onClose();
   }
 

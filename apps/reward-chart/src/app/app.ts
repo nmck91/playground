@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { ChartData } from './models/chart-data.model';
@@ -21,13 +21,13 @@ import { SettingsModalComponent } from './components/settings-modal/settings-mod
   styleUrl: './app.css',
 })
 export class App implements OnInit {
+  private chartDataService = inject(ChartDataService);
+
   chartData$!: Observable<ChartData>;
   weekDisplay = '';
 
   showRewardsModal = false;
   showSettingsModal = false;
-
-  constructor(private chartDataService: ChartDataService) {}
 
   async ngOnInit(): Promise<void> {
     this.chartData$ = this.chartDataService.chartData$;

@@ -1,14 +1,13 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
-import { ChartData, StarsData } from '../models/chart-data.model';
-import { FamilyMember } from '../models/family-member.model';
-import { Reward } from '../models/reward.model';
+import { ChartData } from '../models/chart-data.model';
 import { SupabaseService } from './supabase.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChartDataService {
+  private supabaseService = inject(SupabaseService);
   private familyMemberIds: Map<string, string> = new Map();
 
   private initialData: ChartData = {
@@ -70,7 +69,7 @@ export class ChartDataService {
   private chartDataSubject = new BehaviorSubject<ChartData>(this.initialData);
   public chartData$: Observable<ChartData> = this.chartDataSubject.asObservable();
 
-  constructor(private supabaseService: SupabaseService) {
+  constructor() {
     this.initializeStars();
   }
 
@@ -145,7 +144,7 @@ export class ChartDataService {
 
   private getMemberNameById(id: string): string | undefined {
     return Array.from(this.familyMemberIds.entries())
-      .find(([_, memberId]) => memberId === id)?.[0];
+      .find(([, memberId]) => memberId === id)?.[0];
   }
 
   async toggleStar(
@@ -187,7 +186,7 @@ export class ChartDataService {
     return total;
   }
 
-  getNextMilestone(stars: number, isParent: boolean = false): number {
+  getNextMilestone(stars: number, isParent = false): number {
     const data = this.chartDataSubject.value;
     const rewards = isParent ? data.parentsRewards : data.kidsRewards;
     const milestones = [...new Set(rewards.map(r => r.stars))].sort((a, b) => a - b);

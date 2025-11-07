@@ -1,8 +1,12 @@
 <div
   class="settings-overlay"
   [class.visible]="visible"
-  (click)="onOverlayClick($event)">
-  <div class="settings-modal" (click)="$event.stopPropagation()">
+  (click)="onOverlayClick($event)"
+  (keydown.escape)="onClose()"
+  tabindex="0"
+  role="dialog"
+  aria-modal="true">
+  <div class="settings-modal" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="document">
     <div class="settings-header">
       <h2>⚙️ Settings</h2>
       <button class="close-btn" (click)="onClose()">&times;</button>

@@ -13,10 +13,10 @@ export class RewardsModalComponent {
   @Input() visible = false;
   @Input() kidsRewards: Reward[] = [];
   @Input() parentsRewards: Reward[] = [];
-  @Output() close = new EventEmitter<void>();
+  @Output() closeModal = new EventEmitter<void>();
 
   onClose(): void {
-    this.close.emit();
+    this.closeModal.emit();
   }
 
   onOverlayClick(event: MouseEvent): void {

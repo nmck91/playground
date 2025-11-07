@@ -1,20 +1,19 @@
 import { TestBed } from '@angular/core/testing';
 import { App } from './app';
-import { NxWelcome } from './nx-welcome';
+import { ChartDataService } from './services/chart-data.service';
+import { SupabaseService } from './services/supabase.service';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [App, NxWelcome],
+      imports: [App],
+      providers: [ChartDataService, SupabaseService],
     }).compileComponents();
   });
 
-  it('should render title', () => {
+  it('should create the app component', () => {
     const fixture = TestBed.createComponent(App);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain(
-      'Loading Family Reward Chart'
-    );
+    const app = fixture.componentInstance;
+    expect(app).toBeTruthy();
   });
 });

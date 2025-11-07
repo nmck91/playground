@@ -1,8 +1,12 @@
 <div
   class="rewards-overlay"
   [class.visible]="visible"
-  (click)="onOverlayClick($event)">
-  <div class="rewards-modal" (click)="$event.stopPropagation()">
+  (click)="onOverlayClick($event)"
+  (keydown.escape)="onClose()"
+  tabindex="0"
+  role="dialog"
+  aria-modal="true">
+  <div class="rewards-modal" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="document">
     <div class="rewards-header">
       <h2>🎁 Reward Menu</h2>
       <button class="close-btn" (click)="onClose()">&times;</button>
