@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, signal, inject } from '@angular/core';
 import { CalendarEvent, EventCategory, RecurrenceRule } from '../models/event.model';
 import { SupabaseService } from './supabase.service';
 
@@ -27,11 +27,12 @@ interface DbEvent {
 export class EventService {
   private events = signal<CalendarEvent[]>([]);
   private useSupabase = false;
+  private supabaseService = inject(SupabaseService);
 
   // Expose as readonly signal
   readonly eventsSignal = this.events.asReadonly();
 
-  constructor(private supabaseService: SupabaseService) {
+  constructor() {
     this.useSupabase = this.supabaseService.isConfigured();
 
     if (this.useSupabase) {
@@ -139,7 +140,7 @@ export class EventService {
   private async updateEventInSupabase(id: string, updatedEvent: Partial<CalendarEvent>): Promise<void> {
     try {
       const dbUpdate = this.calendarEventToDbEvent(updatedEvent as CalendarEvent, false);
-      // @ts-ignore - Supabase type inference issue with partial updates
+      // @ts-expect-error - Supabase type inference issue with partial updates
       const { data, error } = await this.supabaseService.client
         .from('events')
         .update(dbUpdate)

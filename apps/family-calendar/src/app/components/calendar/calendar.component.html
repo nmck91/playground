@@ -26,7 +26,12 @@
       [class.other-month]="!day.isCurrentMonth"
       [class.today]="isToday(day.date)"
       [class.selected]="isSelected(day.date)"
+      [attr.tabindex]="day.date ? 0 : null"
+      [attr.role]="day.date ? 'button' : null"
+      [attr.aria-label]="day.date ? day.date.toDateString() : null"
       (click)="day.date && selectDate(day.date)"
+      (keydown.enter)="day.date && selectDate(day.date)"
+      (keydown.space)="day.date && selectDate(day.date)"
     >
       <div class="day-number" *ngIf="day.date">
         {{ day.date.getDate() }}

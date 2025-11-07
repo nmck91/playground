@@ -1,7 +1,7 @@
-<div class="form-overlay" (click)="onCancel()"></div>
-<div class="form-container" (click)="$event.stopPropagation()">
+<div class="form-overlay" tabindex="0" role="button" aria-label="Close form" (click)="onCancel()" (keydown.enter)="onCancel()" (keydown.space)="onCancel()" (keydown.escape)="onCancel()"></div>
+<div class="form-container" role="dialog" aria-modal="true" aria-labelledby="form-title" tabindex="0" (click)="$event.stopPropagation()" (keydown.escape)="onCancel()">
   <div class="form-header">
-    <h2>{{ event ? 'Edit Event' : 'New Event' }}</h2>
+    <h2 id="form-title">{{ event ? 'Edit Event' : 'New Event' }}</h2>
     <button class="close-btn" (click)="onCancel()" aria-label="Close">&times;</button>
   </div>
 

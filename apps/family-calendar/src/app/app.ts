@@ -1,4 +1,4 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CalendarComponent } from './components/calendar/calendar.component';
 import { EventFormComponent } from './components/event-form/event-form.component';
@@ -30,7 +30,7 @@ import { CalendarEvent } from './models/event.model';
         <dadai-event-form
           [event]="selectedEvent()"
           (save)="handleSaveEvent($event)"
-          (cancel)="handleCancelEvent()"
+          (formCancel)="handleCancelEvent()"
         ></dadai-event-form>
       }
     </div>
@@ -104,12 +104,13 @@ export class App {
   showEventForm = signal(false);
   selectedEvent = signal<CalendarEvent | null>(null);
 
-  constructor(private eventService: EventService) {}
+  private eventService = inject(EventService);
 
   handleSaveEvent(eventData: Partial<CalendarEvent>) {
-    if (this.selectedEvent()) {
+    const selected = this.selectedEvent();
+    if (selected) {
       // Update existing event
-      this.eventService.updateEvent(this.selectedEvent()!.id, eventData);
+      this.eventService.updateEvent(selected.id, eventData);
     } else {
       // Create new event
       this.eventService.addEvent(eventData as CalendarEvent);

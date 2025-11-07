@@ -1,4 +1,4 @@
-import { Component, computed, signal, output } from '@angular/core';
+import { Component, computed, signal, output, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EventService } from '../../services/event.service';
 import { CalendarEvent, CATEGORY_COLORS } from '../../models/event.model';
@@ -53,7 +53,7 @@ export class CalendarComponent {
     return days;
   });
 
-  constructor(private eventService: EventService) {}
+  private eventService = inject(EventService);
 
   previousMonth(): void {
     const current = this.currentDate();
@@ -82,8 +82,8 @@ export class CalendarComponent {
   }
 
   isSelected(date: Date | null): boolean {
-    if (!date || !this.selectedDate()) return false;
-    const selected = this.selectedDate()!;
+    const selected = this.selectedDate();
+    if (!date || !selected) return false;
     return date.getDate() === selected.getDate() &&
            date.getMonth() === selected.getMonth() &&
            date.getFullYear() === selected.getFullYear();

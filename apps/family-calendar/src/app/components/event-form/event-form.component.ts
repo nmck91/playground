@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal, OnInit, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CalendarEvent, EventCategory, RecurrenceFrequency } from '../../models/event.model';
@@ -9,10 +9,10 @@ import { CalendarEvent, EventCategory, RecurrenceFrequency } from '../../models/
   templateUrl: './event-form.component.html',
   styleUrls: ['./event-form.component.css']
 })
-export class EventFormComponent {
+export class EventFormComponent implements OnInit, OnChanges {
   @Input() event: CalendarEvent | null = null;
   @Output() save = new EventEmitter<Partial<CalendarEvent>>();
-  @Output() cancel = new EventEmitter<void>();
+  @Output() formCancel = new EventEmitter<void>();
 
   title = signal('');
   description = signal('');
@@ -111,6 +111,6 @@ export class EventFormComponent {
   }
 
   onCancel() {
-    this.cancel.emit();
+    this.formCancel.emit();
   }
 }
