@@ -1,21 +1,38 @@
 name: Deploy Family Calendar to Vercel
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
     branches:
       - main
-    paths:
-      - 'apps/family-calendar/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'nx.json'
 
 env:
   VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FAMILY_CALENDAR }}
 
 jobs:
+  check-changes:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    outputs:
+      should-deploy: ${{ steps.filter.outputs.family-calendar }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            family-calendar:
+              - 'apps/family-calendar/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'nx.json'
+
   deploy:
+    needs: check-changes
+    if: needs.check-changes.outputs.should-deploy == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -56,4 +73,4 @@ jobs:
             --confirm
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FAMILY_CALENDAR }}
