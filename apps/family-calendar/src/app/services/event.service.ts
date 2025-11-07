@@ -140,7 +140,6 @@ export class EventService {
   private async updateEventInSupabase(id: string, updatedEvent: Partial<CalendarEvent>): Promise<void> {
     try {
       const dbUpdate = this.calendarEventToDbEvent(updatedEvent as CalendarEvent, false);
-      // @ts-expect-error - Supabase type inference issue with partial updates
       const { data, error } = await this.supabaseService.client
         .from('events')
         .update(dbUpdate)
