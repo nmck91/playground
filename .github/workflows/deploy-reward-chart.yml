@@ -64,13 +64,18 @@ jobs:
           }
           EOF
 
+      - name: Link Vercel Project
+        run: |
+          cd dist/apps/reward-chart/browser
+          vercel link --yes --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_REWARD_CHART }}
+
       - name: Deploy to Vercel
         run: |
-          vercel deploy dist/apps/reward-chart/browser \
-            --prod \
-            --token=${{ secrets.VERCEL_TOKEN }} \
-            --yes \
-            --confirm
+          cd dist/apps/reward-chart/browser
+          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_REWARD_CHART }}

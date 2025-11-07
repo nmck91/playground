@@ -64,13 +64,18 @@ jobs:
           }
           EOF
 
+      - name: Link Vercel Project
+        run: |
+          cd dist/apps/family-calendar/browser
+          vercel link --yes --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FAMILY_CALENDAR }}
+
       - name: Deploy to Vercel
         run: |
-          vercel deploy dist/apps/family-calendar/browser \
-            --prod \
-            --token=${{ secrets.VERCEL_TOKEN }} \
-            --yes \
-            --confirm
+          cd dist/apps/family-calendar/browser
+          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FAMILY_CALENDAR }}
