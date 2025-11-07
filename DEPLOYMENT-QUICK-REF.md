@@ -78,6 +78,19 @@ git commit --allow-empty -m "Trigger deployment"
 git push
 ```
 
+### Issue: "The provided path does not exist" during deployment
+
+**Error Message:** `Error: The provided path "~/work/.../apps/{app-name}" does not exist`
+
+**Cause:** Vercel project has Root Directory set to `apps/{app-name}`, which conflicts with our deployment path
+
+**Fix:**
+1. Go to Vercel Dashboard → Your Project → Settings
+2. Find "Root Directory" setting
+3. Change from `apps/{app-name}` to `.` (just a period)
+4. Click Save
+5. Re-run deployment
+
 ### Issue: "Deployment succeeded but site shows old version"
 
 **Cause:** Browser cache or CDN cache

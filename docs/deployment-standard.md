@@ -116,9 +116,7 @@ jobs:
           EOF
 
       - name: Deploy to Vercel
-        run: |
-          cd dist/apps/{app-name}/browser
-          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
+        run: vercel deploy dist/apps/{app-name}/browser --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_XXX }}
