@@ -50,9 +50,6 @@ jobs:
       - name: Build with Nx
         run: npx nx build family-calendar --configuration=production
 
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-
       - name: Create Vercel SPA Configuration
         run: |
           cat > dist/apps/family-calendar/browser/vercel.json << 'EOF'
@@ -64,18 +61,11 @@ jobs:
           }
           EOF
 
-      - name: Link Vercel Project
-        run: |
-          cd dist/apps/family-calendar/browser
-          vercel link --yes --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FAMILY_CALENDAR }}
-
       - name: Deploy to Vercel
-        run: |
-          cd dist/apps/family-calendar/browser
-          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} --yes
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_FAMILY_CALENDAR }}
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID_FAMILY_CALENDAR }}
+          working-directory: dist/apps/family-calendar/browser
+          vercel-args: '--prod'
