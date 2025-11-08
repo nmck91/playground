@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd ../.. && npx nx build reward-chart --configuration=production",
+  "outputDirectory": "../../dist/apps/reward-chart/browser",
+  "devCommand": "cd ../.. && npx nx serve reward-chart",
+  "installCommand": "cd ../.. && npm ci",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
