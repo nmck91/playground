@@ -1,5 +1,13 @@
 /* Global Styles - Family Reward Chart */
 
+/* PrimeIcons */
+@import "primeicons/primeicons.css";
+
+/* TailwindCSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* Design Tokens */
 :root {
   /* Primitive Color Tokens */
