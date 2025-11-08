@@ -1,0 +1,9 @@
+{
+  "buildCommand": "npx nx build family-calendar --configuration=production",
+  "outputDirectory": "dist/apps/family-calendar/browser",
+  "devCommand": "npx nx serve family-calendar",
+  "installCommand": "npm ci",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
