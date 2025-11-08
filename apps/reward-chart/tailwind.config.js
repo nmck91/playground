@@ -4,7 +4,7 @@ const { join } = require('path');
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   // Use shared workspace preset for consistent design tokens
-  presets: [require('../../tailwind-workspace-preset.js')],
+  presets: [require('../../libs/tailwind-preset/src/index.ts')],
 
   content: [
     join(__dirname, 'src/**/!(*.stories|*.spec).{ts,html}'),

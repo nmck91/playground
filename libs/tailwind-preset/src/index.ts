@@ -7,7 +7,7 @@
  * Usage in app tailwind.config.js:
  * ```js
  * module.exports = {
- *   presets: [require('../../tailwind-workspace-preset.js')],
+ *   presets: [require('@playground/tailwind-preset')],
  *   // app-specific overrides...
  * }
  * ```

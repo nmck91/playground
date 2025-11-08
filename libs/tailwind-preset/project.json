@@ -1,0 +1,9 @@
+{
+  "name": "tailwind-preset",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/tailwind-preset/src",
+  "projectType": "library",
+  "tags": [],
+  "// targets": "to see all targets run: nx show project tailwind-preset --web",
+  "targets": {}
+}
