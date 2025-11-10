@@ -1,9 +1,9 @@
-<div class="header">
-  <h1>🌟 Our Family Reward Chart 🌟</h1>
-  <div class="week-display">{{ weekDisplay }}</div>
-  <div class="controls">
-    <button class="btn btn--primary" (click)="onShowRewards()">🎁 View Rewards</button>
-    <button class="btn btn--secondary" (click)="onShowSettings()">⚙️ Settings</button>
-    <button class="btn btn--secondary" (click)="onNewWeek()">🔄 New Week</button>
+<div class="text-center mb-24">
+  <h1 class="text-4xl md:text-2xl font-bold text-teal-500 mb-8 md:mb-4">🌟 Our Family Reward Chart 🌟</h1>
+  <div class="text-lg md:text-sm text-slate-500 mb-16 md:mb-12">{{ weekDisplay }}</div>
+  <div class="flex flex-col md:flex-row gap-3 md:gap-12 justify-center flex-wrap mb-24">
+    <button class="inline-flex items-center justify-center px-4 py-2 rounded-md text-base font-medium bg-teal-500 text-cream-50 hover:bg-teal-600 transition-all duration-normal ease-standard" (click)="onShowRewards()">🎁 View Rewards</button>
+    <button class="inline-flex items-center justify-center px-4 py-2 rounded-md text-base font-medium bg-brown-600/12 text-slate-900 hover:bg-brown-600/20 transition-all duration-normal ease-standard" (click)="onShowSettings()">⚙️ Settings</button>
+    <button class="inline-flex items-center justify-center px-4 py-2 rounded-md text-base font-medium bg-brown-600/12 text-slate-900 hover:bg-brown-600/20 transition-all duration-normal ease-standard" (click)="onNewWeek()">🔄 New Week</button>
   </div>
 </div>
