@@ -6,8 +6,7 @@ import { FormsModule } from '@angular/forms';
   selector: 'app-settings-modal',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './settings-modal.component.html',
-  styleUrl: './settings-modal.component.css'
+  templateUrl: './settings-modal.component.html'
 })
 export class SettingsModalComponent implements OnChanges {
   @Input() visible = false;

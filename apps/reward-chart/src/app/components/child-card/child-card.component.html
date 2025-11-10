@@ -1,20 +1,19 @@
-<div class="child-card" [ngClass]="person.className">
-  <div class="child-header">
-    <div class="child-name">{{ person.name }}</div>
-    <div class="child-total">{{ totalStars }} ⭐</div>
+<div [class]="getCardClasses()">
+  <div class="flex justify-between items-center mb-16">
+    <div class="text-xl md:text-base font-semibold">{{ person.name }}</div>
+    <div class="text-lg md:text-base font-bold text-teal-500">{{ totalStars }} ⭐</div>
   </div>
 
-  <div class="days-header">
+  <div class="grid grid-cols-[1fr_repeat(7,40px)] md:grid-cols-[1fr_repeat(7,28px)] max-sm:grid-cols-[1fr_repeat(7,24px)] gap-4 md:gap-2 max-sm:gap-1 mb-8 px-8 md:px-6 max-sm:px-4">
     <div></div>
-    <div class="day-label" *ngFor="let day of days">{{ day }}</div>
+    <div class="text-sm md:text-[10px] max-sm:text-[9px] font-semibold text-center text-slate-500" *ngFor="let day of days">{{ day }}</div>
   </div>
 
-  <div class="habits-grid">
-    <div class="habit-row" *ngFor="let habit of habits; let habitIndex = index; trackBy: trackByIndex">
-      <div class="habit-name" [innerHTML]="habit"></div>
+  <div class="grid gap-8">
+    <div class="grid grid-cols-[1fr_repeat(7,40px)] md:grid-cols-[1fr_repeat(7,28px)] max-sm:grid-cols-[1fr_repeat(7,24px)] gap-4 md:gap-2 max-sm:gap-1 items-center p-8 md:p-6 max-sm:p-4 bg-white/50 rounded-sm" *ngFor="let habit of habits; let habitIndex = index; trackBy: trackByIndex">
+      <div class="text-sm md:text-[11px] max-sm:text-[10px] font-medium md:leading-tight" [innerHTML]="habit"></div>
       <button
-        class="star-btn"
-        [ngClass]="isStarFilled(habitIndex, dayIndex) ? 'filled' : 'empty'"
+        [class]="'w-[32px] h-[32px] md:w-[24px] md:h-[24px] max-sm:w-[20px] max-sm:h-[20px] border-0 bg-transparent cursor-pointer text-[24px] md:text-[18px] max-sm:text-[16px] flex items-center justify-center rounded-sm transition-all duration-fast hover:bg-[rgba(255,215,0,0.2)] hover:scale-110 ' + (isStarFilled(habitIndex, dayIndex) ? 'text-[#FFD700]' : 'text-[#DDD]')"
         *ngFor="let day of days; let dayIndex = index; trackBy: trackByIndex"
         (click)="onStarClick(habitIndex, dayIndex)">
         {{ isStarFilled(habitIndex, dayIndex) ? '★' : '☆' }}
@@ -22,8 +21,8 @@
     </div>
   </div>
 
-  <div class="progress-bar">
-    <div class="progress-fill" [style.width.%]="progressPercent"></div>
+  <div class="w-full h-[8px] bg-black/10 rounded-full overflow-hidden mt-8">
+    <div class="h-full bg-teal-500 transition-all duration-normal rounded-full" [style.width.%]="progressPercent"></div>
   </div>
-  <div class="progress-text">{{ totalStars }} / {{ nextMilestone }} stars to next reward</div>
+  <div class="text-xs md:text-[10px] text-slate-500 mt-4 text-center">{{ totalStars }} / {{ nextMilestone }} stars to next reward</div>
 </div>

@@ -1,43 +1,42 @@
 <div
-  class="settings-overlay"
-  [class.visible]="visible"
+  [class]="'fixed inset-0 bg-black/50 z-[1000] items-center justify-center p-16 ' + (visible ? 'flex' : 'hidden')"
   (click)="onOverlayClick($event)"
   (keydown.escape)="onClose()"
   tabindex="0"
   role="dialog"
   aria-modal="true">
-  <div class="settings-modal" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="document">
-    <div class="settings-header">
+  <div class="bg-cream-100 rounded-lg shadow-lg max-w-[500px] w-full" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="document">
+    <div class="p-16 border-b border-gray-200 flex justify-between items-center">
       <h2>⚙️ Settings</h2>
-      <button class="close-btn" (click)="onClose()">&times;</button>
+      <button class="bg-transparent border-0 text-xl cursor-pointer text-slate-500 w-[32px] h-[32px] flex items-center justify-center rounded-sm hover:bg-brown-600/12 hover:text-slate-900 transition-colors duration-fast" (click)="onClose()">&times;</button>
     </div>
-    <div class="settings-content">
-      <div class="form-group">
-        <label class="form-label" for="child1Name">Child 1 Name:</label>
+    <div class="p-16 md:p-12">
+      <div class="mb-16">
+        <label class="block mb-8 font-medium text-sm" for="child1Name">Child 1 Name:</label>
         <input
           type="text"
-          class="form-control"
+          class="block w-full px-12 py-8 text-base leading-normal text-slate-900 bg-cream-100 border border-gray-200 rounded-base transition-colors duration-fast focus:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:outline-none"
           id="child1Name"
           [(ngModel)]="child1Name">
       </div>
-      <div class="form-group">
-        <label class="form-label" for="child2Name">Child 2 Name:</label>
+      <div class="mb-16">
+        <label class="block mb-8 font-medium text-sm" for="child2Name">Child 2 Name:</label>
         <input
           type="text"
-          class="form-control"
+          class="block w-full px-12 py-8 text-base leading-normal text-slate-900 bg-cream-100 border border-gray-200 rounded-base transition-colors duration-fast focus:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:outline-none"
           id="child2Name"
           [(ngModel)]="child2Name">
       </div>
-      <div class="form-group">
-        <label class="form-label" for="child3Name">Child 3 Name:</label>
+      <div class="mb-16">
+        <label class="block mb-8 font-medium text-sm" for="child3Name">Child 3 Name:</label>
         <input
           type="text"
-          class="form-control"
+          class="block w-full px-12 py-8 text-base leading-normal text-slate-900 bg-cream-100 border border-gray-200 rounded-base transition-colors duration-fast focus:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:outline-none"
           id="child3Name"
           [(ngModel)]="child3Name">
       </div>
-      <div class="form-group">
-        <button class="btn btn--primary" (click)="onSave()">💾 Save Settings</button>
+      <div class="mb-16">
+        <button class="inline-flex items-center justify-center px-4 py-2 rounded-md text-base font-medium bg-teal-500 text-cream-50 hover:bg-teal-600 transition-all duration-normal ease-standard" (click)="onSave()">💾 Save Settings</button>
       </div>
     </div>
   </div>

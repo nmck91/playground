@@ -6,8 +6,7 @@ import { Reward } from '../../models/reward.model';
   selector: 'app-rewards-modal',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './rewards-modal.component.html',
-  styleUrl: './rewards-modal.component.css'
+  templateUrl: './rewards-modal.component.html'
 })
 export class RewardsModalComponent {
   @Input() visible = false;

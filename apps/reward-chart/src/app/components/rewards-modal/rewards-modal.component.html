@@ -1,36 +1,35 @@
 <div
-  class="rewards-overlay"
-  [class.visible]="visible"
+  [class]="'fixed inset-0 bg-black/50 z-[1000] items-center justify-center p-16 ' + (visible ? 'flex' : 'hidden')"
   (click)="onOverlayClick($event)"
   (keydown.escape)="onClose()"
   tabindex="0"
   role="dialog"
   aria-modal="true">
-  <div class="rewards-modal" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="document">
-    <div class="rewards-header">
+  <div class="bg-cream-100 rounded-lg shadow-lg max-w-[800px] w-full max-h-[80vh] md:max-h-[90vh] md:m-8 overflow-y-auto" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="document">
+    <div class="p-16 md:p-12 border-b border-gray-200 flex justify-between items-center">
       <h2>🎁 Reward Menu</h2>
-      <button class="close-btn" (click)="onClose()">&times;</button>
+      <button class="bg-transparent border-0 text-xl cursor-pointer text-slate-500 w-[32px] h-[32px] flex items-center justify-center rounded-sm hover:bg-brown-600/12 hover:text-slate-900 transition-colors duration-fast" (click)="onClose()">&times;</button>
     </div>
-    <div class="rewards-content">
-      <div class="rewards-section">
-        <h3>🧒 Kids' Rewards</h3>
-        <div class="rewards-grid">
-          <div class="reward-item" *ngFor="let reward of kidsRewards; trackBy: trackByIndex">
-            <div class="reward-info">
-              <div class="reward-name" [innerHTML]="reward.name"></div>
+    <div class="p-16 md:p-12">
+      <div class="mb-24 md:mb-16">
+        <h3 class="text-xl md:text-base font-semibold mb-12 text-teal-500">🧒 Kids' Rewards</h3>
+        <div class="grid gap-8">
+          <div class="flex justify-between items-center p-12 md:p-8 bg-cream-50 rounded-base border-l-4 border-teal-500 md:text-sm" *ngFor="let reward of kidsRewards; trackBy: trackByIndex">
+            <div class="flex-1">
+              <div class="font-medium md:text-sm mb-4" [innerHTML]="reward.name"></div>
             </div>
-            <div class="reward-stars">{{ reward.stars }} ⭐</div>
+            <div class="font-bold text-teal-500">{{ reward.stars }} ⭐</div>
           </div>
         </div>
       </div>
-      <div class="rewards-section">
-        <h3>👨‍👩‍👧‍👦 Parents' Rewards</h3>
-        <div class="rewards-grid">
-          <div class="reward-item" *ngFor="let reward of parentsRewards; trackBy: trackByIndex">
-            <div class="reward-info">
-              <div class="reward-name" [innerHTML]="reward.name"></div>
+      <div class="mb-24 md:mb-16">
+        <h3 class="text-xl md:text-base font-semibold mb-12 text-teal-500">👨‍👩‍👧‍👦 Parents' Rewards</h3>
+        <div class="grid gap-8">
+          <div class="flex justify-between items-center p-12 md:p-8 bg-cream-50 rounded-base border-l-4 border-teal-500 md:text-sm" *ngFor="let reward of parentsRewards; trackBy: trackByIndex">
+            <div class="flex-1">
+              <div class="font-medium md:text-sm mb-4" [innerHTML]="reward.name"></div>
             </div>
-            <div class="reward-stars">{{ reward.stars }} ⭐</div>
+            <div class="font-bold text-teal-500">{{ reward.stars }} ⭐</div>
           </div>
         </div>
       </div>
