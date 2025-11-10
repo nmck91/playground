@@ -1,31 +1,35 @@
-<div class="calendar-container">
-  <div class="calendar-header">
-    <h1 class="calendar-title">Family Calendar</h1>
-    <div class="calendar-controls">
-      <button (click)="previousMonth()" class="btn btn-nav" aria-label="Previous month">
+<div class="max-w-[1200px] mx-auto p-5">
+  <div class="flex justify-between items-center mb-[30px] flex-wrap gap-5">
+    <h1 class="text-2xl font-bold text-gray-900 m-0">Family Calendar</h1>
+    <div class="flex items-center gap-[15px]">
+      <button (click)="previousMonth()" class="text-2xl px-3 py-1 font-bold border border-gray-300 rounded bg-white cursor-pointer transition-all duration-200 hover:bg-gray-100 hover:border-gray-400" aria-label="Previous month">
         &#8249;
       </button>
-      <span class="current-month">{{ currentMonth() }} {{ currentYear() }}</span>
-      <button (click)="nextMonth()" class="btn btn-nav" aria-label="Next month">
+      <span class="text-xl font-semibold text-gray-700 min-w-[200px] text-center">{{ currentMonth() }} {{ currentYear() }}</span>
+      <button (click)="nextMonth()" class="text-2xl px-3 py-1 font-bold border border-gray-300 rounded bg-white cursor-pointer transition-all duration-200 hover:bg-gray-100 hover:border-gray-400" aria-label="Next month">
         &#8250;
       </button>
-      <button (click)="goToToday()" class="btn btn-today">Today</button>
+      <button (click)="goToToday()" class="px-4 py-2 border border-blue-500 rounded bg-blue-500 text-white cursor-pointer transition-all duration-200 hover:bg-blue-600 hover:border-blue-600">Today</button>
     </div>
   </div>
 
-  <div class="calendar-grid">
+  <div class="grid grid-cols-7 gap-px bg-gray-200 border border-gray-200 rounded-lg overflow-hidden">
     <!-- Day headers -->
-    <div class="day-header" *ngFor="let day of dayNames">
+    <div class="bg-gray-50 p-3 text-center font-semibold text-gray-500 text-sm" *ngFor="let day of dayNames">
       {{ day }}
     </div>
 
     <!-- Calendar days -->
     <div
       *ngFor="let day of calendarDays()"
-      class="calendar-day"
-      [class.other-month]="!day.isCurrentMonth"
-      [class.today]="isToday(day.date)"
-      [class.selected]="isSelected(day.date)"
+      class="bg-white min-h-[80px] md:min-h-[100px] p-2 md:p-2 cursor-pointer transition-colors duration-200 relative hover:bg-gray-50"
+      [class.bg-gray-50]="!day.isCurrentMonth"
+      [class.opacity-50]="!day.isCurrentMonth"
+      [class.bg-blue-50]="isToday(day.date)"
+      [class.bg-blue-100]="isSelected(day.date)"
+      [class.outline]="isSelected(day.date)"
+      [class.outline-2]="isSelected(day.date)"
+      [class.outline-blue-500]="isSelected(day.date)"
       [attr.tabindex]="day.date ? 0 : null"
       [attr.role]="day.date ? 'button' : null"
       [attr.aria-label]="day.date ? day.date.toDateString() : null"
@@ -33,19 +37,22 @@
       (keydown.enter)="day.date && selectDate(day.date)"
       (keydown.space)="day.date && selectDate(day.date)"
     >
-      <div class="day-number" *ngIf="day.date">
+      <div class="inline-flex items-center justify-center w-6 h-6 md:w-7 md:h-7 rounded-full font-medium text-gray-900 text-xs md:text-sm mb-1"
+           [class.bg-blue-500]="isToday(day.date)"
+           [class.text-white]="isToday(day.date)"
+           *ngIf="day.date">
         {{ day.date.getDate() }}
       </div>
-      <div class="day-events" *ngIf="day.events.length > 0">
+      <div class="flex flex-col gap-0.5 mt-1" *ngIf="day.events.length > 0">
         <div
           *ngFor="let event of day.events.slice(0, 3)"
-          class="event-indicator"
+          class="px-1.5 py-0.5 rounded-sm text-[10px] md:text-xs text-white overflow-hidden text-ellipsis whitespace-nowrap font-medium"
           [style.background-color]="getEventColor(event)"
           [title]="event.title"
         >
-          <span class="event-title">{{ event.title }}</span>
+          <span>{{ event.title }}</span>
         </div>
-        <div *ngIf="day.events.length > 3" class="more-events">
+        <div *ngIf="day.events.length > 3" class="text-[10px] text-gray-500 px-1.5 py-0.5 font-medium">
           +{{ day.events.length - 3 }} more
         </div>
       </div>
@@ -53,33 +60,33 @@
   </div>
 
   <!-- Selected date details -->
-  <div *ngIf="selectedDate()" class="selected-date-panel">
-    <h3>{{ selectedDate()!.toDateString() }}</h3>
-    <div class="selected-date-events">
-      <div *ngIf="getEventsForDate(selectedDate()!).length === 0" class="no-events">
+  <div *ngIf="selectedDate()" class="mt-[30px] p-5 bg-white border border-gray-200 rounded-lg">
+    <h3 class="m-0 mb-5 text-gray-900 text-xl">{{ selectedDate()!.toDateString() }}</h3>
+    <div class="flex flex-col gap-3">
+      <div *ngIf="getEventsForDate(selectedDate()!).length === 0" class="text-gray-400 italic p-5 text-center">
         No events scheduled
       </div>
       <div
         *ngFor="let event of getEventsForDate(selectedDate()!)"
-        class="event-card"
+        class="px-4 py-3 bg-gray-50 border-l-4 rounded transition-colors duration-200 hover:bg-gray-100"
         [style.border-left-color]="getEventColor(event)"
       >
-        <div class="event-card-content">
-          <div class="event-info">
-            <h4>{{ event.title }}</h4>
-            <p *ngIf="event.description">{{ event.description }}</p>
-            <div class="event-meta">
-              <span class="event-time">
+        <div class="flex justify-between items-start gap-3">
+          <div class="flex-1 min-w-0">
+            <h4 class="m-0 mb-2 text-gray-900 text-base">{{ event.title }}</h4>
+            <p *ngIf="event.description" class="m-0 mb-2 text-gray-500 text-sm">{{ event.description }}</p>
+            <div class="flex flex-wrap gap-3 text-[12.8px] text-gray-500">
+              <span>
                 {{ event.startDate | date:'shortTime' }} - {{ event.endDate | date:'shortTime' }}
               </span>
-              <span class="event-category">{{ event.category }}</span>
-              <span *ngIf="event.isRecurring" class="event-recurring" title="Recurring event">🔁</span>
-              <span *ngIf="event.location" class="event-location" title="{{ event.location }}">📍 {{ event.location }}</span>
+              <span class="capitalize font-medium">{{ event.category }}</span>
+              <span *ngIf="event.isRecurring" title="Recurring event" class="text-[14.4px]">🔁</span>
+              <span *ngIf="event.location" [title]="event.location" class="text-[12.8px] whitespace-nowrap overflow-hidden text-ellipsis max-w-[200px]">📍 {{ event.location }}</span>
             </div>
           </div>
-          <div class="event-actions">
+          <div class="flex gap-2 flex-shrink-0">
             <button
-              class="btn-icon btn-edit"
+              class="bg-transparent border-0 cursor-pointer text-xl px-2 py-1 rounded flex items-center justify-center transition-all duration-200 hover:bg-blue-100 hover:scale-110"
               (click)="onEditEvent(event, $event)"
               title="Edit event"
               aria-label="Edit event"
@@ -87,7 +94,7 @@
               ✏️
             </button>
             <button
-              class="btn-icon btn-delete"
+              class="bg-transparent border-0 cursor-pointer text-xl px-2 py-1 rounded flex items-center justify-center transition-all duration-200 hover:bg-red-100 hover:scale-110"
               (click)="onDeleteEvent(event.id, $event)"
               title="Delete event"
               aria-label="Delete event"

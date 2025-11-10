@@ -6,8 +6,7 @@ import { CalendarEvent, CATEGORY_COLORS } from '../../models/event.model';
 @Component({
   selector: 'dadai-calendar',
   imports: [CommonModule],
-  templateUrl: './calendar.component.html',
-  styleUrls: ['./calendar.component.css']
+  templateUrl: './calendar.component.html'
 })
 export class CalendarComponent {
   editEvent = output<CalendarEvent>();

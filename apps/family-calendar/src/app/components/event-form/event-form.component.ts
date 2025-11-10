@@ -6,8 +6,7 @@ import { CalendarEvent, EventCategory, RecurrenceFrequency } from '../../models/
 @Component({
   selector: 'dadai-event-form',
   imports: [CommonModule, FormsModule],
-  templateUrl: './event-form.component.html',
-  styleUrls: ['./event-form.component.css']
+  templateUrl: './event-form.component.html'
 })
 export class EventFormComponent implements OnInit, OnChanges {
   @Input() event: CalendarEvent | null = null;

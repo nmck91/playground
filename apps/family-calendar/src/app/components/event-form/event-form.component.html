@@ -1,13 +1,13 @@
-<div class="form-overlay" tabindex="0" role="button" aria-label="Close form" (click)="onCancel()" (keydown.enter)="onCancel()" (keydown.space)="onCancel()" (keydown.escape)="onCancel()"></div>
-<div class="form-container" role="dialog" aria-modal="true" aria-labelledby="form-title" tabindex="0" (click)="$event.stopPropagation()" (keydown.escape)="onCancel()">
-  <div class="form-header">
-    <h2 id="form-title">{{ event ? 'Edit Event' : 'New Event' }}</h2>
-    <button class="close-btn" (click)="onCancel()" aria-label="Close">&times;</button>
+<div class="fixed inset-0 bg-black/50 z-[1000] animate-[fadeIn_0.2s]" tabindex="0" role="button" aria-label="Close form" (click)="onCancel()" (keydown.enter)="onCancel()" (keydown.space)="onCancel()" (keydown.escape)="onCancel()"></div>
+<div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-xl shadow-xl z-[1001] max-w-[600px] w-[90%] max-h-[90vh] overflow-y-auto animate-[slideIn_0.3s]" role="dialog" aria-modal="true" aria-labelledby="form-title" tabindex="0" (click)="$event.stopPropagation()" (keydown.escape)="onCancel()">
+  <div class="flex justify-between items-center px-6 pt-6 pb-4 border-b border-gray-200">
+    <h2 id="form-title" class="m-0 text-2xl text-gray-900">{{ event ? 'Edit Event' : 'New Event' }}</h2>
+    <button class="bg-transparent border-0 text-2xl text-gray-500 cursor-pointer p-0 w-8 h-8 flex items-center justify-center rounded transition-colors duration-200 hover:bg-gray-100" (click)="onCancel()" aria-label="Close">&times;</button>
   </div>
 
-  <form (ngSubmit)="onSubmit()" class="event-form">
-    <div class="form-group">
-      <label for="title">Event Title *</label>
+  <form (ngSubmit)="onSubmit()" class="p-6">
+    <div class="mb-5 flex-1">
+      <label for="title" class="block mb-1.5 font-medium text-gray-700 text-sm">Event Title *</label>
       <input
         type="text"
         id="title"
@@ -15,28 +15,31 @@
         (input)="title.set($any($event.target).value)"
         required
         placeholder="Enter event title"
+        class="w-full px-3 py-2.5 border border-gray-300 rounded text-base font-sans transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-10"
       />
     </div>
 
-    <div class="form-group">
-      <label for="description">Description</label>
+    <div class="mb-5 flex-1">
+      <label for="description" class="block mb-1.5 font-medium text-gray-700 text-sm">Description</label>
       <textarea
         id="description"
         [value]="description()"
         (input)="description.set($any($event.target).value)"
         rows="3"
         placeholder="Add details about the event"
+        class="w-full px-3 py-2.5 border border-gray-300 rounded text-base font-sans transition-all duration-200 resize-y focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-10"
       ></textarea>
     </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <label for="category">Category *</label>
+    <div class="flex gap-4 sm:flex-row flex-col sm:gap-4 gap-0">
+      <div class="mb-5 flex-1">
+        <label for="category" class="block mb-1.5 font-medium text-gray-700 text-sm">Category *</label>
         <select
           id="category"
           [value]="category()"
           (change)="category.set($any($event.target).value)"
           required
+          class="w-full px-3 py-2.5 border border-gray-300 rounded text-base font-sans transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-10"
         >
           <option *ngFor="let cat of categories" [value]="cat">
             {{ cat }}
@@ -44,85 +47,92 @@
         </select>
       </div>
 
-      <div class="form-group">
-        <label for="location">Location</label>
+      <div class="mb-5 flex-1">
+        <label for="location" class="block mb-1.5 font-medium text-gray-700 text-sm">Location</label>
         <input
           type="text"
           id="location"
           [value]="location()"
           (input)="location.set($any($event.target).value)"
           placeholder="Add location"
+          class="w-full px-3 py-2.5 border border-gray-300 rounded text-base font-sans transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-10"
         />
       </div>
     </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <label for="startDate">Start Date *</label>
+    <div class="flex gap-4 sm:flex-row flex-col sm:gap-4 gap-0">
+      <div class="mb-5 flex-1">
+        <label for="startDate" class="block mb-1.5 font-medium text-gray-700 text-sm">Start Date *</label>
         <input
           type="date"
           id="startDate"
           [value]="startDate()"
           (input)="startDate.set($any($event.target).value)"
           required
+          class="w-full px-3 py-2.5 border border-gray-300 rounded text-base font-sans transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-10"
         />
       </div>
 
-      <div class="form-group">
-        <label for="startTime">Start Time *</label>
+      <div class="mb-5 flex-1">
+        <label for="startTime" class="block mb-1.5 font-medium text-gray-700 text-sm">Start Time *</label>
         <input
           type="time"
           id="startTime"
           [value]="startTime()"
           (input)="startTime.set($any($event.target).value)"
           required
+          class="w-full px-3 py-2.5 border border-gray-300 rounded text-base font-sans transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-10"
         />
       </div>
     </div>
 
-    <div class="form-row">
-      <div class="form-group">
-        <label for="endDate">End Date *</label>
+    <div class="flex gap-4 sm:flex-row flex-col sm:gap-4 gap-0">
+      <div class="mb-5 flex-1">
+        <label for="endDate" class="block mb-1.5 font-medium text-gray-700 text-sm">End Date *</label>
         <input
           type="date"
           id="endDate"
           [value]="endDate()"
           (input)="endDate.set($any($event.target).value)"
           required
+          class="w-full px-3 py-2.5 border border-gray-300 rounded text-base font-sans transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-10"
         />
       </div>
 
-      <div class="form-group">
-        <label for="endTime">End Time *</label>
+      <div class="mb-5 flex-1">
+        <label for="endTime" class="block mb-1.5 font-medium text-gray-700 text-sm">End Time *</label>
         <input
           type="time"
           id="endTime"
           [value]="endTime()"
           (input)="endTime.set($any($event.target).value)"
           required
+          class="w-full px-3 py-2.5 border border-gray-300 rounded text-base font-sans transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-10"
         />
       </div>
     </div>
 
-    <div class="form-group">
-      <label class="checkbox-label">
+    <div class="mb-5 flex-1">
+      <label class="flex items-center gap-2 cursor-pointer font-medium text-gray-700">
         <input
           type="checkbox"
           [checked]="isRecurring()"
           (change)="isRecurring.set($any($event.target).checked)"
+          class="w-[18px] h-[18px] cursor-pointer"
         />
         <span>Recurring Event</span>
       </label>
     </div>
 
-    <div *ngIf="isRecurring()" class="recurrence-options">
-      <div class="form-row">
-        <div class="form-group">
-          <label for="frequency">Frequency</label>
+    <div *ngIf="isRecurring()" class="bg-gray-50 p-4 rounded-lg mt-3">
+      <div class="flex gap-4 sm:flex-row flex-col sm:gap-4 gap-0">
+        <div class="mb-5 flex-1">
+          <label for="frequency" class="block mb-1.5 font-medium text-gray-700 text-sm">Frequency</label>
           <select
             id="frequency"
             [value]="recurrenceFrequency()"
             (change)="recurrenceFrequency.set($any($event.target).value)"
+            class="w-full px-3 py-2.5 border border-gray-300 rounded text-base font-sans transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-10"
           >
             <option *ngFor="let freq of frequencies" [value]="freq">
               {{ freq }}
@@ -130,8 +140,8 @@
           </select>
         </div>
 
-        <div class="form-group">
-          <label for="interval">Repeat Every</label>
+        <div class="mb-5 flex-1">
+          <label for="interval" class="block mb-1.5 font-medium text-gray-700 text-sm">Repeat Every</label>
           <input
             type="number"
             id="interval"
@@ -139,16 +149,17 @@
             (input)="recurrenceInterval.set(+$any($event.target).value)"
             min="1"
             placeholder="1"
+            class="w-full px-3 py-2.5 border border-gray-300 rounded text-base font-sans transition-all duration-200 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-10"
           />
         </div>
       </div>
     </div>
 
-    <div class="form-actions">
-      <button type="button" class="btn btn-secondary" (click)="onCancel()">
+    <div class="flex justify-end gap-3 mt-6 pt-5 border-t border-gray-200 sm:flex-row flex-col-reverse">
+      <button type="button" class="px-5 py-2.5 border border-gray-300 rounded text-base font-medium cursor-pointer transition-all duration-200 bg-white text-gray-700 hover:bg-gray-50 sm:w-auto w-full" (click)="onCancel()">
         Cancel
       </button>
-      <button type="submit" class="btn btn-primary">
+      <button type="submit" class="px-5 py-2.5 border-0 rounded text-base font-medium cursor-pointer transition-all duration-200 bg-blue-500 text-white hover:bg-blue-600 sm:w-auto w-full">
         {{ event ? 'Update' : 'Create' }} Event
       </button>
     </div>
