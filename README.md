@@ -63,7 +63,8 @@ Each app's `vercel.json` ensures deployments only trigger from `release` branch:
 
 - **Architecture:** `docs/architecture/` - Comprehensive system documentation
 - **Project Briefs:** `docs/brief.md` (Reward Chart), `docs/last-player-standing/README.md`
-- **Database Schemas:** `docs/supabase-schema.sql`
+- **Database Schemas:** `docs/supabase-playground-consolidated-schema.sql` - Unified database schema
+- **Supabase Migration:** `docs/SUPABASE-CONSOLIDATION-GUIDE.md` - Step-by-step consolidation guide
 - **Deployment:** `docs/architecture/deployment-playbook.md`
 
 
