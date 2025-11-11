@@ -17,13 +17,14 @@ This project uses a **CI-gated release branch** strategy:
 - **`main`** - Development branch
   - All development happens here
   - CI runs on every push (lint, test, build, e2e)
+  - Vercel preview deployments (optional)
 
 - **`release`** - Production branch
   - Automatically updated when CI passes on `main`
-  - Vercel deploys from this branch to production
+  - Vercel deploys from this branch to production only
   - Only contains CI-validated code
 
-**Workflow:** `main` → CI ✅ → auto-merge to `release` → Production Deploy
+**Workflow:** `main` → CI ✅ → auto-merge to `release` → Production Deploy 🚀
 
 [Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created.
 
