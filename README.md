@@ -6,6 +6,8 @@
 
 ## 🚀 Applications
 
+All applications now use a **unified Supabase backend** for simplified management and better resource utilization.
+
 ### Family Calendar
 Family event management system with recurring events support
 - **Tech:** Angular 20.3, PrimeNG, Tailwind CSS, Supabase
