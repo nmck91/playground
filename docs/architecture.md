@@ -12,6 +12,7 @@ This document captures the **CURRENT STATE** of the Playground Nx monorepo codeb
 
 | Date       | Version | Description                      | Author  |
 | ---------- | ------- | -------------------------------- | ------- |
+| 2025-11-11 | 1.1     | Added Last Player Standing app, removed Nx Cloud references | Claude Code |
 | 2025-11-08 | 1.0     | Initial brownfield analysis      | Winston (Architect Agent) |
 
 ---
@@ -46,6 +47,16 @@ This document captures the **CURRENT STATE** of the Playground Nx monorepo codeb
 - **Styles**: `src/styles.css` - Global styles with CSS custom properties
 - **Build**: `tailwind.config.js` - Tailwind configuration using shared preset
 
+**Last Player Standing Application (`apps/last-player-standing/`):**
+- **Main Entry**: `src/main.ts` - Angular bootstrap (NgModule architecture)
+- **App Module**: `src/app/app-module.ts` - PrimeNG Aura theme configuration
+- **Core Services**: `src/app/core/services/` - Auth, Supabase, Payment (Stripe)
+- **Guards**: `src/app/core/guards/` - Auth guard, Admin guard
+- **Features**: `src/app/features/` - Public (home, login, register), Dashboard, Admin
+- **Components**: `src/app/shared/components/header.component.ts` - Navigation header
+- **Environments**: `src/environments/` - Supabase and Stripe configuration
+- **Docs**: `docs/last-player-standing/` - Setup guide, database schema, Supabase fixes
+
 **Shared Libraries (`libs/`):**
 - **Tailwind Preset**: `libs/tailwind-preset/src/index.ts` - Shared design system tokens
 
@@ -65,17 +76,19 @@ This document captures the **CURRENT STATE** of the Playground Nx monorepo codeb
 **Architecture Pattern**: Nx Monorepo with Angular SPAs + Supabase Backend-as-a-Service (BaaS)
 
 **Repository Type**: Monorepo managed by Nx 22.0.2
-- Two production Angular applications
+- Three Angular applications (2 production, 1 in development)
 - One shared library (Tailwind design system)
 - E2E test projects for each app
 - Shared tooling and configuration
 
 **Deployment Model**:
-- **Frontend**: Deployed to Vercel via GitHub integration
-  - `family-calendar` → https://family-calendar-niall-mckinneys-projects.vercel.app
-  - `reward-chart` → https://family-reward-chart-niall-mckinneys-projects.vercel.app
+- **Frontend**: Deployed to Vercel via GitHub integration (CI-gated release branch)
+  - `family-calendar` → Production (Vercel)
+  - `reward-chart` → Production (Vercel)
+  - `last-player-standing` → Development (not yet deployed)
 - **Backend**: Supabase (managed PostgreSQL + Auth + Real-time)
-- **CI/CD**: GitHub Actions for testing, Vercel for deployment
+- **Payments**: Stripe (Last Player Standing only)
+- **CI/CD**: GitHub Actions for testing, auto-merge to release branch, Vercel for deployment
 
 ### Actual Tech Stack
 
@@ -94,20 +107,21 @@ This document captures the **CURRENT STATE** of the Playground Nx monorepo codeb
 | **Testing - E2E** | Playwright | ^1.36.0 | Modern browser automation |
 | **Linting** | ESLint + angular-eslint | ^9.8.0 / ^20.3.0 | Flat config with Angular-specific rules |
 | **Type Checking** | TypeScript | ~5.9.2 | Strict mode enabled |
-| **CI/CD** | GitHub Actions | N/A | Lint, test, build, e2e on PR and main push |
-| **Deployment** | Vercel | N/A | GitHub integration, auto-deploy from main |
-| **Cloud Services** | Nx Cloud | ID: 690bb8b50b43db7aa6c2f781 | Build caching and task distribution |
+| **CI/CD** | GitHub Actions | N/A | CI-gated release branch workflow |
+| **Deployment** | Vercel | N/A | GitHub integration, auto-deploy from release branch only |
+| **Payments** | Stripe | SDK (Last Player Standing) | Payment processing for competition entries |
 
 ### Repository Structure Reality Check
 
 - **Type**: Monorepo
 - **Package Manager**: npm with package-lock.json (lockfileVersion 3)
-- **Apps**: 2 production apps + 2 e2e test apps
+- **Apps**: 3 apps (2 production, 1 in development) + 3 e2e test apps
 - **Libs**: 1 shared library (Tailwind preset)
 - **Notable**:
-  - Recently refactored Tailwind preset from root into libs/
+  - CI-gated release branch strategy (main → CI ✅ → release → deploy)
+  - Vercel deployments controlled via `git.deploymentEnabled` in vercel.json
   - Uses Nx plugins for automatic target inference
-  - Vercel configuration moved from app-specific to workspace root
+  - Shared Tailwind preset in libs/
 
 ---
 
@@ -129,6 +143,7 @@ playground/
 │   │   ├── public/                   # Static assets
 │   │   ├── project.json             # Nx build/serve/test targets
 │   │   ├── tailwind.config.js       # Tailwind config (uses libs/tailwind-preset)
+│   │   ├── vercel.json              # Vercel deployment config (release branch only)
 │   │   └── tsconfig.app.json        # App-specific TypeScript config
 │   │
 │   ├── family-calendar-e2e/         # Playwright E2E tests
@@ -146,9 +161,36 @@ playground/
 │   │   ├── public/                   # Static assets
 │   │   ├── project.json             # Nx build/serve/test targets
 │   │   ├── tailwind.config.js       # Tailwind config (uses libs/tailwind-preset)
+│   │   ├── vercel.json              # Vercel deployment config (release branch only)
 │   │   └── tsconfig.app.json        # App-specific TypeScript config
 │   │
-│   └── reward-chart-e2e/            # Playwright E2E tests
+│   ├── reward-chart-e2e/            # Playwright E2E tests
+│   │   ├── src/                      # E2E test specs
+│   │   └── playwright.config.ts     # Playwright configuration
+│   │
+│   ├── last-player-standing/         # Football competition app (NgModule)
+│   │   ├── src/
+│   │   │   ├── app/
+│   │   │   │   ├── core/
+│   │   │   │   │   ├── guards/      # Auth guard, Admin guard
+│   │   │   │   │   └── services/    # AuthService, SupabaseService, PaymentService
+│   │   │   │   ├── features/
+│   │   │   │   │   ├── public/      # HomeComponent, LoginComponent, RegisterComponent
+│   │   │   │   │   ├── dashboard/   # User dashboard
+│   │   │   │   │   └── admin/       # Admin panel
+│   │   │   │   ├── shared/
+│   │   │   │   │   └── components/  # HeaderComponent
+│   │   │   │   ├── app-module.ts    # NgModule with PrimeNG Aura theme
+│   │   │   │   └── app.routes.ts    # Route configuration
+│   │   │   ├── environments/        # Supabase and Stripe config
+│   │   │   ├── main.ts              # Angular bootstrap
+│   │   │   └── styles.css           # Global styles + Tailwind imports
+│   │   ├── project.json             # Nx build/serve/test targets
+│   │   ├── tailwind.config.js       # Tailwind config (uses libs/tailwind-preset)
+│   │   ├── vercel.json              # Vercel deployment config (release branch only)
+│   │   └── tsconfig.app.json        # App-specific TypeScript config
+│   │
+│   └── last-player-standing-e2e/    # Playwright E2E tests
 │       ├── src/                      # E2E test specs
 │       └── playwright.config.ts     # Playwright configuration
 │
@@ -204,6 +246,14 @@ playground/
 - `supabase.service.ts` - Database client for calendar events with recurrence support
 - `calendar.component.ts` - Month view calendar with event display
 - `event-form.component.ts` - Event creation/editing with recurrence rules
+
+**Last Player Standing Application:**
+- `auth.service.ts` - Supabase authentication with profile management via database triggers
+- `payment.service.ts` - Stripe integration for £10 entry fee processing
+- `admin.guard.ts` - Functional guard protecting admin-only routes
+- `home.component.ts` - Landing page with competition information
+- `dashboard.component.ts` - User dashboard for making weekly picks
+- Database triggers handle profile creation automatically (bypasses RLS)
 
 **Shared Libraries:**
 - `libs/tailwind-preset/src/index.ts` - Design system tokens (colors, typography, spacing, shadows)
@@ -655,17 +705,20 @@ npx nx g @nx/js:library my-lib --directory=libs/my-lib --bundler=none --unitTest
 ## Summary for AI Agents
 
 **This codebase is**:
-- ✅ Nx monorepo with Angular 20.3 + Supabase
-- ✅ Two production SPAs (reward-chart, family-calendar)
-- ✅ Deployed to Vercel, CI via GitHub Actions
-- ✅ Uses modern Angular patterns (standalone, Signals, inject())
+- ✅ Nx monorepo with Angular 18-20.3 + Supabase
+- ✅ Three SPAs: reward-chart, family-calendar (production), last-player-standing (development)
+- ✅ CI-gated release branch strategy with auto-merge
+- ✅ Uses modern Angular patterns (standalone, Signals, inject(), NgModule)
 - ✅ Shared Tailwind design system in libs/
+- ✅ Stripe payments integration (Last Player Standing)
 
 **Key characteristics**:
 - Personal playground for AI-assisted development
 - Pragmatic over perfect (bundle size, test coverage acceptable)
-- Two different state management patterns (learning experiments)
-- Authentication not implemented (future enhancement)
+- Multiple state management patterns (RxJS, Signals, inject())
+- Multiple Angular architectures (standalone vs NgModule)
+- Authentication implemented in Last Player Standing via Supabase
+- CI-gated deployments ensure quality in production
 - Well-documented for AI agent navigation
 
 **When extending**:

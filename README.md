@@ -2,105 +2,183 @@
 
 <a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
 
-✨ Nx workspace with Angular applications and CI/CD automation ✨
+✨ **AI-assisted development playground** - Nx monorepo with Angular applications and automated CI/CD ✨
 
 ## 🚀 Applications
 
-- **Family Calendar** - Family event management
-- **Reward Chart** - Kids reward tracking system
-- **Last Player Standing** - Football competition app
+### Family Calendar
+Family event management system with recurring events support
+- **Tech:** Angular 20.3, PrimeNG, Tailwind CSS, Supabase
+- **State:** Angular Signals
+- **Status:** ✅ Production
+
+### Reward Chart
+Kids reward tracking system with star-based achievements
+- **Tech:** Angular 20.3, PrimeNG, Tailwind CSS, Supabase
+- **State:** RxJS BehaviorSubject
+- **Status:** ✅ Production
+
+### Last Player Standing
+Football competition app for school PTA fundraiser
+- **Tech:** Angular 18, PrimeNG with Aura theme, Tailwind CSS, Supabase, Stripe
+- **State:** Angular Signals + inject()
+- **Status:** 🚧 Development
 
 ## 🔄 CI/CD Workflow
 
-This project uses a **CI-gated release branch** strategy:
+This project uses a **CI-gated release branch** strategy for quality assurance:
 
+### Branches
 - **`main`** - Development branch
   - All development happens here
-  - CI runs on every push (lint, test, build, e2e)
-  - Vercel preview deployments (optional)
+  - CI runs on every push: lint, test, build, e2e
+  - Blocked from deploying to production
 
 - **`release`** - Production branch
-  - Automatically updated when CI passes on `main`
-  - Vercel deploys from this branch to production only
+  - Auto-updated when CI passes on `main`
   - Only contains CI-validated code
+  - Triggers production deployments to Vercel
 
-**Workflow:** `main` → CI ✅ → auto-merge to `release` → Production Deploy 🚀
-
-> **Note:** Only the `release` branch triggers production deployments in Vercel.
-
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created.
-
-## Finish your CI setup
-
-[Click here to finish setting up your workspace!](https://cloud.nx.app/connect/OsxWTRHDYX)
-
-
-## Run tasks
-
-To run the dev server for your app, use:
-
-```sh
-npx nx serve reward-chart
+### Workflow
+```
+Developer Push → main → GitHub Actions CI ✅ → Auto-merge → release → Vercel Deploy 🚀
 ```
 
-To create a production bundle:
-
-```sh
-npx nx build reward-chart
+### Deployment Control
+Each app's `vercel.json` ensures deployments only trigger from `release` branch:
+```json
+{
+  "git": {
+    "deploymentEnabled": {
+      "main": false,
+      "release": true
+    }
+  }
+}
 ```
 
-To see all available targets to run for a project, run:
+## 📚 Documentation
 
-```sh
-npx nx show project reward-chart
+- **Architecture:** `docs/architecture/` - Comprehensive system documentation
+- **Project Briefs:** `docs/brief.md` (Reward Chart), `docs/last-player-standing/README.md`
+- **Database Schemas:** `docs/supabase-schema.sql`
+- **Deployment:** `docs/architecture/deployment-playbook.md`
+
+
+## 🛠️ Development
+
+### Quick Start
+
+```bash
+# Install dependencies
+npm install
+
+# Serve an application
+npx nx serve family-calendar    # Port 4200
+npx nx serve reward-chart         # Port 4300
+npx nx serve last-player-standing # Port 4200
+
+# Build for production
+npx nx build family-calendar --configuration=production
+npx nx build reward-chart --configuration=production
+npx nx build last-player-standing --configuration=production
+
+# Run tests
+npx nx test family-calendar
+npx nx test reward-chart
+npx nx test last-player-standing
+
+# Run E2E tests
+npx nx e2e family-calendar-e2e
+npx nx e2e reward-chart-e2e
+npx nx e2e last-player-standing-e2e
+
+# Lint
+npx nx lint family-calendar
+npx nx run-many -t lint  # Lint all projects
 ```
 
-These targets are either [inferred automatically](https://nx.dev/concepts/inferred-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) or defined in the `project.json` or `package.json` files.
+### Nx Commands
 
-[More about running tasks in the docs &raquo;](https://nx.dev/features/run-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```bash
+# Visualize project dependencies
+npx nx graph
 
-## Add new projects
+# Show project details
+npx nx show project family-calendar
 
-While you could add new projects to your workspace manually, you might want to leverage [Nx plugins](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) and their [code generation](https://nx.dev/features/generate-code?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) feature.
+# Run tasks for all affected projects
+npx nx affected -t test build
 
-Use the plugin's generator to create new projects.
-
-To generate a new application, use:
-
-```sh
-npx nx g @nx/angular:app demo
+# List available plugins
+npx nx list
 ```
 
-To generate a new library, use:
+## 🧰 Tech Stack
 
-```sh
-npx nx g @nx/angular:lib mylib
+### Core
+- **Monorepo:** Nx 22.0.2
+- **Framework:** Angular 18-20.3
+- **UI Library:** PrimeNG with Aura theme
+- **Styling:** Tailwind CSS with shared preset (`libs/tailwind-preset`)
+- **Backend:** Supabase (PostgreSQL, Auth, Real-time)
+- **Payments:** Stripe (Last Player Standing only)
+
+### Tooling
+- **Package Manager:** npm
+- **Build Tool:** Angular CLI with esbuild
+- **Testing:** Jest (unit), Playwright (E2E)
+- **Linting:** ESLint with angular-eslint
+- **TypeScript:** 5.9.2 (strict mode)
+- **CI/CD:** GitHub Actions + Vercel
+
+## 🎯 Project Structure
+
+```
+playground/
+├── apps/
+│   ├── family-calendar/          # Event management app
+│   ├── family-calendar-e2e/      # E2E tests
+│   ├── reward-chart/             # Star tracking app
+│   ├── reward-chart-e2e/         # E2E tests
+│   ├── last-player-standing/     # Football competition app
+│   └── last-player-standing-e2e/ # E2E tests
+├── libs/
+│   └── tailwind-preset/          # Shared design system
+├── docs/
+│   ├── architecture/             # System documentation
+│   ├── last-player-standing/     # LPS app docs
+│   └── stories/                  # Completed work docs
+└── .github/workflows/
+    └── ci.yml                    # CI/CD pipeline
 ```
 
-You can use `npx nx list` to get a list of installed plugins. Then, run `npx nx list <plugin-name>` to learn about more specific capabilities of a particular plugin. Alternatively, [install Nx Console](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) to browse plugins and generators in your IDE.
+## 🔧 Code Generation
 
-[Learn more about Nx plugins &raquo;](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) | [Browse the plugin registry &raquo;](https://nx.dev/plugin-registry?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+```bash
+# Generate a new Angular component
+npx nx g @nx/angular:component my-component --project=family-calendar
 
+# Generate a new service
+npx nx g @nx/angular:service my-service --project=reward-chart
 
-[Learn more about Nx on CI](https://nx.dev/ci/intro/ci-with-nx#ready-get-started-with-your-provider?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+# Generate a new library
+npx nx g @nx/js:library my-lib --directory=libs/my-lib
 
-## Install Nx Console
+# Use Nx Console in VS Code for visual generation
+```
 
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
+## 🌟 Key Features
 
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- ✅ **CI-Gated Deployments** - Only CI-validated code reaches production
+- ✅ **Shared Design System** - Consistent UI across all apps via Tailwind preset
+- ✅ **Modular Architecture** - Well-organized documentation in `docs/architecture/`
+- ✅ **Multiple State Patterns** - RxJS, Signals, and inject() patterns demonstrated
+- ✅ **AI-Friendly** - Comprehensive documentation optimized for AI agents
 
-## Useful links
+## 📖 Learn More
 
-Learn more:
-
-- [Learn more about this workspace setup](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects)
-- [Learn about Nx on CI](https://nx.dev/ci/intro/ci-with-nx?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Releasing Packages with Nx release](https://nx.dev/features/manage-releases?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [What are Nx plugins?](https://nx.dev/concepts/nx-plugins?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-And join the Nx community:
-- [Discord](https://go.nx.dev/community)
-- [Follow us on X](https://twitter.com/nxdevtools) or [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [Our Youtube channel](https://www.youtube.com/@nxdevtools)
-- [Our blog](https://nx.dev/blog?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
+- [Nx Documentation](https://nx.dev)
+- [Angular Documentation](https://angular.dev)
+- [PrimeNG Documentation](https://primeng.org)
+- [Supabase Documentation](https://supabase.com/docs)
