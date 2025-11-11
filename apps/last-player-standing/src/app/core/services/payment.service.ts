@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { loadStripe, Stripe } from '@stripe/stripe-js';
 import { environment } from '../../../environments/environment';
 import { SupabaseService } from './supabase.service';
@@ -7,9 +7,10 @@ import { SupabaseService } from './supabase.service';
   providedIn: 'root'
 })
 export class PaymentService {
+  private supabase = inject(SupabaseService);
   private stripePromise: Promise<Stripe | null>;
 
-  constructor(private supabase: SupabaseService) {
+  constructor() {
     this.stripePromise = loadStripe(environment.stripePublishableKey);
   }
 

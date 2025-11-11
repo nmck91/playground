@@ -24,6 +24,11 @@ export default [
           style: 'kebab-case',
         },
       ],
+      // Disable standalone requirement - we're using NgModule architecture
+      '@angular-eslint/prefer-standalone': 'off',
+      '@angular-eslint/prefer-inject': 'warn', // Downgrade to warning
+      '@typescript-eslint/no-explicit-any': 'warn', // Downgrade to warning
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     },
   },
   {

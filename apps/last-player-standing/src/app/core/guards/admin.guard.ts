@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-export const adminGuard: CanActivateFn = async (route, state) => {
+export const adminGuard: CanActivateFn = async () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
@@ -22,7 +22,7 @@ export const adminGuard: CanActivateFn = async (route, state) => {
     }
 
     return true;
-  } catch (error) {
+  } catch {
     router.navigate(['/login']);
     return false;
   }

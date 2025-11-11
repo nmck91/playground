@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { Matchweek } from '../models/matchweek.model';
 import { Pick, Fixture } from '../models/pick.model';
@@ -7,7 +7,7 @@ import { Pick, Fixture } from '../models/pick.model';
   providedIn: 'root'
 })
 export class PicksService {
-  constructor(private supabase: SupabaseService) {}
+  private supabase = inject(SupabaseService);
 
   async getAvailableMatchweeks(competitionId: string): Promise<Matchweek[]> {
     const { data, error } = await this.supabase.client
