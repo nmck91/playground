@@ -2,9 +2,30 @@
 
 <a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
 
-✨ Your new, shiny [Nx workspace](https://nx.dev) is almost ready ✨.
+✨ Nx workspace with Angular applications and CI/CD automation ✨
 
-[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created. Now, let's get you up to speed!
+## 🚀 Applications
+
+- **Family Calendar** - Family event management
+- **Reward Chart** - Kids reward tracking system
+- **Last Player Standing** - Football competition app
+
+## 🔄 CI/CD Workflow
+
+This project uses a **CI-gated release branch** strategy:
+
+- **`main`** - Development branch
+  - All development happens here
+  - CI runs on every push (lint, test, build, e2e)
+
+- **`release`** - Production branch
+  - Automatically updated when CI passes on `main`
+  - Vercel deploys from this branch to production
+  - Only contains CI-validated code
+
+**Workflow:** `main` → CI ✅ → auto-merge to `release` → Production Deploy
+
+[Learn more about this workspace setup and its capabilities](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial?utm_source=nx_project&amp;utm_medium=readme&amp;utm_campaign=nx_projects) or run `npx nx graph` to visually explore what was created.
 
 ## Finish your CI setup
 
