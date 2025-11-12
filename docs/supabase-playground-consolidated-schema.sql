@@ -83,6 +83,16 @@ CREATE INDEX idx_family_members_family ON family_members(family_id);
 
 COMMENT ON TABLE family_members IS '[REWARD CHART] Individual members (children and parents) within a family';
 
+-- Current week table (for MVP single-family tracking)
+CREATE TABLE current_week (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  week_start_date DATE NOT NULL,
+  week_end_date DATE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+COMMENT ON TABLE current_week IS '[REWARD CHART MVP] Simple current week tracking for single family';
+
 -- Habits table
 CREATE TABLE habits (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -313,7 +323,10 @@ ALTER TABLE daily_completions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE rewards ENABLE ROW LEVEL SECURITY;
 ALTER TABLE reward_redemptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE family_users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE star_completions ENABLE ROW LEVEL SECURITY;
+
+-- MVP tables use public access (no auth required)
+ALTER TABLE current_week DISABLE ROW LEVEL SECURITY;
+ALTER TABLE star_completions DISABLE ROW LEVEL SECURITY;
 
 -- Families policies
 CREATE POLICY "Users can view their own families"
@@ -402,22 +415,9 @@ CREATE POLICY "Users can insert redemptions in their families"
   ON reward_redemptions FOR INSERT
   WITH CHECK (family_member_id IN (SELECT id FROM family_members WHERE family_id IN (SELECT family_id FROM family_users WHERE user_id = auth.uid())));
 
--- Star completions policies (simplified tracking)
-CREATE POLICY "Users can view star completions in their families"
-  ON star_completions FOR SELECT
-  USING (member_id IN (SELECT id FROM family_members WHERE family_id IN (SELECT family_id FROM family_users WHERE user_id = auth.uid())));
-
-CREATE POLICY "Users can insert star completions in their families"
-  ON star_completions FOR INSERT
-  WITH CHECK (member_id IN (SELECT id FROM family_members WHERE family_id IN (SELECT family_id FROM family_users WHERE user_id = auth.uid())));
-
-CREATE POLICY "Users can update star completions in their families"
-  ON star_completions FOR UPDATE
-  USING (member_id IN (SELECT id FROM family_members WHERE family_id IN (SELECT family_id FROM family_users WHERE user_id = auth.uid())));
-
-CREATE POLICY "Users can delete star completions in their families"
-  ON star_completions FOR DELETE
-  USING (member_id IN (SELECT id FROM family_members WHERE family_id IN (SELECT family_id FROM family_users WHERE user_id = auth.uid())));
+-- MVP tables use public access (no RLS policies needed)
+GRANT ALL ON current_week TO anon;
+GRANT ALL ON star_completions TO anon;
 
 -- Family users policies
 CREATE POLICY "Users can view their own family memberships"
@@ -551,6 +551,30 @@ RETURNS INTEGER AS $$
     AND family_member_id = p_family_member_id
     AND is_completed = true;
 $$ LANGUAGE SQL STABLE;
+
+-- Function to get star count from MVP star_completions table
+CREATE OR REPLACE FUNCTION get_star_count(p_member_id UUID)
+RETURNS INTEGER AS $$
+  SELECT COUNT(*)::INTEGER
+  FROM star_completions
+  WHERE member_id = p_member_id
+    AND is_completed = true;
+$$ LANGUAGE SQL STABLE;
+
+-- Function to reset week (MVP)
+CREATE OR REPLACE FUNCTION reset_week()
+RETURNS void AS $$
+BEGIN
+  -- Clear all star completions
+  DELETE FROM star_completions;
+
+  -- Update current week to this week
+  UPDATE current_week
+  SET
+    week_start_date = CURRENT_DATE - ((EXTRACT(DOW FROM CURRENT_DATE)::INTEGER + 6) % 7),
+    week_end_date = CURRENT_DATE - ((EXTRACT(DOW FROM CURRENT_DATE)::INTEGER + 6) % 7) + 6;
+END;
+$$ LANGUAGE plpgsql;
 
 -- ============================================
 -- COMPLETED!

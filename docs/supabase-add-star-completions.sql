@@ -1,9 +1,21 @@
 -- ============================================
--- ADD STAR_COMPLETIONS TABLE TO PLAYGROUND
+-- ADD REWARD CHART MVP TABLES TO PLAYGROUND
 -- ============================================
--- Run this in your Supabase SQL Editor to add the missing table
+-- Run this in your Supabase SQL Editor to add the missing tables
 -- This fixes the "Could not find table 'star_completions'" error
+--
+-- Note: Reward Chart MVP uses a simplified schema (no auth, single family)
 -- ============================================
+
+-- Current week table (simple week tracking)
+CREATE TABLE IF NOT EXISTS current_week (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  week_start_date DATE NOT NULL,
+  week_end_date DATE NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+COMMENT ON TABLE current_week IS '[REWARD CHART MVP] Simple current week tracking';
 
 -- Star completions table (simplified version for MVP)
 -- Note: This is a simplified tracking table used by the current Reward Chart UI
@@ -20,31 +32,71 @@ CREATE TABLE IF NOT EXISTS star_completions (
 
 CREATE INDEX IF NOT EXISTS idx_star_completions_member ON star_completions(member_id);
 
-COMMENT ON TABLE star_completions IS '[REWARD CHART] Simplified star tracking used by current UI (habit_index 0-4, day_index 0-6)';
+COMMENT ON TABLE star_completions IS '[REWARD CHART MVP] Simplified star tracking (habit_index 0-4, day_index 0-6)';
 
--- Enable RLS
-ALTER TABLE star_completions ENABLE ROW LEVEL SECURITY;
+-- ============================================
+-- ROW LEVEL SECURITY (DISABLED FOR MVP)
+-- ============================================
+-- MVP uses public access, no authentication required
 
--- RLS Policies
-CREATE POLICY "Users can view star completions in their families"
-  ON star_completions FOR SELECT
-  USING (member_id IN (SELECT id FROM family_members WHERE family_id IN (SELECT family_id FROM family_users WHERE user_id = auth.uid())));
+ALTER TABLE current_week DISABLE ROW LEVEL SECURITY;
+ALTER TABLE star_completions DISABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Users can insert star completions in their families"
-  ON star_completions FOR INSERT
-  WITH CHECK (member_id IN (SELECT id FROM family_members WHERE family_id IN (SELECT family_id FROM family_users WHERE user_id = auth.uid())));
+-- Grant public access
+GRANT ALL ON current_week TO anon;
+GRANT ALL ON star_completions TO anon;
 
-CREATE POLICY "Users can update star completions in their families"
-  ON star_completions FOR UPDATE
-  USING (member_id IN (SELECT id FROM family_members WHERE family_id IN (SELECT family_id FROM family_users WHERE user_id = auth.uid())));
+-- ============================================
+-- HELPER FUNCTIONS
+-- ============================================
 
-CREATE POLICY "Users can delete star completions in their families"
-  ON star_completions FOR DELETE
-  USING (member_id IN (SELECT id FROM family_members WHERE family_id IN (SELECT family_id FROM family_users WHERE user_id = auth.uid())));
+-- Function: Reset Week
+CREATE OR REPLACE FUNCTION reset_week()
+RETURNS void AS $$
+BEGIN
+  -- Clear all star completions
+  DELETE FROM star_completions;
+
+  -- Update current week to this week
+  UPDATE current_week
+  SET
+    week_start_date = CURRENT_DATE - ((EXTRACT(DOW FROM CURRENT_DATE)::INTEGER + 6) % 7),
+    week_end_date = CURRENT_DATE - ((EXTRACT(DOW FROM CURRENT_DATE)::INTEGER + 6) % 7) + 6;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Function: Get Star Count
+CREATE OR REPLACE FUNCTION get_star_count(p_member_id UUID)
+RETURNS INTEGER AS $$
+  SELECT COUNT(*)::INTEGER
+  FROM star_completions
+  WHERE member_id = p_member_id
+    AND is_completed = true;
+$$ LANGUAGE SQL STABLE;
+
+-- ============================================
+-- INSERT INITIAL DATA
+-- ============================================
+
+-- Insert current week (gets the Monday of current week)
+-- Only insert if table is empty
+INSERT INTO current_week (week_start_date, week_end_date)
+SELECT
+  CURRENT_DATE - ((EXTRACT(DOW FROM CURRENT_DATE)::INTEGER + 6) % 7),
+  CURRENT_DATE - ((EXTRACT(DOW FROM CURRENT_DATE)::INTEGER + 6) % 7) + 6
+WHERE NOT EXISTS (SELECT 1 FROM current_week);
 
 -- ============================================
 -- COMPLETED!
 -- ============================================
--- The star_completions table is now ready to use
+-- The Reward Chart MVP tables are now ready
 -- Your Reward Chart app should now work correctly
+--
+-- Tables added:
+-- - current_week
+-- - star_completions
+--
+-- Functions added:
+-- - reset_week()
+-- - get_star_count(member_id)
 -- ============================================
