@@ -120,4 +120,104 @@ export class SupabaseService {
       console.error('Error resetting week:', error);
     }
   }
+
+  async ensureFamilyMembersExist(members: Array<{ name: string; type: 'child' | 'parent'; color: string; order: number }>) {
+    if (!this.supabase) {
+      console.warn('⚠️ Supabase not initialized, cannot sync family members');
+      return [];
+    }
+
+    try {
+      console.log('🔄 Syncing family members to database...');
+
+      // First, check if we need to create a family
+      const { data: families, error: familyError } = await this.supabase
+        .from('families')
+        .select('id')
+        .limit(1);
+
+      if (familyError) {
+        console.error('❌ Error loading families:', familyError);
+        throw familyError;
+      }
+
+      let familyId: string;
+
+      if (!families || families.length === 0) {
+        // Create a default family
+        console.log('📝 No family found, creating default family...');
+        const { data: newFamily, error: createError } = await this.supabase
+          .from('families')
+          .insert({ name: 'My Family' })
+          .select('id')
+          .single();
+
+        if (createError) {
+          console.error('❌ Error creating family:', createError);
+          throw createError;
+        }
+        familyId = newFamily.id;
+        console.log('✅ Created default family:', familyId);
+      } else {
+        familyId = families[0].id;
+        console.log('✅ Found existing family:', familyId);
+      }
+
+      // Load existing members
+      const { data: existingMembers, error: loadError } = await this.supabase
+        .from('family_members')
+        .select('*')
+        .eq('family_id', familyId);
+
+      if (loadError) {
+        console.error('❌ Error loading family members:', loadError);
+        throw loadError;
+      }
+
+      console.log('📋 Found existing members:', existingMembers?.length || 0);
+
+      const existingMemberMap = new Map(
+        (existingMembers || []).map(m => [m.name, m])
+      );
+
+      const createdMembers: Array<{ id: string; name: string }> = [];
+
+      // Create or update members
+      for (const member of members) {
+        const existing = existingMemberMap.get(member.name);
+
+        if (!existing) {
+          // Create new member
+          console.log(`📝 Creating member: ${member.name}`);
+          const { data: newMember, error: insertError } = await this.supabase
+            .from('family_members')
+            .insert({
+              family_id: familyId,
+              name: member.name,
+              member_type: member.type,
+              color_code: member.color,
+              display_order: member.order
+            })
+            .select('id, name')
+            .single();
+
+          if (insertError) {
+            console.error(`❌ Error creating member ${member.name}:`, insertError);
+            throw insertError;
+          }
+          createdMembers.push(newMember);
+          console.log('✅ Created family member:', member.name, newMember.id);
+        } else {
+          createdMembers.push({ id: existing.id, name: existing.name });
+          console.log('✅ Using existing member:', member.name, existing.id);
+        }
+      }
+
+      console.log('✅ Family member sync complete. Total members:', createdMembers.length);
+      return createdMembers;
+    } catch (error) {
+      console.error('❌ Fatal error ensuring family members exist:', error);
+      return [];
+    }
+  }
 }

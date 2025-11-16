@@ -6,30 +6,215 @@
   role="dialog"
   aria-modal="true">
   <div class="bg-cream-100 rounded-lg shadow-lg max-w-[800px] w-full max-h-[80vh] md:max-h-[90vh] md:m-8 overflow-y-auto" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="document">
-    <div class="p-16 md:p-12 border-b border-gray-200 flex justify-between items-center">
-      <h2>🎁 Reward Menu</h2>
+    <div class="p-16 md:p-12 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-cream-100 z-10">
+      <h2 class="text-xl md:text-lg font-semibold">🎁 Reward Menu</h2>
       <button class="bg-transparent border-0 text-xl cursor-pointer text-slate-500 w-[32px] h-[32px] flex items-center justify-center rounded-sm hover:bg-brown-600/12 hover:text-slate-900 transition-colors duration-fast" (click)="onClose()">&times;</button>
     </div>
     <div class="p-16 md:p-12">
+      <!-- Kids Rewards -->
       <div class="mb-24 md:mb-16">
-        <h3 class="text-xl md:text-base font-semibold mb-12 text-teal-500">🧒 Kids' Rewards</h3>
+        <div class="flex justify-between items-center mb-12">
+          <h3 class="text-xl md:text-base font-semibold text-teal-500">🧒 Kids' Rewards</h3>
+          <button
+            *ngIf="!addingReward || addingReward.type !== 'kids'"
+            class="px-12 py-6 bg-teal-500 text-white rounded-base text-sm font-medium hover:bg-teal-600 transition-colors border-0 cursor-pointer"
+            (click)="startAdd('kids')">
+            + Add Reward
+          </button>
+        </div>
+
+        <!-- Add New Reward Form -->
+        <div *ngIf="addingReward?.type === 'kids'" class="p-12 mb-8 bg-teal-50 rounded-base border-2 border-teal-500">
+          <div class="mb-8">
+            <label for="new-reward-name-kids" class="block text-sm font-medium mb-4">Reward Name</label>
+            <input
+              id="new-reward-name-kids"
+              type="text"
+              [(ngModel)]="newReward.name"
+              class="w-full p-8 border border-slate-200 rounded-base text-sm"
+              placeholder="e.g., Extra screen time">
+          </div>
+          <div class="mb-12">
+            <label for="new-reward-stars-kids" class="block text-sm font-medium mb-4">Stars Required</label>
+            <input
+              id="new-reward-stars-kids"
+              type="number"
+              [(ngModel)]="newReward.stars"
+              min="1"
+              class="w-full p-8 border border-slate-200 rounded-base text-sm">
+          </div>
+          <div class="flex gap-8">
+            <button
+              class="px-12 py-6 bg-teal-500 text-white rounded-base text-sm font-medium hover:bg-teal-600 transition-colors border-0 cursor-pointer"
+              (click)="saveAdd()">
+              Save
+            </button>
+            <button
+              class="px-12 py-6 bg-gray-300 text-slate-900 rounded-base text-sm font-medium hover:bg-gray-400 transition-colors border-0 cursor-pointer"
+              (click)="cancelAdd()">
+              Cancel
+            </button>
+          </div>
+        </div>
+
         <div class="grid gap-8">
-          <div class="flex justify-between items-center p-12 md:p-8 bg-cream-50 rounded-base border-l-4 border-teal-500 md:text-sm" *ngFor="let reward of kidsRewards; trackBy: trackByIndex">
-            <div class="flex-1">
-              <div class="font-medium md:text-sm mb-4" [innerHTML]="reward.name"></div>
+          <div *ngFor="let reward of kidsRewards; let i = index; trackBy: trackByIndex" class="p-12 md:p-8 bg-cream-50 rounded-base border-l-4 border-teal-500">
+            <!-- View Mode -->
+            <div *ngIf="!isEditing(i, 'kids')" class="flex justify-between items-center gap-8">
+              <div class="flex-1">
+                <div class="font-medium md:text-sm" [innerHTML]="reward.name"></div>
+              </div>
+              <div class="flex items-center gap-8">
+                <div class="font-bold text-teal-500 whitespace-nowrap">{{ reward.stars }} ⭐</div>
+                <button
+                  class="px-8 py-4 bg-transparent text-slate-500 rounded-base text-xs hover:bg-slate-200 transition-colors border border-slate-300 cursor-pointer"
+                  (click)="startEdit(reward, i, 'kids')">
+                  Edit
+                </button>
+                <button
+                  class="px-8 py-4 bg-transparent text-red-500 rounded-base text-xs hover:bg-red-50 transition-colors border border-red-300 cursor-pointer"
+                  (click)="deleteRewardItem(i, 'kids')">
+                  Delete
+                </button>
+              </div>
             </div>
-            <div class="font-bold text-teal-500">{{ reward.stars }} ⭐</div>
+
+            <!-- Edit Mode -->
+            <div *ngIf="isEditing(i, 'kids')">
+              <div class="mb-8">
+                <label for="edit-reward-name-kids-{{i}}" class="block text-sm font-medium mb-4">Reward Name</label>
+                <input
+                  id="edit-reward-name-kids-{{i}}"
+                  type="text"
+                  [(ngModel)]="editingReward!.reward.name"
+                  class="w-full p-8 border border-slate-200 rounded-base text-sm">
+              </div>
+              <div class="mb-12">
+                <label for="edit-reward-stars-kids-{{i}}" class="block text-sm font-medium mb-4">Stars Required</label>
+                <input
+                  id="edit-reward-stars-kids-{{i}}"
+                  type="number"
+                  [(ngModel)]="editingReward!.reward.stars"
+                  min="1"
+                  class="w-full p-8 border border-slate-200 rounded-base text-sm">
+              </div>
+              <div class="flex gap-8">
+                <button
+                  class="px-12 py-6 bg-teal-500 text-white rounded-base text-sm font-medium hover:bg-teal-600 transition-colors border-0 cursor-pointer"
+                  (click)="saveEdit()">
+                  Save
+                </button>
+                <button
+                  class="px-12 py-6 bg-gray-300 text-slate-900 rounded-base text-sm font-medium hover:bg-gray-400 transition-colors border-0 cursor-pointer"
+                  (click)="cancelEdit()">
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      <!-- Parents Rewards -->
       <div class="mb-24 md:mb-16">
-        <h3 class="text-xl md:text-base font-semibold mb-12 text-teal-500">👨‍👩‍👧‍👦 Parents' Rewards</h3>
+        <div class="flex justify-between items-center mb-12">
+          <h3 class="text-xl md:text-base font-semibold text-teal-500">👨‍👩‍👧‍👦 Parents' Rewards</h3>
+          <button
+            *ngIf="!addingReward || addingReward.type !== 'parents'"
+            class="px-12 py-6 bg-teal-500 text-white rounded-base text-sm font-medium hover:bg-teal-600 transition-colors border-0 cursor-pointer"
+            (click)="startAdd('parents')">
+            + Add Reward
+          </button>
+        </div>
+
+        <!-- Add New Reward Form -->
+        <div *ngIf="addingReward?.type === 'parents'" class="p-12 mb-8 bg-teal-50 rounded-base border-2 border-teal-500">
+          <div class="mb-8">
+            <label for="new-reward-name-parents" class="block text-sm font-medium mb-4">Reward Name</label>
+            <input
+              id="new-reward-name-parents"
+              type="text"
+              [(ngModel)]="newReward.name"
+              class="w-full p-8 border border-slate-200 rounded-base text-sm"
+              placeholder="e.g., Coffee in bed">
+          </div>
+          <div class="mb-12">
+            <label for="new-reward-stars-parents" class="block text-sm font-medium mb-4">Stars Required</label>
+            <input
+              id="new-reward-stars-parents"
+              type="number"
+              [(ngModel)]="newReward.stars"
+              min="1"
+              class="w-full p-8 border border-slate-200 rounded-base text-sm">
+          </div>
+          <div class="flex gap-8">
+            <button
+              class="px-12 py-6 bg-teal-500 text-white rounded-base text-sm font-medium hover:bg-teal-600 transition-colors border-0 cursor-pointer"
+              (click)="saveAdd()">
+              Save
+            </button>
+            <button
+              class="px-12 py-6 bg-gray-300 text-slate-900 rounded-base text-sm font-medium hover:bg-gray-400 transition-colors border-0 cursor-pointer"
+              (click)="cancelAdd()">
+              Cancel
+            </button>
+          </div>
+        </div>
+
         <div class="grid gap-8">
-          <div class="flex justify-between items-center p-12 md:p-8 bg-cream-50 rounded-base border-l-4 border-teal-500 md:text-sm" *ngFor="let reward of parentsRewards; trackBy: trackByIndex">
-            <div class="flex-1">
-              <div class="font-medium md:text-sm mb-4" [innerHTML]="reward.name"></div>
+          <div *ngFor="let reward of parentsRewards; let i = index; trackBy: trackByIndex" class="p-12 md:p-8 bg-cream-50 rounded-base border-l-4 border-teal-500">
+            <!-- View Mode -->
+            <div *ngIf="!isEditing(i, 'parents')" class="flex justify-between items-center gap-8">
+              <div class="flex-1">
+                <div class="font-medium md:text-sm" [innerHTML]="reward.name"></div>
+              </div>
+              <div class="flex items-center gap-8">
+                <div class="font-bold text-teal-500 whitespace-nowrap">{{ reward.stars }} ⭐</div>
+                <button
+                  class="px-8 py-4 bg-transparent text-slate-500 rounded-base text-xs hover:bg-slate-200 transition-colors border border-slate-300 cursor-pointer"
+                  (click)="startEdit(reward, i, 'parents')">
+                  Edit
+                </button>
+                <button
+                  class="px-8 py-4 bg-transparent text-red-500 rounded-base text-xs hover:bg-red-50 transition-colors border border-red-300 cursor-pointer"
+                  (click)="deleteRewardItem(i, 'parents')">
+                  Delete
+                </button>
+              </div>
             </div>
-            <div class="font-bold text-teal-500">{{ reward.stars }} ⭐</div>
+
+            <!-- Edit Mode -->
+            <div *ngIf="isEditing(i, 'parents')">
+              <div class="mb-8">
+                <label for="edit-reward-name-parents-{{i}}" class="block text-sm font-medium mb-4">Reward Name</label>
+                <input
+                  id="edit-reward-name-parents-{{i}}"
+                  type="text"
+                  [(ngModel)]="editingReward!.reward.name"
+                  class="w-full p-8 border border-slate-200 rounded-base text-sm">
+              </div>
+              <div class="mb-12">
+                <label for="edit-reward-stars-parents-{{i}}" class="block text-sm font-medium mb-4">Stars Required</label>
+                <input
+                  id="edit-reward-stars-parents-{{i}}"
+                  type="number"
+                  [(ngModel)]="editingReward!.reward.stars"
+                  min="1"
+                  class="w-full p-8 border border-slate-200 rounded-base text-sm">
+              </div>
+              <div class="flex gap-8">
+                <button
+                  class="px-12 py-6 bg-teal-500 text-white rounded-base text-sm font-medium hover:bg-teal-600 transition-colors border-0 cursor-pointer"
+                  (click)="saveEdit()">
+                  Save
+                </button>
+                <button
+                  class="px-12 py-6 bg-gray-300 text-slate-900 rounded-base text-sm font-medium hover:bg-gray-400 transition-colors border-0 cursor-pointer"
+                  (click)="cancelEdit()">
+                  Cancel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>

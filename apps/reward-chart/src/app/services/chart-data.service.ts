@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { ChartData } from '../models/chart-data.model';
+import { Reward } from '../models/reward.model';
 import { SupabaseService } from './supabase.service';
 
 @Injectable({
@@ -108,16 +109,37 @@ export class ChartDataService {
   }
 
   private async loadFromSupabase(): Promise<void> {
-    const members = await this.supabaseService.loadFamilyMembers();
+    const data = this.chartDataSubject.value;
 
-    // Map member names to IDs
-    members.forEach(member => {
+    // Prepare family members data from current app state
+    const membersToSync = [
+      ...data.children.map((child, index) => ({
+        name: child.name,
+        type: 'child' as const,
+        color: child.color,
+        order: index + 1
+      })),
+      ...data.parents.map((parent, index) => ({
+        name: parent.name,
+        type: 'parent' as const,
+        color: parent.color,
+        order: data.children.length + index + 1
+      }))
+    ];
+
+    // Ensure family members exist in database and get their IDs
+    const syncedMembers = await this.supabaseService.ensureFamilyMembersExist(membersToSync);
+
+    // Clear and rebuild the member ID map
+    this.familyMemberIds.clear();
+    syncedMembers.forEach(member => {
       this.familyMemberIds.set(member.name, member.id);
     });
 
+    console.log('📋 Family member IDs mapped:', Array.from(this.familyMemberIds.entries()));
+
     // Load star completions
     const completions = await this.supabaseService.loadStarCompletions();
-    const data = this.chartDataSubject.value;
 
     // Reset stars
     data.kidsStars = {};
@@ -159,7 +181,8 @@ export class ChartDataService {
     starsData[personIndex][habitIndex][dayIndex] = !starsData[personIndex][habitIndex][dayIndex];
     const isCompleted = starsData[personIndex][habitIndex][dayIndex];
 
-    this.chartDataSubject.next(data);
+    // Emit new object reference to trigger change detection
+    this.chartDataSubject.next({ ...data });
 
     // Save to Supabase
     if (this.supabaseService.isInitialized()) {
@@ -168,6 +191,9 @@ export class ChartDataService {
 
       if (memberId) {
         await this.supabaseService.saveStarCompletion(memberId, habitIndex, dayIndex, isCompleted);
+      } else {
+        console.warn(`⚠️ Could not save star - member ID not found for: ${person.name}`);
+        console.warn('Available members:', Array.from(this.familyMemberIds.keys()));
       }
     }
   }
@@ -202,7 +228,7 @@ export class ChartDataService {
   toggleParentsVisibility(): void {
     const data = this.chartDataSubject.value;
     data.parentsVisible = !data.parentsVisible;
-    this.chartDataSubject.next(data);
+    this.chartDataSubject.next({ ...data });
   }
 
   updateChildrenNames(names: string[]): void {
@@ -212,7 +238,7 @@ export class ChartDataService {
         data.children[index].name = name;
       }
     });
-    this.chartDataSubject.next(data);
+    this.chartDataSubject.next({ ...data });
   }
 
   async resetWeek(): Promise<void> {
@@ -225,7 +251,8 @@ export class ChartDataService {
       await this.supabaseService.resetWeek();
     }
 
-    this.chartDataSubject.next(data);
+    // Emit new object reference to trigger change detection
+    this.chartDataSubject.next({ ...data });
   }
 
   getCurrentWeekDisplay(): string {
@@ -241,5 +268,39 @@ export class ChartDataService {
     };
 
     return `Week of ${formatDate(monday)} - ${formatDate(sunday)}, ${monday.getFullYear()}`;
+  }
+
+  updateReward(type: 'kids' | 'parents', index: number, reward: Reward): void {
+    const data = this.chartDataSubject.value;
+    if (type === 'kids') {
+      data.kidsRewards[index] = reward;
+    } else {
+      data.parentsRewards[index] = reward;
+    }
+    this.chartDataSubject.next({ ...data });
+  }
+
+  deleteReward(type: 'kids' | 'parents', index: number): void {
+    const data = this.chartDataSubject.value;
+    if (type === 'kids') {
+      data.kidsRewards.splice(index, 1);
+    } else {
+      data.parentsRewards.splice(index, 1);
+    }
+    this.chartDataSubject.next({ ...data });
+  }
+
+  addReward(type: 'kids' | 'parents', reward: Reward): void {
+    const data = this.chartDataSubject.value;
+    if (type === 'kids') {
+      data.kidsRewards.push(reward);
+      // Sort by stars
+      data.kidsRewards.sort((a, b) => a.stars - b.stars);
+    } else {
+      data.parentsRewards.push(reward);
+      // Sort by stars
+      data.parentsRewards.sort((a, b) => a.stars - b.stars);
+    }
+    this.chartDataSubject.next({ ...data });
   }
 }

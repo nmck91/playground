@@ -98,4 +98,16 @@ export class App implements OnInit {
   getChildrenNames(chartData: ChartData): string[] {
     return chartData.children.map(c => c.name);
   }
+
+  onUpdateReward(event: { type: 'kids' | 'parents'; index: number; reward: any }): void {
+    this.chartDataService.updateReward(event.type, event.index, event.reward);
+  }
+
+  onDeleteReward(event: { type: 'kids' | 'parents'; index: number }): void {
+    this.chartDataService.deleteReward(event.type, event.index);
+  }
+
+  onAddReward(event: { type: 'kids' | 'parents'; reward: any }): void {
+    this.chartDataService.addReward(event.type, event.reward);
+  }
 }
