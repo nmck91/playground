@@ -40,15 +40,18 @@
       <div class="grid grid-cols-3 gap-3">
         @for (location of locations(); track location.id) {
           <div
-            class="aspect-square rounded-lg flex items-center justify-center text-2xl"
+            class="aspect-square rounded-lg flex flex-col items-center justify-center"
             [class.bg-amber-200]="hasStamp(location.stampId)"
             [class.bg-gray-200]="!hasStamp(location.stampId)"
             [class.opacity-30]="!hasStamp(location.stampId)"
           >
+            <div class="text-3xl">
+              {{ getStampEmoji(location.stampId) }}
+            </div>
             @if (hasStamp(location.stampId)) {
-              🎫
-            } @else {
-              ❓
+              <div class="text-xs text-gray-600 mt-1 truncate px-1">
+                {{ location.name.split(' ')[0] }}
+              </div>
             }
           </div>
         }

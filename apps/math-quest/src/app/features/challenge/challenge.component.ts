@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -16,7 +16,7 @@ import {
   templateUrl: './challenge.component.html',
   styleUrl: './challenge.component.css',
 })
-export class ChallengeComponent implements OnInit, AfterViewInit {
+export class ChallengeComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('answerInput') answerInput!: ElementRef<HTMLInputElement>;
 
   private gameState = inject(GameStateService);
@@ -33,6 +33,11 @@ export class ChallengeComponent implements OnInit, AfterViewInit {
   userAnswer = '';
   showFeedback = false;
   isCorrect = false;
+
+  // Timer
+  elapsedTimeMs = 0;
+  private timerInterval: ReturnType<typeof setInterval> | null = null;
+  private challengeStartTime = 0;
 
   ngOnInit(): void {
     const locationId = this.route.snapshot.params['locationId'];
@@ -53,6 +58,30 @@ export class ChallengeComponent implements OnInit, AfterViewInit {
     // Start challenge
     this.gameState.selectLocation(location);
     this.gameState.startChallenge(level);
+
+    // Start timer
+    this.challengeStartTime = Date.now();
+    this.startTimer();
+  }
+
+  private startTimer(): void {
+    this.timerInterval = setInterval(() => {
+      this.elapsedTimeMs = Date.now() - this.challengeStartTime;
+    }, 100);
+  }
+
+  private stopTimer(): void {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = null;
+    }
+  }
+
+  formatTime(ms: number): string {
+    const seconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
 
   ngAfterViewInit(): void {
@@ -103,13 +132,19 @@ export class ChallengeComponent implements OnInit, AfterViewInit {
   }
 
   private completeChallenge(): void {
+    this.stopTimer();
     this.gameState.completeChallenge();
     this.difficultyService.adjustDifficulty();
     this.router.navigate(['/results']);
   }
 
   goBack(): void {
+    this.stopTimer();
     this.gameState.resetChallenge();
     this.router.navigate(['/world-map']);
+  }
+
+  ngOnDestroy(): void {
+    this.stopTimer();
   }
 }

@@ -1,4 +1,5 @@
 import { Pet } from './pet.model';
+import { StampTier } from './location.model';
 
 /**
  * Player profile representing a child user
@@ -14,7 +15,8 @@ export interface Player {
   currentLevel: number;
 
   // Passport progress
-  stamps: string[]; // Location IDs completed
+  stamps: string[]; // Location IDs completed (legacy, kept for backwards compatibility)
+  stampTiers: Record<string, StampTier>; // Location ID -> best tier earned
   artifacts: string[]; // Collected artifact IDs
 
   // Pet companions
@@ -65,6 +67,7 @@ export function createDefaultPlayer(name: string, id: string): Player {
     totalXp: 0,
     currentLevel: 1,
     stamps: [],
+    stampTiers: {},
     artifacts: [],
     pets: [],
     activePetId: null,

@@ -36,16 +36,78 @@ export interface Location {
 }
 
 /**
+ * Stamp tier based on performance
+ */
+export type StampTier = 'gold' | 'silver' | 'bronze' | 'none';
+
+/**
  * Progress for a specific location
  */
 export interface LocationProgress {
   locationId: string;
   completed: boolean;
   bestScore: number;
+  bestTime: number;
+  bestStampTier: StampTier;
   attemptsCount: number;
   lastAttemptAt?: Date;
   stampEarned: boolean;
   artifactEarned: boolean;
+}
+
+/**
+ * Calculate stamp tier based on score and time
+ * @param score - Score out of 100
+ * @param avgTimePerProblemMs - Average time per problem in milliseconds
+ */
+export function calculateStampTier(
+  score: number,
+  avgTimePerProblemMs: number
+): StampTier {
+  // Time thresholds (in ms per problem)
+  const fastTime = 5000;   // Under 5s per problem = fast
+  const okTime = 10000;    // Under 10s per problem = ok
+
+  // Gold: 90+ score AND fast time
+  if (score >= 90 && avgTimePerProblemMs <= fastTime) {
+    return 'gold';
+  }
+
+  // Silver: 70+ score AND ok time, OR 90+ with slower time
+  if ((score >= 70 && avgTimePerProblemMs <= okTime) || score >= 90) {
+    return 'silver';
+  }
+
+  // Bronze: 50+ score (completion)
+  if (score >= 50) {
+    return 'bronze';
+  }
+
+  return 'none';
+}
+
+/**
+ * Get XP multiplier for stamp tier
+ */
+export function getStampTierMultiplier(tier: StampTier): number {
+  switch (tier) {
+    case 'gold': return 1.5;
+    case 'silver': return 1.2;
+    case 'bronze': return 1.0;
+    case 'none': return 0.5;
+  }
+}
+
+/**
+ * Get emoji for stamp tier
+ */
+export function getStampTierEmoji(tier: StampTier): string {
+  switch (tier) {
+    case 'gold': return '🥇';
+    case 'silver': return '🥈';
+    case 'bronze': return '🥉';
+    case 'none': return '📋';
+  }
 }
 
 /**

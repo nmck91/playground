@@ -5,6 +5,7 @@ import {
   createPet,
   StorageService,
   STORAGE_KEYS,
+  StampTier,
 } from '@playground/game-engine';
 
 @Injectable({
@@ -119,21 +120,50 @@ export class PlayerProfileService {
   }
 
   /**
-   * Add stamp to player's passport
+   * Add stamp to player's passport with tier
    */
-  addStamp(playerId: string, stampId: string): void {
+  addStamp(playerId: string, stampId: string, tier: StampTier = 'bronze'): void {
     this.playersSignal.update((players) =>
       players.map((p) => {
         if (p.id !== playerId) return p;
-        if (p.stamps.includes(stampId)) return p;
+
+        // Ensure stampTiers exists (for backwards compatibility)
+        const stampTiers = p.stampTiers || {};
+        const currentTier = stampTiers[stampId];
+
+        // Only update if new tier is better
+        const tierRank: Record<StampTier, number> = {
+          'gold': 3,
+          'silver': 2,
+          'bronze': 1,
+          'none': 0
+        };
+
+        const newTierRank = tierRank[tier];
+        const currentTierRank = currentTier ? tierRank[currentTier] : -1;
+
+        if (newTierRank <= currentTierRank) return p;
 
         return {
           ...p,
-          stamps: [...p.stamps, stampId],
+          stamps: p.stamps.includes(stampId) ? p.stamps : [...p.stamps, stampId],
+          stampTiers: {
+            ...stampTiers,
+            [stampId]: tier
+          }
         };
       })
     );
     this.saveToStorage();
+  }
+
+  /**
+   * Get stamp tier for a location
+   */
+  getStampTier(playerId: string, stampId: string): StampTier | null {
+    const player = this.playersSignal().find(p => p.id === playerId);
+    if (!player) return null;
+    return player.stampTiers?.[stampId] || null;
   }
 
   /**

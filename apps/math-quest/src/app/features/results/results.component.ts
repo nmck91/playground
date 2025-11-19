@@ -6,7 +6,13 @@ import {
   PlayerProfileService,
   AudioService,
 } from '../../core/services';
-import { calculateXpEarned } from '@playground/game-engine';
+import {
+  calculateXpEarned,
+  calculateStampTier,
+  getStampTierMultiplier,
+  getStampTierEmoji,
+  StampTier,
+} from '@playground/game-engine';
 
 @Component({
   selector: 'app-results',
@@ -27,6 +33,8 @@ export class ResultsComponent implements OnInit {
     score: number;
     timeMs: number;
     xpEarned: number;
+    stampTier: StampTier;
+    stampTierEmoji: string;
   } | null = null;
 
   stampEarned = false;
@@ -47,16 +55,26 @@ export class ResultsComponent implements OnInit {
       return;
     }
 
-    // Calculate XP
-    const xpEarned = calculateXpEarned(
+    // Calculate stamp tier based on score and time
+    const avgTimePerProblemMs = challengeResults.timeMs / challengeResults.totalCount;
+    const stampTier = calculateStampTier(
+      challengeResults.score,
+      avgTimePerProblemMs
+    );
+
+    // Calculate XP with tier multiplier
+    const baseXp = calculateXpEarned(
       challengeResults.score,
       location.xpReward,
       player.stats.currentStreak
     );
+    const xpEarned = Math.round(baseXp * getStampTierMultiplier(stampTier));
 
     this.results = {
       ...challengeResults,
       xpEarned,
+      stampTier,
+      stampTierEmoji: getStampTierEmoji(stampTier),
     };
 
     // Update player stats
@@ -70,18 +88,30 @@ export class ResultsComponent implements OnInit {
     // Add XP
     this.playerService.addXp(player.id, xpEarned);
 
-    // Check for stamp (score >= 70)
-    if (challengeResults.score >= 70 && !player.stamps.includes(location.stampId)) {
-      this.playerService.addStamp(player.id, location.stampId);
-      this.playerService.addArtifact(player.id, location.artifactId);
-      this.stampEarned = true;
-      this.audioService.play('stamp');
+    // Check for stamp (need at least bronze tier - score >= 50)
+    if (stampTier !== 'none') {
+      const isNewStamp = !player.stamps.includes(location.stampId);
+      const currentTier = player.stampTiers?.[location.stampId];
 
-      // Check for pet unlock
-      if (location.unlocksPetId && !player.pets.some(p => p.species === location.unlocksPetId)) {
-        this.playerService.unlockPet(player.id, location.unlocksPetId as 'dog' | 'cheetah' | 'eagle' | 'shark');
-        this.petUnlocked = location.unlocksPetId;
-        this.audioService.play('unlock');
+      // Add or upgrade stamp
+      this.playerService.addStamp(player.id, location.stampId, stampTier);
+
+      // Only show "earned" notification for new stamps
+      if (isNewStamp) {
+        this.playerService.addArtifact(player.id, location.artifactId);
+        this.stampEarned = true;
+        this.audioService.play('stamp');
+
+        // Check for pet unlock
+        if (location.unlocksPetId && !player.pets.some(p => p.species === location.unlocksPetId)) {
+          this.playerService.unlockPet(player.id, location.unlocksPetId as 'dog' | 'cheetah' | 'eagle' | 'shark');
+          this.petUnlocked = location.unlocksPetId;
+          this.audioService.play('unlock');
+        }
+      } else if (stampTier !== currentTier) {
+        // Upgraded existing stamp tier
+        this.stampEarned = true;
+        this.audioService.play('stamp');
       }
     }
 

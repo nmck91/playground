@@ -4,8 +4,11 @@
     <button (click)="goBack()" class="text-white">
       ← Back
     </button>
+    <div class="text-2xl font-bold text-white">
+      ⏱️ {{ formatTime(elapsedTimeMs) }}
+    </div>
     <div class="text-white text-sm">
-      Progress: {{ challengeProgress() | number:'1.0-0' }}%
+      {{ challengeProgress() | number:'1.0-0' }}%
     </div>
   </div>
 

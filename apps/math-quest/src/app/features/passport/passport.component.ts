@@ -2,6 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { PlayerProfileService, GameStateService } from '../../core/services';
+import { getStampTierEmoji, StampTier } from '@playground/game-engine';
 
 @Component({
   selector: 'app-passport',
@@ -24,5 +25,16 @@ export class PassportComponent {
 
   hasStamp(stampId: string): boolean {
     return this.player()?.stamps.includes(stampId) || false;
+  }
+
+  getStampTier(stampId: string): StampTier | null {
+    const player = this.player();
+    if (!player) return null;
+    return player.stampTiers?.[stampId] || null;
+  }
+
+  getStampEmoji(stampId: string): string {
+    const tier = this.getStampTier(stampId);
+    return tier ? getStampTierEmoji(tier) : '❓';
   }
 }

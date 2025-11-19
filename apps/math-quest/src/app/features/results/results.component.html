@@ -1,32 +1,41 @@
 <div class="min-h-screen bg-gradient-to-b from-yellow-400 to-orange-500 p-4 flex flex-col items-center justify-center">
   @if (results) {
     <div class="bg-white rounded-2xl p-8 shadow-xl max-w-md w-full text-center">
+      <!-- Stamp Tier -->
+      <div class="text-6xl mb-2">
+        {{ results.stampTierEmoji }}
+      </div>
+
       <!-- Score -->
       <h1 class="text-4xl font-bold mb-2">
-        @if (results.score >= 90) {
-          Amazing! 🌟
-        } @else if (results.score >= 70) {
-          Great Job! ⭐
-        } @else if (results.score >= 50) {
-          Good Try! 👍
+        @if (results.stampTier === 'gold') {
+          Gold Medal! 🌟
+        } @else if (results.stampTier === 'silver') {
+          Silver Medal! ⭐
+        } @else if (results.stampTier === 'bronze') {
+          Bronze Medal! 👍
         } @else {
           Keep Practicing! 💪
         }
       </h1>
 
       <div class="text-6xl font-bold text-yellow-500 mb-4">
-        {{ results.score }}
+        {{ results.score }}%
       </div>
 
       <!-- Stats -->
-      <div class="grid grid-cols-2 gap-4 mb-6 text-left">
+      <div class="grid grid-cols-3 gap-3 mb-6 text-left">
         <div class="bg-gray-100 rounded-lg p-3">
           <div class="text-sm text-gray-600">Correct</div>
           <div class="font-bold">{{ results.correctCount }}/{{ results.totalCount }}</div>
         </div>
         <div class="bg-gray-100 rounded-lg p-3">
-          <div class="text-sm text-gray-600">Time</div>
+          <div class="text-sm text-gray-600">Total Time</div>
           <div class="font-bold">{{ (results.timeMs / 1000) | number:'1.1-1' }}s</div>
+        </div>
+        <div class="bg-gray-100 rounded-lg p-3">
+          <div class="text-sm text-gray-600">Avg/Problem</div>
+          <div class="font-bold">{{ (results.timeMs / results.totalCount / 1000) | number:'1.1-1' }}s</div>
         </div>
       </div>
 
