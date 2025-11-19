@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -16,7 +16,9 @@ import {
   templateUrl: './challenge.component.html',
   styleUrl: './challenge.component.css',
 })
-export class ChallengeComponent implements OnInit {
+export class ChallengeComponent implements OnInit, AfterViewInit {
+  @ViewChild('answerInput') answerInput!: ElementRef<HTMLInputElement>;
+
   private gameState = inject(GameStateService);
   private playerService = inject(PlayerProfileService);
   private difficultyService = inject(DifficultyService);
@@ -53,6 +55,16 @@ export class ChallengeComponent implements OnInit {
     this.gameState.startChallenge(level);
   }
 
+  ngAfterViewInit(): void {
+    this.focusInput();
+  }
+
+  private focusInput(): void {
+    setTimeout(() => {
+      this.answerInput?.nativeElement?.focus();
+    }, 0);
+  }
+
   submitAnswer(): void {
     const answer = parseInt(this.userAnswer, 10);
     if (isNaN(answer)) return;
@@ -85,6 +97,7 @@ export class ChallengeComponent implements OnInit {
         this.completeChallenge();
       } else {
         this.gameState.nextProblem();
+        this.focusInput();
       }
     }, 1000);
   }
