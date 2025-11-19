@@ -1,0 +1,73 @@
+<div class="min-h-screen bg-gradient-to-b from-amber-100 to-amber-200 p-4">
+  <!-- Header -->
+  <div class="flex items-center mb-6">
+    <button (click)="goBack()" class="text-amber-800">
+      ← Back
+    </button>
+  </div>
+
+  <div class="max-w-md mx-auto">
+    <!-- Passport Cover -->
+    <div class="bg-amber-800 rounded-t-lg p-4 text-center">
+      <h1 class="text-2xl font-bold text-amber-100">
+        📜 Explorer Passport
+      </h1>
+      <div class="text-amber-200">
+        {{ player()?.name }}
+      </div>
+    </div>
+
+    <!-- Passport Pages -->
+    <div class="bg-amber-50 rounded-b-lg p-6 shadow-lg">
+      <!-- Stats -->
+      <div class="grid grid-cols-3 gap-4 mb-6 text-center">
+        <div>
+          <div class="text-2xl font-bold">{{ player()?.stamps?.length || 0 }}</div>
+          <div class="text-xs text-gray-600">Stamps</div>
+        </div>
+        <div>
+          <div class="text-2xl font-bold">{{ player()?.currentLevel }}</div>
+          <div class="text-xs text-gray-600">Level</div>
+        </div>
+        <div>
+          <div class="text-2xl font-bold">{{ player()?.totalXp }}</div>
+          <div class="text-xs text-gray-600">XP</div>
+        </div>
+      </div>
+
+      <!-- Stamps Grid -->
+      <h2 class="font-bold mb-3">Stamp Collection</h2>
+      <div class="grid grid-cols-3 gap-3">
+        @for (location of locations(); track location.id) {
+          <div
+            class="aspect-square rounded-lg flex items-center justify-center text-2xl"
+            [class.bg-amber-200]="hasStamp(location.stampId)"
+            [class.bg-gray-200]="!hasStamp(location.stampId)"
+            [class.opacity-30]="!hasStamp(location.stampId)"
+          >
+            @if (hasStamp(location.stampId)) {
+              🎫
+            } @else {
+              ❓
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Artifacts -->
+      <h2 class="font-bold mt-6 mb-3">Artifacts</h2>
+      <div class="flex flex-wrap gap-2">
+        @for (artifact of player()?.artifacts || []; track artifact) {
+          <div class="bg-yellow-200 px-3 py-1 rounded-full text-sm">
+            💎 {{ artifact }}
+          </div>
+        }
+        @if (!player()?.artifacts?.length) {
+          <div class="text-gray-500 text-sm">
+            Complete locations to collect artifacts!
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

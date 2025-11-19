@@ -1,0 +1,70 @@
+<div class="min-h-screen bg-gradient-to-b from-yellow-400 to-orange-500 p-4 flex flex-col items-center justify-center">
+  @if (results) {
+    <div class="bg-white rounded-2xl p-8 shadow-xl max-w-md w-full text-center">
+      <!-- Score -->
+      <h1 class="text-4xl font-bold mb-2">
+        @if (results.score >= 90) {
+          Amazing! 🌟
+        } @else if (results.score >= 70) {
+          Great Job! ⭐
+        } @else if (results.score >= 50) {
+          Good Try! 👍
+        } @else {
+          Keep Practicing! 💪
+        }
+      </h1>
+
+      <div class="text-6xl font-bold text-yellow-500 mb-4">
+        {{ results.score }}
+      </div>
+
+      <!-- Stats -->
+      <div class="grid grid-cols-2 gap-4 mb-6 text-left">
+        <div class="bg-gray-100 rounded-lg p-3">
+          <div class="text-sm text-gray-600">Correct</div>
+          <div class="font-bold">{{ results.correctCount }}/{{ results.totalCount }}</div>
+        </div>
+        <div class="bg-gray-100 rounded-lg p-3">
+          <div class="text-sm text-gray-600">Time</div>
+          <div class="font-bold">{{ (results.timeMs / 1000) | number:'1.1-1' }}s</div>
+        </div>
+      </div>
+
+      <!-- XP Earned -->
+      <div class="bg-yellow-100 rounded-lg p-4 mb-6">
+        <div class="text-2xl font-bold text-yellow-600">
+          +{{ results.xpEarned }} XP
+        </div>
+      </div>
+
+      <!-- Rewards -->
+      @if (stampEarned) {
+        <div class="bg-green-100 rounded-lg p-4 mb-4">
+          <div class="text-xl">🎫 New Stamp Earned!</div>
+        </div>
+      }
+
+      @if (petUnlocked) {
+        <div class="bg-purple-100 rounded-lg p-4 mb-4">
+          <div class="text-xl">🐾 New Pet Unlocked: {{ petUnlocked }}!</div>
+        </div>
+      }
+
+      <!-- Actions -->
+      <div class="flex flex-col gap-3">
+        <button
+          (click)="playAgain()"
+          class="bg-yellow-400 text-gray-800 py-3 rounded-lg font-bold hover:bg-yellow-500 transition-colors"
+        >
+          Play Again
+        </button>
+        <button
+          (click)="goToMap()"
+          class="bg-gray-200 text-gray-700 py-3 rounded-lg font-bold hover:bg-gray-300 transition-colors"
+        >
+          Back to Map
+        </button>
+      </div>
+    </div>
+  }
+</div>

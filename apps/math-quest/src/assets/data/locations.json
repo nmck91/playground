@@ -1,0 +1,34 @@
+{
+  "locations": [
+    {
+      "id": "egypt-pyramids",
+      "name": "Egyptian Pyramids",
+      "region": "africa",
+      "description": "Crack the ancient codes of the pharaohs!"
+    },
+    {
+      "id": "amazon-rainforest",
+      "name": "Amazon Rainforest",
+      "region": "americas",
+      "description": "Decode the secrets of the jungle!"
+    },
+    {
+      "id": "himalaya-mountains",
+      "name": "Himalaya Mountains",
+      "region": "asia",
+      "description": "Solve puzzles at the roof of the world!"
+    },
+    {
+      "id": "african-savanna",
+      "name": "African Savanna",
+      "region": "africa",
+      "description": "Race against time on the plains!"
+    },
+    {
+      "id": "pacific-islands",
+      "name": "Pacific Islands",
+      "region": "oceania",
+      "description": "Dive into underwater code mysteries!"
+    }
+  ]
+}

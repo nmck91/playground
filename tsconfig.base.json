@@ -15,7 +15,8 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@playground/tailwind-preset": ["libs/tailwind-preset/src/index.ts"]
+      "@playground/tailwind-preset": ["libs/tailwind-preset/src/index.ts"],
+      "@playground/game-engine": ["libs/game-engine/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

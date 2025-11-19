@@ -1,0 +1,8 @@
+{
+  "name": "@playground/game-engine",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@angular/core": "^20.3.0"
+  },
+  "sideEffects": false
+}
