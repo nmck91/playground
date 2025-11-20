@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { PlayerProfileService } from '../../core/services';
+import { PlayerProfileService, AudioService } from '../../core/services';
 
 @Component({
   selector: 'app-profile-select',
@@ -13,6 +13,7 @@ import { PlayerProfileService } from '../../core/services';
 })
 export class ProfileSelectComponent {
   private playerService = inject(PlayerProfileService);
+  private audioService = inject(AudioService);
   private router = inject(Router);
 
   players = this.playerService.players;
@@ -20,12 +21,16 @@ export class ProfileSelectComponent {
   showCreateForm = false;
 
   selectPlayer(playerId: string): void {
+    // Initialize audio on first user interaction
+    this.audioService.initialize();
     this.playerService.selectPlayer(playerId);
     this.router.navigate(['/world-map']);
   }
 
   createPlayer(): void {
     if (this.newPlayerName.trim()) {
+      // Initialize audio on first user interaction
+      this.audioService.initialize();
       const player = this.playerService.createPlayer(this.newPlayerName.trim());
       this.playerService.selectPlayer(player.id);
       this.newPlayerName = '';

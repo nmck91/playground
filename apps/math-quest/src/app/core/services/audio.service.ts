@@ -13,8 +13,8 @@ export type SoundEffect =
   providedIn: 'root',
 })
 export class AudioService {
-  private audioContext: AudioContext | null = null;
-  private soundBuffers: Map<string, AudioBuffer> = new Map();
+  private sounds: Map<SoundEffect, HTMLAudioElement> = new Map();
+  private initialized = false;
 
   // Settings
   private sfxEnabledSignal = signal<boolean>(true);
@@ -37,65 +37,51 @@ export class AudioService {
   };
 
   /**
-   * Initialize audio context (must be called after user interaction)
+   * Initialize audio (must be called after user interaction)
    */
   async initialize(): Promise<void> {
-    if (this.audioContext) return;
+    if (this.initialized) return;
 
     try {
-      this.audioContext = new AudioContext();
-      await this.preloadSounds();
+      // Preload all sounds
+      Object.entries(this.soundFiles).forEach(([name, path]) => {
+        const audio = new Audio(path);
+        audio.volume = this.volumeSignal();
+        audio.preload = 'auto';
+        this.sounds.set(name as SoundEffect, audio);
+      });
+
+      this.initialized = true;
+      console.log('Audio initialized successfully');
     } catch (error) {
       console.warn('Audio initialization failed:', error);
     }
   }
 
   /**
-   * Preload all sound effects
-   */
-  private async preloadSounds(): Promise<void> {
-    if (!this.audioContext) return;
-
-    const loadPromises = Object.entries(this.soundFiles).map(
-      async ([name, path]) => {
-        try {
-          const response = await fetch(path);
-          const arrayBuffer = await response.arrayBuffer();
-          const audioBuffer = await this.audioContext?.decodeAudioData(arrayBuffer);
-          if (!audioBuffer) return;
-          this.soundBuffers.set(name, audioBuffer);
-        } catch (error) {
-          console.warn(`Failed to load sound: ${name}`, error);
-        }
-      }
-    );
-
-    await Promise.all(loadPromises);
-  }
-
-  /**
    * Play a sound effect
    */
   play(effect: SoundEffect): void {
-    if (!this.sfxEnabledSignal() || !this.audioContext) return;
+    if (!this.sfxEnabledSignal()) return;
 
-    const buffer = this.soundBuffers.get(effect);
-    if (!buffer) {
+    // Auto-initialize if not done yet
+    if (!this.initialized) {
+      this.initialize();
+    }
+
+    const audio = this.sounds.get(effect);
+    if (!audio) {
       console.warn(`Sound not loaded: ${effect}`);
       return;
     }
 
     try {
-      const source = this.audioContext.createBufferSource();
-      const gainNode = this.audioContext.createGain();
-
-      source.buffer = buffer;
-      gainNode.gain.value = this.volumeSignal();
-
-      source.connect(gainNode);
-      gainNode.connect(this.audioContext.destination);
-
-      source.start(0);
+      // Reset and play
+      audio.currentTime = 0;
+      audio.volume = this.volumeSignal();
+      audio.play().catch(error => {
+        console.warn(`Failed to play sound: ${effect}`, error);
+      });
     } catch (error) {
       console.warn(`Failed to play sound: ${effect}`, error);
     }
@@ -127,14 +113,5 @@ export class AudioService {
    */
   setSfxEnabled(enabled: boolean): void {
     this.sfxEnabledSignal.set(enabled);
-  }
-
-  /**
-   * Resume audio context (needed after user interaction)
-   */
-  async resume(): Promise<void> {
-    if (this.audioContext?.state === 'suspended') {
-      await this.audioContext.resume();
-    }
   }
 }
