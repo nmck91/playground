@@ -18,6 +18,11 @@
           {
             "glob": "**/*",
             "input": "apps/math-quest/public"
+          },
+          {
+            "glob": "**/*",
+            "input": "apps/math-quest/src/assets",
+            "output": "assets"
           }
         ],
         "styles": ["apps/math-quest/src/styles.css"]
