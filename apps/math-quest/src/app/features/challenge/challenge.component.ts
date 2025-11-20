@@ -29,6 +29,7 @@ export class ChallengeComponent implements OnInit, AfterViewInit, OnDestroy {
   currentProblem = this.gameState.currentProblem;
   challengeProgress = this.gameState.challengeProgress;
   isLastProblem = this.gameState.isLastProblem;
+  selectedLocation = this.gameState.selectedLocation;
 
   userAnswer = '';
   showFeedback = false;

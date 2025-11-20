@@ -29,31 +29,39 @@
       <button
         (click)="selectLocation(location)"
         [disabled]="!isLocationUnlocked(location)"
-        class="bg-white rounded-lg p-4 shadow-lg transition-all"
+        class="bg-white rounded-lg overflow-hidden shadow-lg transition-all"
         [class.opacity-50]="!isLocationUnlocked(location)"
         [class.hover:shadow-xl]="isLocationUnlocked(location)"
         [class.cursor-not-allowed]="!isLocationUnlocked(location)"
       >
-        <div class="text-4xl mb-2">
-          @switch (location.region) {
-            @case ('africa') { 🏜️ }
-            @case ('asia') { ⛰️ }
-            @case ('europe') { 🏰 }
-            @case ('americas') { 🌴 }
-            @case ('oceania') { 🏝️ }
+        <!-- Location Image -->
+        <div class="aspect-video bg-gray-100 relative overflow-hidden">
+          <img
+            [src]="location.thumbnailImage"
+            [alt]="location.name"
+            class="w-full h-full object-cover"
+          />
+          @if (!isLocationUnlocked(location)) {
+            <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <div class="text-white text-4xl">🔒</div>
+            </div>
           }
         </div>
-        <div class="font-bold">{{ location.name }}</div>
-        <div class="text-sm text-gray-600 mb-2">{{ location.description }}</div>
-        @if (!isLocationUnlocked(location)) {
-          <div class="text-xs text-red-500">
-            🔒 Need {{ location.requiredStamps }} stamps
-          </div>
-        } @else {
-          <div class="text-xs text-green-500">
-            ✅ Unlocked
-          </div>
-        }
+
+        <!-- Location Info -->
+        <div class="p-4">
+          <div class="font-bold text-lg">{{ location.name }}</div>
+          <div class="text-sm text-gray-600 mb-2">{{ location.description }}</div>
+          @if (!isLocationUnlocked(location)) {
+            <div class="text-xs text-red-500">
+              Need {{ location.requiredStamps }} stamps
+            </div>
+          } @else {
+            <div class="text-xs text-green-500">
+              ✅ Unlocked
+            </div>
+          }
+        </div>
       </button>
     }
   </div>

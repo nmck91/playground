@@ -15,31 +15,35 @@
       <button
         (click)="selectPet(petDef.species)"
         [disabled]="!hasPet(petDef.species)"
-        class="bg-white rounded-lg p-4 shadow-lg transition-all"
+        class="bg-white rounded-lg overflow-hidden shadow-lg transition-all"
         [class.ring-4]="isActivePet(petDef.species)"
         [class.ring-yellow-400]="isActivePet(petDef.species)"
         [class.opacity-50]="!hasPet(petDef.species)"
       >
-        <div class="text-4xl mb-2">
-          @switch (petDef.species) {
-            @case ('dog') { 🐕 }
-            @case ('cheetah') { 🐆 }
-            @case ('eagle') { 🦅 }
-            @case ('shark') { 🦈 }
+        <!-- Pet Image -->
+        <div class="aspect-square bg-gray-100 relative">
+          <img
+            [src]="petDef.spriteSheet"
+            [alt]="petDef.displayName"
+            class="w-full h-full object-cover"
+          />
+          @if (!hasPet(petDef.species)) {
+            <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
+              <div class="text-white text-5xl">🔒</div>
+            </div>
+          }
+          @if (isActivePet(petDef.species)) {
+            <div class="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+              ✓ Active
+            </div>
           }
         </div>
-        <div class="font-bold">{{ petDef.displayName }}</div>
-        <div class="text-xs text-gray-600">{{ petDef.description }}</div>
 
-        @if (!hasPet(petDef.species)) {
-          <div class="text-xs text-red-500 mt-2">
-            🔒 Locked
-          </div>
-        } @else if (isActivePet(petDef.species)) {
-          <div class="text-xs text-green-500 mt-2">
-            ✓ Active
-          </div>
-        }
+        <!-- Pet Info -->
+        <div class="p-3">
+          <div class="font-bold">{{ petDef.displayName }}</div>
+          <div class="text-xs text-gray-600">{{ petDef.description }}</div>
+        </div>
       </button>
     }
   </div>

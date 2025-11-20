@@ -1,4 +1,18 @@
-<div class="min-h-screen bg-gradient-to-b from-purple-500 to-indigo-600 p-4 flex flex-col">
+<div class="min-h-screen relative p-4 flex flex-col">
+  <!-- Background Image -->
+  @if (selectedLocation()) {
+    <div class="absolute inset-0 z-0">
+      <img
+        [src]="selectedLocation()?.backgroundImage"
+        [alt]="selectedLocation()?.name"
+        class="w-full h-full object-cover"
+      />
+      <div class="absolute inset-0 bg-gradient-to-b from-purple-900/70 to-indigo-900/70"></div>
+    </div>
+  }
+
+  <!-- Content overlay -->
+  <div class="relative z-10 flex flex-col min-h-screen">
   <!-- Header -->
   <div class="flex justify-between items-center mb-4">
     <button (click)="goBack()" class="text-white">
@@ -62,4 +76,5 @@
       }
     </div>
   }
+  </div>
 </div>
