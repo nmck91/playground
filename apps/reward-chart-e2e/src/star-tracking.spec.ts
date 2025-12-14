@@ -92,8 +92,7 @@ test.describe('Star Tracking', () => {
 
     // Check if cards are hidden (they might use display: none or hidden class)
     const parentCards = page.locator('app-child-card').filter({ hasText: /Mum|Dad/ });
-    const isHidden = await parentCards.first().isHidden();
-    expect(isHidden).toBe(true);
+    await expect(parentCards.first()).toBeHidden();
 
     // Toggle back on
     await toggleButton.click();
