@@ -53,7 +53,6 @@ export function DevelopmentReport({ reports, onClose }: DevelopmentReportProps) 
 
   const improved = reports.filter((r) => r.skillChange > 0.3).length;
   const declined = reports.filter((r) => r.skillChange < -0.3).length;
-  const maintained = reports.length - improved - declined;
 
   const avgChange =
     reports.reduce((sum, r) => sum + r.skillChange, 0) / reports.length;

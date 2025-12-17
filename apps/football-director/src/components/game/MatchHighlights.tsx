@@ -24,21 +24,6 @@ export function MatchHighlights({ results, playerTeamName, onClose }: MatchHighl
     (r) => r.homeTeam !== playerTeamName && r.awayTeam !== playerTeamName
   );
 
-  const getPositionColor = (position: string) => {
-    switch (position) {
-      case 'GK':
-        return 'text-yellow-600';
-      case 'DEF':
-        return 'text-green-600';
-      case 'MID':
-        return 'text-blue-600';
-      case 'FWD':
-        return 'text-red-600';
-      default:
-        return 'text-slate-600';
-    }
-  };
-
   const renderMatch = (match: MatchResult, isPlayerMatch: boolean) => {
     const { homeTeam, awayTeam, homeScore, awayScore, homeGoalScorers = [], awayGoalScorers = [], events = [], attendance } = match;
 

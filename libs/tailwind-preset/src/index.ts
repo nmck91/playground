@@ -13,17 +13,12 @@
  * ```
  */
 
-const colors = require('tailwindcss/colors');
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   theme: {
     extend: {
       // Color System - Unified design tokens
       colors: {
-        // Include default Tailwind colors
-        ...colors,
-
         // Brand Colors - Creamy neutrals (custom)
         cream: {
           50: '#FCFCF9',
@@ -32,13 +27,17 @@ module.exports = {
 
         // Override Teal with brand colors
         teal: {
-          ...colors.teal,
+          50: '#f0fdfa',
+          100: '#ccfbf1',
+          200: '#99f6e4',
           300: '#32B8C6',
           400: '#2DA6B2',
           500: '#21808D',  // Primary brand color
           600: '#1D7480',
           700: '#1A6873',
           800: '#2996A1',
+          900: '#134e4a',
+          950: '#042f2e',
         },
 
         // Domain-Specific Colors (Reward Chart)

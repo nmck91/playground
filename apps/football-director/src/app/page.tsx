@@ -6,7 +6,6 @@ import { MatchHighlights } from '../components/game/MatchHighlights';
 import { DevelopmentReport } from '../components/game/DevelopmentReport';
 import { SeasonEvaluation } from '../components/game/SeasonEvaluation';
 import Link from 'next/link';
-import { MatchResult } from '@playground/football-director-engine';
 
 export default function Dashboard() {
   const { gameState, loading, error, lastSimulationResults, developmentReports, seasonEvaluation, actions } = useGameState();

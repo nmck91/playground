@@ -19,6 +19,7 @@ import {
   DevelopmentReport,
   BoardManager,
   BoardObjective,
+  MatchResult,
 } from '@playground/football-director-engine';
 import { SaveService } from '../services/SaveService';
 
@@ -26,7 +27,7 @@ export function useGameState() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [lastSimulationResults, setLastSimulationResults] = useState<any[]>([]);
+  const [lastSimulationResults, setLastSimulationResults] = useState<MatchResult[]>([]);
   const [developmentReports, setDevelopmentReports] = useState<DevelopmentReport[]>([]);
   const [seasonEvaluation, setSeasonEvaluation] = useState<{
     objective: BoardObjective;
@@ -163,7 +164,6 @@ export function useGameState() {
       // 7. Apply player development if season is complete
       let finalPlayerTeam = { ...gameState.playerTeam, budget: newBudget };
       let finalAITeams = updatedTeams;
-      let playerDevelopmentReports: DevelopmentReport[] = [];
 
       if (isComplete) {
         const playerDev = new PlayerDevelopment();
@@ -172,7 +172,6 @@ export function useGameState() {
         const { team: developedPlayerTeam, reports: playerReports } =
           playerDev.developTeam(finalPlayerTeam);
         finalPlayerTeam = developedPlayerTeam;
-        playerDevelopmentReports = playerReports;
 
         // Develop AI teams
         const { teams: developedAITeams } = playerDev.developLeague(finalAITeams);
@@ -296,20 +295,26 @@ export function useGameState() {
           weekNumber: gameState.season.currentWeek,
         };
 
-        setGameState({
-          ...gameState,
-          playerTeam: result.updatedBuyerTeam!,
-          aiTeams: gameState.aiTeams.map((t) =>
-            t.id === sellerTeam.id ? result.updatedSellerTeam! : t
-          ),
-          transferMarket: result.updatedListings!,
-          finances: {
-            ...gameState.finances,
-            budget: result.updatedBuyerTeam!.budget,
-            totalExpenses: gameState.finances.totalExpenses + listing.askingPrice,
-            transactions: [...gameState.finances.transactions, transferTransaction],
-          },
-        });
+        if (result.updatedBuyerTeam && result.updatedSellerTeam && result.updatedListings) {
+          const updatedBuyerTeam = result.updatedBuyerTeam;
+          const updatedSellerTeam = result.updatedSellerTeam;
+          const updatedListings = result.updatedListings;
+
+          setGameState({
+            ...gameState,
+            playerTeam: updatedBuyerTeam,
+            aiTeams: gameState.aiTeams.map((t) =>
+              t.id === sellerTeam.id ? updatedSellerTeam : t
+            ),
+            transferMarket: updatedListings,
+            finances: {
+              ...gameState.finances,
+              budget: updatedBuyerTeam.budget,
+              totalExpenses: gameState.finances.totalExpenses + listing.askingPrice,
+              transactions: [...gameState.finances.transactions, transferTransaction],
+            },
+          });
+        }
 
         setError(null);
       } catch (err) {
@@ -343,11 +348,16 @@ export function useGameState() {
           return;
         }
 
-        setGameState({
-          ...gameState,
-          playerTeam: result.updatedTeam!,
-          transferMarket: result.updatedListings!,
-        });
+        if (result.updatedTeam && result.updatedListings) {
+          const updatedTeam = result.updatedTeam;
+          const updatedListings = result.updatedListings;
+
+          setGameState({
+            ...gameState,
+            playerTeam: updatedTeam,
+            transferMarket: updatedListings,
+          });
+        }
 
         setError(null);
       } catch (err) {

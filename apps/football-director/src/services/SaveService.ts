@@ -115,7 +115,7 @@ export class SaveService {
       parsed.createdAt = new Date(parsed.createdAt);
       parsed.lastSaved = new Date(parsed.lastSaved);
       parsed.finances.transactions = parsed.finances.transactions.map(
-        (t: any) => ({
+        (t: { date: string | Date; [key: string]: unknown }) => ({
           ...t,
           date: new Date(t.date),
         })
@@ -154,7 +154,7 @@ export class SaveService {
   static hasSave(): boolean {
     try {
       return localStorage.getItem(SAVE_KEY) !== null;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
