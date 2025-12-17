@@ -48,3 +48,7 @@ Thumbs.db
 
 # Logs
 error.log
+
+# Next.js
+.next
+out

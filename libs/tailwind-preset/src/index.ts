@@ -13,62 +13,32 @@
  * ```
  */
 
+const colors = require('tailwindcss/colors');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   theme: {
     extend: {
       // Color System - Unified design tokens
       colors: {
-        // Brand Colors - Creamy neutrals
+        // Include default Tailwind colors
+        ...colors,
+
+        // Brand Colors - Creamy neutrals (custom)
         cream: {
           50: '#FCFCF9',
           100: '#FFFFFD',
         },
 
-        // Primary - Teal (for primary actions, success states)
+        // Override Teal with brand colors
         teal: {
+          ...colors.teal,
           300: '#32B8C6',
           400: '#2DA6B2',
           500: '#21808D',  // Primary brand color
           600: '#1D7480',
           700: '#1A6873',
           800: '#2996A1',
-        },
-
-        // Neutrals - Slate
-        slate: {
-          500: '#626C71',
-          900: '#13343B',
-        },
-
-        // Neutrals - Brown
-        brown: {
-          600: '#5E5240',
-        },
-
-        // Neutrals - Charcoal
-        charcoal: {
-          700: '#1F2121',
-          800: '#262828',
-        },
-
-        // Grays (standard Tailwind grays extended)
-        gray: {
-          200: '#F5F5F5',
-          300: '#A7A9A9',
-          400: '#777C7C',
-        },
-
-        // Semantic Colors - Error states
-        red: {
-          400: '#FF5459',
-          500: '#C0152F',
-        },
-
-        // Semantic Colors - Warning states
-        orange: {
-          400: '#E68161',
-          500: '#A84B2F',
         },
 
         // Domain-Specific Colors (Reward Chart)

@@ -16,7 +16,10 @@
     "baseUrl": ".",
     "paths": {
       "@playground/tailwind-preset": ["libs/tailwind-preset/src/index.ts"],
-      "@playground/game-engine": ["libs/game-engine/src/index.ts"]
+      "@playground/game-engine": ["libs/game-engine/src/index.ts"],
+      "@playground/football-director-engine": [
+        "libs/football-director-engine/src/index.ts"
+      ]
     }
   },
   "exclude": ["node_modules", "tmp"]
