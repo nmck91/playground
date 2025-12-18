@@ -4,6 +4,7 @@
  */
 
 import { Player, Team } from './types';
+import { StaffManager } from './staff-manager';
 
 export interface DevelopmentReport {
   playerId: string;
@@ -114,10 +115,32 @@ export class PlayerDevelopment {
     const reports: DevelopmentReport[] = [];
     const developedPlayers: Player[] = [];
 
+    // Get coach bonus (additional skill growth)
+    const staffManager = new StaffManager();
+    const coachBonus = staffManager.getCoachBonus(team);
+
     team.players.forEach((player, index) => {
       const playerSeed = seed !== undefined ? seed + index : undefined;
       const { player: developedPlayer, report } = this.developPlayer(player, playerSeed);
-      developedPlayers.push(developedPlayer);
+
+      // Apply coach bonus to skill change (only for positive changes)
+      if (report.skillChange > 0 && coachBonus > 0) {
+        const bonusSkill = developedPlayer.skill + coachBonus;
+        const finalSkill = Math.max(1, Math.min(20, bonusSkill));
+        const enhancedPlayer = {
+          ...developedPlayer,
+          skill: Math.round(finalSkill * 10) / 10,
+        };
+
+        // Update report to reflect coach bonus
+        report.newSkill = enhancedPlayer.skill;
+        report.skillChange = Math.round((enhancedPlayer.skill - report.oldSkill) * 10) / 10;
+
+        developedPlayers.push(enhancedPlayer);
+      } else {
+        developedPlayers.push(developedPlayer);
+      }
+
       reports.push(report);
     });
 

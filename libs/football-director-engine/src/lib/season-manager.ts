@@ -90,7 +90,7 @@ export class SeasonManager {
       // Simulate match
       const match: Match = { homeTeam, awayTeam };
       const matchSeed = seed !== undefined ? seed + week * 100 + index : undefined;
-      const result = simulator.simulateMatch(match, matchSeed);
+      const result = simulator.simulateMatch(match, week, matchSeed);
 
       results.push(result);
 

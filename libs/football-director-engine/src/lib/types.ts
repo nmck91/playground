@@ -2,6 +2,39 @@
  * Football Director Engine - Core Types
  */
 
+export interface PlayerStats {
+  // Current season stats
+  appearances: number;
+  goals: number;
+  assists: number;
+  cleanSheets: number; // GK only
+  yellowCards: number;
+  redCards: number;
+  // Career stats (all seasons)
+  careerAppearances: number;
+  careerGoals: number;
+  careerAssists: number;
+  careerCleanSheets: number;
+}
+
+export interface PlayerHistoryRecord {
+  season: number;
+  teamName: string;
+  appearances: number;
+  goals: number;
+  assists: number;
+  cleanSheets?: number;
+  transferType?: 'signed' | 'sold' | 'developed';
+  transferFee?: number;
+}
+
+export interface Injury {
+  type: 'minor' | 'moderate' | 'serious';
+  description: string;
+  weeksRemaining: number;
+  sustainedInWeek: number;
+}
+
 export interface Player {
   id: string;
   name: string;
@@ -9,13 +42,45 @@ export interface Player {
   skill: number; // 1-20 scale
   age: number;
   wages: number;
+  stats: PlayerStats;
+  history: PlayerHistoryRecord[];
+  injury?: Injury; // Current injury status
+  suspendedUntil?: number; // Week number when suspension ends
+}
+
+export type StaffRole = 'manager' | 'coach' | 'scout';
+
+export interface Staff {
+  id: string;
+  name: string;
+  role: StaffRole;
+  skill: number; // 1-20 scale (affects their effectiveness)
+  salary: number; // Weekly wage
+  specialty?: string; // e.g., "Youth Development", "South America", "Tactics"
+}
+
+export type FormationType =
+  | '4-4-2'
+  | '4-3-3'
+  | '3-5-2'
+  | '4-5-1'
+  | '3-4-3'
+  | '5-3-2';
+
+export type Mentality = 'defensive' | 'balanced' | 'attacking';
+
+export interface Tactics {
+  formation: FormationType;
+  mentality: Mentality;
 }
 
 export interface Team {
   id: string;
   name: string;
   players: Player[];
+  staff: Staff[]; // Manager, coaches, scouts
   budget: number;
+  tactics?: Tactics; // Team's tactical setup
 }
 
 export interface Match {
@@ -28,6 +93,9 @@ export interface MatchEvent {
   type: 'goal' | 'yellow-card' | 'red-card' | 'penalty' | 'own-goal';
   team: 'home' | 'away';
   playerName: string;
+  playerId?: string; // For linking to Player
+  assistPlayerName?: string;
+  assistPlayerId?: string;
   description: string;
 }
 
@@ -116,6 +184,13 @@ export interface BoardStatus {
   objectiveHistory: BoardObjective[];
 }
 
+export interface SeasonTopPerformers {
+  topScorer: { player: Player; goals: number } | null;
+  topAssists: { player: Player; assists: number } | null;
+  mostAppearances: { player: Player; appearances: number } | null;
+  cleanSheetKing: { player: Player; cleanSheets: number } | null; // GK
+}
+
 export interface GameState {
   id: string;
   createdAt: Date;
@@ -128,5 +203,187 @@ export interface GameState {
   finances: TeamFinances;
   matchHistory: MatchResult[];
   transferMarket: TransferListing[]; // Available players for transfer
+  staffMarket: Staff[]; // Available staff for hire
   boardStatus: BoardStatus; // Board objectives and job security
+  seasonRecords: SeasonRecords[]; // Historical season records
+  clubRecords: ClubRecords; // All-time club records
+  achievements: Achievement[]; // Unlockable achievements
+  seasonAwards: SeasonAward[]; // Season-by-season awards
+  newsFeed: NewsArticle[]; // News articles (ordered by date DESC)
+}
+
+export interface SaveMetadata {
+  slotId: number; // 1-5
+  saveName: string; // User-provided name for the save
+  teamName: string;
+  season: number;
+  week: number;
+  position: number;
+  lastSaved: Date;
+  createdAt: Date;
+}
+
+export interface SaveSlot {
+  metadata: SaveMetadata;
+  gameState: GameState;
+}
+
+export interface SeasonRecords {
+  season: number;
+  finalPosition: number;
+  points: number;
+  won: number;
+  drawn: number;
+  lost: number;
+  goalsFor: number;
+  goalsAgainst: number;
+  goalDifference: number;
+  biggestWin?: {
+    opponent: string;
+    score: string; // e.g., "5-0"
+    homeOrAway: 'home' | 'away';
+    week: number;
+  };
+  biggestLoss?: {
+    opponent: string;
+    score: string; // e.g., "0-4"
+    homeOrAway: 'home' | 'away';
+    week: number;
+  };
+  longestWinStreak: number;
+  longestUnbeatenStreak: number;
+  topScorer?: {
+    playerId: string;
+    playerName: string;
+    goals: number;
+  };
+  topAssists?: {
+    playerId: string;
+    playerName: string;
+    assists: number;
+  };
+  cleanSheets: number;
+}
+
+export interface ClubRecords {
+  bestLeaguePosition: {
+    position: number;
+    season: number;
+  };
+  mostPoints: {
+    points: number;
+    season: number;
+  };
+  mostWins: {
+    wins: number;
+    season: number;
+  };
+  mostGoalsScored: {
+    goals: number;
+    season: number;
+  };
+  fewestGoalsConceded: {
+    goals: number;
+    season: number;
+  };
+  bestGoalDifference: {
+    difference: number;
+    season: number;
+  };
+  biggestWin: {
+    opponent: string;
+    score: string;
+    homeOrAway: 'home' | 'away';
+    week: number;
+    season: number;
+  };
+  longestWinStreak: {
+    streak: number;
+    season: number;
+  };
+  longestUnbeatenStreak: {
+    streak: number;
+    season: number;
+  };
+  mostGoalsSingleSeason: {
+    playerId: string;
+    playerName: string;
+    goals: number;
+    season: number;
+  };
+  mostAssistsSingleSeason: {
+    playerId: string;
+    playerName: string;
+    assists: number;
+    season: number;
+  };
+  mostCleanSheetsSeason: {
+    cleanSheets: number;
+    season: number;
+  };
+}
+
+export type AchievementCategory =
+  | 'league'
+  | 'goals'
+  | 'defense'
+  | 'finance'
+  | 'players'
+  | 'special';
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  category: AchievementCategory;
+  icon: string; // Emoji or icon identifier
+  unlocked: boolean;
+  unlockedAt?: Date;
+  progress?: number; // Current progress (e.g., 75 out of 100)
+  target?: number; // Target for completion (e.g., 100)
+}
+
+export interface SeasonAward {
+  season: number;
+  awards: {
+    playerOfYear?: {
+      playerId: string;
+      playerName: string;
+      reason: string;
+    };
+    goldenBoot?: {
+      playerId: string;
+      playerName: string;
+      goals: number;
+    };
+    goldenGlove?: {
+      playerId: string;
+      playerName: string;
+      cleanSheets: number;
+    };
+    youngPlayerOfYear?: {
+      playerId: string;
+      playerName: string;
+      age: number;
+      reason: string;
+    };
+  };
+}
+
+export type NewsArticleType = 'transfer' | 'result' | 'milestone' | 'board' | 'standings' | 'development' | 'general';
+
+export type NewsImportance = 'low' | 'medium' | 'high';
+
+export interface NewsArticle {
+  id: string;
+  date: Date;
+  week: number;
+  season: number;
+  type: NewsArticleType;
+  headline: string;
+  body: string;
+  teams?: string[]; // Team names involved
+  players?: string[]; // Player names involved
+  importance: NewsImportance;
+  read: boolean;
 }

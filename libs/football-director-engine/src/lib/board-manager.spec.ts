@@ -3,6 +3,7 @@
  */
 
 import { BoardManager } from './board-manager';
+import { PlayerStatsTracker } from './player-stats-tracker';
 import { Team, LeagueTable, BoardStatus, BoardObjective } from './types';
 
 describe('BoardManager', () => {
@@ -12,19 +13,24 @@ describe('BoardManager', () => {
     boardManager = new BoardManager();
   });
 
-  const createTestTeam = (avgSkill: number): Team => ({
-    id: 'team-1',
-    name: 'Test FC',
-    budget: 1000000,
-    players: Array.from({ length: 11 }, (_, i) => ({
-      id: `player-${i}`,
-      name: `Player ${i}`,
-      position: 'MID' as const,
-      skill: avgSkill,
-      age: 25,
-      wages: 1000,
-    })),
-  });
+  const createTestTeam = (avgSkill: number): Team => {
+    const statsTracker = new PlayerStatsTracker();
+    return {
+      id: 'team-1',
+      name: 'Test FC',
+      budget: 1000000,
+      players: Array.from({ length: 11 }, (_, i) => ({
+        id: `player-${i}`,
+        name: `Player ${i}`,
+        position: 'MID' as const,
+        skill: avgSkill,
+        age: 25,
+        wages: 1000,
+        stats: statsTracker.initializePlayerStats(),
+        history: [],
+      })),
+    };
+  };
 
   describe('generateObjective', () => {
     it('should set top 4 objective for elite team', () => {

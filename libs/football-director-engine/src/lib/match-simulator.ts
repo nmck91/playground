@@ -6,33 +6,70 @@
 
 import { Team, Match, MatchResult } from './types';
 import { MatchCommentary } from './match-commentary';
+import { StaffManager } from './staff-manager';
+import { TacticsManager } from './tactics-manager';
+import { InjuryManager } from './injury-manager';
 
 export class MatchSimulator {
+  private tacticsManager = new TacticsManager();
+  private injuryManager = new InjuryManager();
+
   /**
-   * Calculate team strength based on player skills
+   * Calculate team strength based on player skills, manager bonus, and available players
    */
-  calculateTeamStrength(team: Team): number {
+  calculateTeamStrength(team: Team, currentWeek: number): number {
     if (!team.players || team.players.length === 0) {
       return 0;
     }
 
-    const totalSkill = team.players.reduce((sum, player) => sum + player.skill, 0);
-    return totalSkill / team.players.length;
+    // Only count available (not injured/suspended) players
+    const availablePlayers = this.injuryManager.getAvailablePlayers(team, currentWeek);
+
+    if (availablePlayers.length === 0) {
+      return 0;
+    }
+
+    const totalSkill = availablePlayers.reduce((sum, player) => sum + player.skill, 0);
+    const baseStrength = totalSkill / availablePlayers.length;
+
+    // Apply manager bonus (affects team performance)
+    const staffManager = new StaffManager();
+    const managerBonus = staffManager.getManagerBonus(team);
+
+    return baseStrength * managerBonus;
   }
 
   /**
    * Simulate a single match between two teams
    */
-  simulateMatch(match: Match, seed?: number): MatchResult {
-    const homeStrength = this.calculateTeamStrength(match.homeTeam);
-    const awayStrength = this.calculateTeamStrength(match.awayTeam);
+  simulateMatch(match: Match, currentWeek: number = 1, seed?: number): MatchResult {
+    const homeStrength = this.calculateTeamStrength(match.homeTeam, currentWeek);
+    const awayStrength = this.calculateTeamStrength(match.awayTeam, currentWeek);
 
-    // Home advantage (10% boost)
-    const adjustedHomeStrength = homeStrength * 1.1;
+    // Apply tactical modifiers
+    const homeTactics = match.homeTeam.tactics || this.tacticsManager.getDefaultTactics();
+    const awayTactics = match.awayTeam.tactics || this.tacticsManager.getDefaultTactics();
+
+    const homeTacticalModifier = this.tacticsManager.calculateTacticalModifier(
+      homeTactics,
+      awayTactics
+    );
+    const awayTacticalModifier = this.tacticsManager.calculateTacticalModifier(
+      awayTactics,
+      homeTactics
+    );
+
+    // Home advantage (10% boost) + tactical modifier
+    const adjustedHomeStrength = homeStrength * 1.1 * homeTacticalModifier;
+    const adjustedAwayStrength = awayStrength * awayTacticalModifier;
 
     // Calculate goal probabilities based on strength difference
-    const homeGoals = this.generateGoals(adjustedHomeStrength, awayStrength, seed);
-    const awayGoals = this.generateGoals(awayStrength, adjustedHomeStrength, seed ? seed + 1 : undefined);
+    const homeGoals = this.generateGoals(adjustedHomeStrength, adjustedAwayStrength, seed);
+    const awayGoals = this.generateGoals(
+      adjustedAwayStrength,
+      adjustedHomeStrength,
+      seed ? seed + 1 : undefined
+    );
 
     let result: 'home' | 'away' | 'draw';
     if (homeGoals > awayGoals) {
@@ -45,18 +82,22 @@ export class MatchSimulator {
 
     // Generate match commentary
     const commentary = new MatchCommentary();
-    const homeGoalScorers = commentary.selectGoalScorers(match.homeTeam, homeGoals, seed);
-    const awayGoalScorers = commentary.selectGoalScorers(match.awayTeam, awayGoals, seed ? seed + 10 : undefined);
+    const homeScorerPlayers = commentary.selectGoalScorers(match.homeTeam, homeGoals, seed);
+    const awayScorerPlayers = commentary.selectGoalScorers(match.awayTeam, awayGoals, seed ? seed + 10 : undefined);
     const events = commentary.generateMatchEvents(
       match.homeTeam,
       match.awayTeam,
       homeGoals,
       awayGoals,
-      homeGoalScorers,
-      awayGoalScorers,
+      homeScorerPlayers,
+      awayScorerPlayers,
       seed
     );
     const attendance = commentary.generateAttendance(match.homeTeam, seed);
+
+    // Convert Player[] to string[] for goal scorers
+    const homeGoalScorers = homeScorerPlayers.map((player) => player.name);
+    const awayGoalScorers = awayScorerPlayers.map((player) => player.name);
 
     return {
       homeScore: homeGoals,

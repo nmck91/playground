@@ -9,8 +9,8 @@ export class MatchCommentary {
   /**
    * Select random goal scorers from a team based on position
    */
-  selectGoalScorers(team: Team, numberOfGoals: number, seed?: number): string[] {
-    const scorers: string[] = [];
+  selectGoalScorers(team: Team, numberOfGoals: number, seed?: number): Player[] {
+    const scorers: Player[] = [];
 
     // Weight scorers by position (FWD most likely, GK least likely)
     const positionWeights = {
@@ -35,11 +35,52 @@ export class MatchCommentary {
 
       if (weightedPlayers.length > 0) {
         const scorer = weightedPlayers[Math.floor(random * weightedPlayers.length)];
-        scorers.push(scorer.name);
+        scorers.push(scorer);
       }
     }
 
     return scorers;
+  }
+
+  /**
+   * Select assist provider for a goal (50% probability)
+   * Returns null if no assist (solo goal)
+   */
+  selectAssistProvider(team: Team, scorer: Player, seed?: number): Player | null {
+    const random = seed !== undefined ? this.seededRandom(seed) : Math.random();
+
+    // 50% chance of having an assist
+    if (random > 0.5) {
+      return null;
+    }
+
+    // Weight assist providers by position (MID most likely, GK least likely)
+    const positionWeights = {
+      FWD: 3,
+      MID: 5,
+      DEF: 1,
+      GK: 0.1,
+    };
+
+    const assistRandom = seed !== undefined ? this.seededRandom(seed + 1) : Math.random();
+
+    // Create weighted player pool (excluding the scorer)
+    const weightedPlayers: Player[] = [];
+    team.players.forEach((player) => {
+      if (player.id !== scorer.id) {
+        const weight = positionWeights[player.position] * (player.skill / 10);
+        const copies = Math.max(1, Math.floor(weight));
+        for (let j = 0; j < copies; j++) {
+          weightedPlayers.push(player);
+        }
+      }
+    });
+
+    if (weightedPlayers.length > 0) {
+      return weightedPlayers[Math.floor(assistRandom * weightedPlayers.length)];
+    }
+
+    return null;
   }
 
   /**
@@ -50,32 +91,43 @@ export class MatchCommentary {
     awayTeam: Team,
     homeScore: number,
     awayScore: number,
-    homeScorers: string[],
-    awayScorers: string[],
+    homeScorers: Player[],
+    awayScorers: Player[],
     seed?: number
   ): MatchEvent[] {
     const events: MatchEvent[] = [];
 
-    // Add goal events
+    // Add goal events for home team
     homeScorers.forEach((scorer, index) => {
       const minute = this.generateGoalMinute(homeScore + awayScore, index, seed);
+      const assistProvider = this.selectAssistProvider(homeTeam, scorer, seed ? seed + index + 300 : undefined);
+
       events.push({
         minute,
         type: 'goal',
         team: 'home',
-        playerName: scorer,
-        description: this.generateGoalDescription(scorer, homeTeam.name, minute, seed),
+        playerName: scorer.name,
+        playerId: scorer.id,
+        assistPlayerName: assistProvider?.name,
+        assistPlayerId: assistProvider?.id,
+        description: this.generateGoalDescription(scorer.name, homeTeam.name, minute, seed, assistProvider?.name),
       });
     });
 
+    // Add goal events for away team
     awayScorers.forEach((scorer, index) => {
       const minute = this.generateGoalMinute(homeScore + awayScore, index + homeScore, seed);
+      const assistProvider = this.selectAssistProvider(awayTeam, scorer, seed ? seed + index + 400 : undefined);
+
       events.push({
         minute,
         type: 'goal',
         team: 'away',
-        playerName: scorer,
-        description: this.generateGoalDescription(scorer, awayTeam.name, minute, seed),
+        playerName: scorer.name,
+        playerId: scorer.id,
+        assistPlayerName: assistProvider?.name,
+        assistPlayerId: assistProvider?.id,
+        description: this.generateGoalDescription(scorer.name, awayTeam.name, minute, seed, assistProvider?.name),
       });
     });
 
@@ -96,6 +148,7 @@ export class MatchCommentary {
           type: 'yellow-card',
           team: teamChoice < 0.5 ? 'home' : 'away',
           playerName: randomPlayer.name,
+          playerId: randomPlayer.id,
           description: `${randomPlayer.name} receives a yellow card for a late challenge`,
         });
       }
@@ -127,17 +180,32 @@ export class MatchCommentary {
   /**
    * Generate exciting goal description
    */
-  private generateGoalDescription(scorer: string, team: string, minute: number, seed?: number): string {
-    const descriptions = [
-      `⚽ GOAL! ${scorer} finds the back of the net!`,
-      `⚽ ${scorer} scores a brilliant goal for ${team}!`,
-      `⚽ What a strike! ${scorer} makes it count!`,
-      `⚽ ${scorer} with a clinical finish!`,
-      `⚽ ${team} take the lead through ${scorer}!`,
-      `⚽ ${scorer} slots it home with precision!`,
-      `⚽ Spectacular goal by ${scorer}!`,
-      `⚽ ${scorer} finds space and finishes beautifully!`,
-    ];
+  private generateGoalDescription(scorer: string, team: string, minute: number, seed?: number, assistProvider?: string): string {
+    let descriptions: string[];
+
+    if (assistProvider) {
+      descriptions = [
+        `⚽ GOAL! ${scorer} finds the back of the net! Assist: ${assistProvider}`,
+        `⚽ ${scorer} scores a brilliant goal for ${team}! Great pass from ${assistProvider}!`,
+        `⚽ What a strike! ${scorer} makes it count! Set up by ${assistProvider}`,
+        `⚽ ${scorer} with a clinical finish! Assisted by ${assistProvider}`,
+        `⚽ ${team} take the lead through ${scorer}! ${assistProvider} with the assist`,
+        `⚽ ${scorer} slots it home with precision! ${assistProvider} creates the chance`,
+        `⚽ Spectacular goal by ${scorer}! Wonderful assist from ${assistProvider}`,
+        `⚽ ${scorer} finds space and finishes beautifully! ${assistProvider} picks out the pass`,
+      ];
+    } else {
+      descriptions = [
+        `⚽ GOAL! ${scorer} finds the back of the net!`,
+        `⚽ ${scorer} scores a brilliant goal for ${team}!`,
+        `⚽ What a strike! ${scorer} makes it count!`,
+        `⚽ ${scorer} with a clinical finish!`,
+        `⚽ ${team} take the lead through ${scorer}!`,
+        `⚽ ${scorer} slots it home with precision!`,
+        `⚽ Spectacular goal by ${scorer}!`,
+        `⚽ ${scorer} finds space and finishes beautifully!`,
+      ];
+    }
 
     const random = seed !== undefined ? this.seededRandom(seed + minute) : Math.random();
     const description = descriptions[Math.floor(random * descriptions.length)];

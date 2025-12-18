@@ -3,11 +3,13 @@
  */
 
 import { FinanceEngine } from './finance-engine';
+import { PlayerStatsTracker } from './player-stats-tracker';
 import { Team, Player } from './types';
 
 describe('FinanceEngine', () => {
   let engine: FinanceEngine;
   let testTeam: Team;
+  const statsTracker = new PlayerStatsTracker();
 
   beforeEach(() => {
     engine = new FinanceEngine();
@@ -20,6 +22,8 @@ describe('FinanceEngine', () => {
         skill: 12,
         age: 25,
         wages: 5000,
+        stats: statsTracker.initializePlayerStats(),
+        history: [],
       },
       {
         id: 'p2',
@@ -28,6 +32,8 @@ describe('FinanceEngine', () => {
         skill: 10,
         age: 28,
         wages: 3000,
+        stats: statsTracker.initializePlayerStats(),
+        history: [],
       },
       {
         id: 'p3',
@@ -36,6 +42,8 @@ describe('FinanceEngine', () => {
         skill: 14,
         age: 23,
         wages: 7000,
+        stats: statsTracker.initializePlayerStats(),
+        history: [],
       },
     ];
 
@@ -78,6 +86,8 @@ describe('FinanceEngine', () => {
             skill: 15,
             age: 26,
             wages: 8000,
+            stats: statsTracker.initializePlayerStats(),
+            history: [],
           },
         ],
       };

@@ -6,6 +6,7 @@
 import { Team, Player } from './types';
 import { PlayerStatsTracker } from './player-stats-tracker';
 import { StaffManager } from './staff-manager';
+import { TacticsManager } from './tactics-manager';
 
 export class TeamGenerator {
   private nameCounter = 0;
@@ -113,12 +114,17 @@ export class TeamGenerator {
     const managerSeed = seed !== undefined ? seed + 1000 : undefined;
     const manager = staffManager.generateStaff('manager', managerSeed);
 
+    // Set default tactics
+    const tacticsManager = new TacticsManager();
+    const tactics = tacticsManager.getDefaultTactics();
+
     return {
       id: `team-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name,
       budget,
       players,
       staff: [manager], // Start with just a manager
+      tactics, // Default 4-4-2 balanced
     };
   }
 

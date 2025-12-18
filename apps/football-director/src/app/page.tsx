@@ -1,17 +1,34 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { Player } from '@playground/football-director-engine';
 import { useGameState } from '../hooks/useGameState';
 import { MatchHighlights } from '../components/game/MatchHighlights';
 import { DevelopmentReport } from '../components/game/DevelopmentReport';
 import { SeasonEvaluation } from '../components/game/SeasonEvaluation';
+import { TopPerformersWidget } from '../components/game/TopPerformersWidget';
+import { PlayerStatsModal } from '../components/game/PlayerStatsModal';
+import { RecordsModal } from '../components/game/RecordsModal';
+import { TrophyCabinet } from '../components/game/TrophyCabinet';
+import { AchievementToast } from '../components/game/AchievementToast';
+import { NewsFeed } from '../components/game/NewsFeed';
+import { NewsTickerWidget } from '../components/game/NewsTickerWidget';
+import { NewsBadge } from '../components/game/NewsBadge';
+import { TacticsManager } from '../components/game/TacticsManager';
+import { SaveSlotManager } from '../components/saves/SaveSlotManager';
 import Link from 'next/link';
 
 export default function Dashboard() {
-  const { gameState, loading, error, lastSimulationResults, developmentReports, seasonEvaluation, actions } = useGameState();
+  const { gameState, loading, error, lastSimulationResults, developmentReports, seasonTopPerformers, seasonEvaluation, pendingAchievements, actions } = useGameState();
   const [showHighlights, setShowHighlights] = useState(false);
   const [showDevelopment, setShowDevelopment] = useState(false);
   const [showEvaluation, setShowEvaluation] = useState(false);
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [showPlayerStats, setShowPlayerStats] = useState(false);
+  const [showRecords, setShowRecords] = useState(false);
+  const [showTrophyCabinet, setShowTrophyCabinet] = useState(false);
+  const [showNewsFeed, setShowNewsFeed] = useState(false);
+  const [showTactics, setShowTactics] = useState(false);
 
   // Show highlights after simulation
   useEffect(() => {
@@ -52,22 +69,10 @@ export default function Dashboard() {
 
   if (!gameState) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
-        <div className="bg-white rounded-lg shadow-lg p-12 max-w-md">
-          <h1 className="text-4xl font-bold text-slate-900 mb-4 text-center">
-            ⚽ Football Director
-          </h1>
-          <p className="text-slate-600 mb-8 text-center">
-            Manage your football club to glory!
-          </p>
-          <button
-            onClick={actions.newGame}
-            className="w-full bg-teal-500 hover:bg-teal-600 text-white font-semibold py-4 px-6 rounded-lg shadow-md transition-normal"
-          >
-            Start New Game
-          </button>
-        </div>
-      </div>
+      <SaveSlotManager
+        onLoadSlot={actions.loadSlot}
+        onCreateNew={actions.newGame}
+      />
     );
   }
 
@@ -109,6 +114,11 @@ export default function Dashboard() {
       default:
         return 'text-slate-600';
     }
+  };
+
+  const handlePlayerClick = (player: Player) => {
+    setSelectedPlayer(player);
+    setShowPlayerStats(true);
   };
 
   return (
@@ -224,6 +234,34 @@ export default function Dashboard() {
             >
               💰 Transfer Market
             </Link>
+            <Link
+              href="/staff"
+              className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-3 rounded-lg shadow-sm transition-normal inline-flex items-center"
+            >
+              👔 Staff Management
+            </Link>
+            <button
+              onClick={() => setShowTactics(true)}
+              className="bg-purple-500 hover:bg-purple-600 text-white font-medium px-6 py-3 rounded-lg shadow-sm transition-normal"
+            >
+              ⚙️ Tactics
+            </button>
+            <button
+              onClick={() => setShowRecords(true)}
+              className="bg-indigo-500 hover:bg-indigo-600 text-white font-medium px-6 py-3 rounded-lg shadow-sm transition-normal"
+            >
+              📊 Club Records
+            </button>
+            <button
+              onClick={() => setShowTrophyCabinet(true)}
+              className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-6 py-3 rounded-lg shadow-sm transition-normal"
+            >
+              🏆 Trophy Cabinet
+            </button>
+            <NewsBadge
+              unreadCount={gameState.newsFeed.filter(n => !n.read).length}
+              onClick={() => setShowNewsFeed(true)}
+            />
             <button
               onClick={actions.deleteSave}
               className="bg-red-500 hover:bg-red-600 text-white font-medium px-6 py-3 rounded-lg shadow-sm transition-normal"
@@ -232,6 +270,22 @@ export default function Dashboard() {
             </button>
           </div>
         </div>
+
+        {/* Top Performers Widget */}
+        {seasonTopPerformers && (
+          <div className="mb-8">
+            <TopPerformersWidget
+              topPerformers={seasonTopPerformers}
+              onPlayerClick={handlePlayerClick}
+            />
+          </div>
+        )}
+
+        {/* News Ticker Widget */}
+        <NewsTickerWidget
+          news={gameState.newsFeed}
+          onNewsClick={() => setShowNewsFeed(true)}
+        />
 
         {/* League Table */}
         <div className="bg-white rounded-lg shadow-md p-6">
@@ -351,13 +405,74 @@ export default function Dashboard() {
       {showEvaluation && seasonEvaluation && (
         <SeasonEvaluation
           evaluation={seasonEvaluation}
-          onContinue={() => setShowEvaluation(false)}
+          onContinue={() => {
+            actions.continueToNextSeason();
+            setShowEvaluation(false);
+          }}
           onGameOver={() => {
             actions.deleteSave();
             window.location.reload();
           }}
         />
       )}
+
+      {/* Player Stats Modal */}
+      <PlayerStatsModal
+        player={selectedPlayer}
+        isOpen={showPlayerStats}
+        onClose={() => {
+          setShowPlayerStats(false);
+          setSelectedPlayer(null);
+        }}
+      />
+
+      {/* Records Modal */}
+      {gameState && (
+        <RecordsModal
+          clubRecords={gameState.clubRecords}
+          seasonRecords={gameState.seasonRecords}
+          currentSeason={gameState.season.year}
+          isOpen={showRecords}
+          onClose={() => setShowRecords(false)}
+        />
+      )}
+
+      {/* Trophy Cabinet Modal */}
+      {gameState && (
+        <TrophyCabinet
+          achievements={gameState.achievements}
+          seasonAwards={gameState.seasonAwards}
+          isOpen={showTrophyCabinet}
+          onClose={() => setShowTrophyCabinet(false)}
+        />
+      )}
+
+      {/* News Feed Modal */}
+      {gameState && (
+        <NewsFeed
+          news={gameState.newsFeed}
+          isOpen={showNewsFeed}
+          onClose={() => setShowNewsFeed(false)}
+          onMarkAllRead={actions.markAllNewsRead}
+        />
+      )}
+
+      {/* Tactics Manager Modal */}
+      {gameState && gameState.playerTeam.tactics && (
+        <TacticsManager
+          currentFormation={gameState.playerTeam.tactics.formation}
+          currentMentality={gameState.playerTeam.tactics.mentality}
+          onSave={actions.setTeamTactics}
+          onClose={() => setShowTactics(false)}
+          isOpen={showTactics}
+        />
+      )}
+
+      {/* Achievement Toast */}
+      <AchievementToast
+        achievements={pendingAchievements}
+        onDismiss={actions.dismissAchievement}
+      />
     </div>
   );
 }

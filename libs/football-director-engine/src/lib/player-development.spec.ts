@@ -3,10 +3,12 @@
  */
 
 import { PlayerDevelopment } from './player-development';
+import { PlayerStatsTracker } from './player-stats-tracker';
 import { Player, Team } from './types';
 
 describe('PlayerDevelopment', () => {
   let playerDev: PlayerDevelopment;
+  const statsTracker = new PlayerStatsTracker();
 
   beforeEach(() => {
     playerDev = new PlayerDevelopment();
@@ -19,6 +21,8 @@ describe('PlayerDevelopment', () => {
     skill,
     age,
     wages: 1000,
+    stats: statsTracker.initializePlayerStats(),
+    history: [],
   });
 
   describe('agePlayer', () => {

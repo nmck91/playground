@@ -4,12 +4,14 @@
 
 import { SeasonManager } from './season-manager';
 import { MatchSimulator } from './match-simulator';
+import { PlayerStatsTracker } from './player-stats-tracker';
 import { Team, Player, Fixture } from './types';
 
 describe('SeasonManager', () => {
   let manager: SeasonManager;
   let simulator: MatchSimulator;
   let testTeams: Team[];
+  const statsTracker = new PlayerStatsTracker();
 
   beforeEach(() => {
     manager = new SeasonManager();
@@ -24,6 +26,8 @@ describe('SeasonManager', () => {
         skill: 10,
         age: 25,
         wages: 3000,
+        stats: statsTracker.initializePlayerStats(),
+        history: [],
       },
       {
         id: 'p2',
@@ -32,6 +36,8 @@ describe('SeasonManager', () => {
         skill: 12,
         age: 27,
         wages: 4000,
+        stats: statsTracker.initializePlayerStats(),
+        history: [],
       },
     ];
 

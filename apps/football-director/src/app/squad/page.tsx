@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { useGameState } from '../../hooks/useGameState';
 import Link from 'next/link';
 import { Player, TransferMarket } from '@playground/football-director-engine';
+import { PlayerStatsModal } from '../../components/game/PlayerStatsModal';
 
 type SortBy = 'position' | 'skill' | 'age' | 'wages' | 'name';
 type FilterPosition = 'ALL' | 'GK' | 'DEF' | 'MID' | 'FWD';
@@ -18,6 +19,7 @@ export default function SquadPage() {
   const [sortBy, setSortBy] = useState<SortBy>('position');
   const [filterPosition, setFilterPosition] = useState<FilterPosition>('ALL');
   const [showSellModal, setShowSellModal] = useState(false);
+  const [showPlayerStats, setShowPlayerStats] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const transferMarket = new TransferMarket();
 
@@ -117,6 +119,11 @@ export default function SquadPage() {
     gameState.playerTeam.players.reduce((sum, p) => sum + p.skill, 0) /
     gameState.playerTeam.players.length
   ).toFixed(1);
+
+  const handleViewStats = (player: Player) => {
+    setSelectedPlayer(player);
+    setShowPlayerStats(true);
+  };
 
   const handleSellClick = (player: Player) => {
     setSelectedPlayer(player);
@@ -239,7 +246,27 @@ export default function SquadPage() {
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h3 className="text-lg font-semibold text-slate-900">{player.name}</h3>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold text-slate-900">{player.name}</h3>
+                        {/* Injury Indicator */}
+                        {player.injury && (
+                          <span
+                            className="px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700 border border-red-300"
+                            title={`${player.injury.description} - ${player.injury.weeksRemaining} weeks`}
+                          >
+                            🚑 {player.injury.weeksRemaining}w
+                          </span>
+                        )}
+                        {/* Suspension Indicator */}
+                        {player.suspendedUntil && gameState.season.currentWeek < player.suspendedUntil && (
+                          <span
+                            className="px-2 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700 border border-orange-300"
+                            title={`Suspended until week ${player.suspendedUntil}`}
+                          >
+                            🟥 {player.suspendedUntil - gameState.season.currentWeek}w
+                          </span>
+                        )}
+                      </div>
                       <span
                         className={`inline-block px-2 py-1 rounded text-xs font-medium border ${getPositionColor(
                           player.position
@@ -269,23 +296,58 @@ export default function SquadPage() {
                     </div>
                   </div>
 
+                  {/* Season Stats Preview */}
+                  {player.stats && player.stats.appearances > 0 && (
+                    <div className="bg-gray-50 rounded-lg p-3 mb-3">
+                      <div className="text-xs font-semibold text-slate-700 mb-2">Season Stats</div>
+                      <div className="grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <div className="text-slate-500">Apps</div>
+                          <div className="font-semibold text-slate-900">{player.stats.appearances}</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-slate-500">Goals</div>
+                          <div className="font-semibold text-green-600">{player.stats.goals}</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-slate-500">Assists</div>
+                          <div className="font-semibold text-blue-600">{player.stats.assists}</div>
+                        </div>
+                      </div>
+                      {player.position === 'GK' && (
+                        <div className="text-center mt-2 pt-2 border-t border-gray-200">
+                          <div className="text-slate-500 text-xs">Clean Sheets</div>
+                          <div className="font-semibold text-teal-600">{player.stats.cleanSheets}</div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <div className="border-t border-gray-200 pt-3">
                     <div className="text-xs text-slate-500 mb-2">Estimated Value</div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-3">
                       <div className="text-lg font-bold text-teal-600">
                         £{estimatedValue.toLocaleString()}
                       </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleViewStats(player)}
+                        className="flex-1 bg-purple-500 hover:bg-purple-600 text-white text-sm px-4 py-2 rounded-lg transition-normal"
+                      >
+                        View Stats
+                      </button>
                       <button
                         onClick={() => handleSellClick(player)}
                         disabled={!canSell}
-                        className={`text-sm px-4 py-2 rounded-lg transition-normal ${
+                        className={`flex-1 text-sm px-4 py-2 rounded-lg transition-normal ${
                           canSell
                             ? 'bg-blue-500 hover:bg-blue-600 text-white'
                             : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                         }`}
                         title={!canSell ? 'Cannot sell (minimum 11 players required)' : ''}
                       >
-                        {canSell ? 'List for Sale' : 'Cannot Sell'}
+                        {canSell ? 'Sell' : 'Cannot Sell'}
                       </button>
                     </div>
                   </div>
@@ -325,6 +387,16 @@ export default function SquadPage() {
           </div>
         </div>
       )}
+
+      {/* Player Stats Modal */}
+      <PlayerStatsModal
+        player={selectedPlayer}
+        isOpen={showPlayerStats}
+        onClose={() => {
+          setShowPlayerStats(false);
+          setSelectedPlayer(null);
+        }}
+      />
     </div>
   );
 }

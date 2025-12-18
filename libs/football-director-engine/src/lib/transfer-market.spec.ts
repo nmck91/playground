@@ -3,12 +3,26 @@
  */
 
 import { TransferMarket } from './transfer-market';
+import { PlayerStatsTracker } from './player-stats-tracker';
 import { Player, Team, TransferListing } from './types';
 
 describe('TransferMarket', () => {
   let market: TransferMarket;
   let testPlayer: Player;
   let testTeam: Team;
+  const statsTracker = new PlayerStatsTracker();
+
+  const createTestPlayer = (overrides: Partial<Player> = {}): Player => ({
+    id: 'test-player',
+    name: 'Test Player',
+    position: 'MID',
+    skill: 10,
+    age: 25,
+    wages: 3000,
+    stats: statsTracker.initializePlayerStats(),
+    history: [],
+    ...overrides,
+  });
 
   beforeEach(() => {
     market = new TransferMarket();
@@ -20,6 +34,8 @@ describe('TransferMarket', () => {
       skill: 12,
       age: 25,
       wages: 5000,
+      stats: statsTracker.initializePlayerStats(),
+      history: [],
     };
 
     testTeam = {
@@ -95,6 +111,8 @@ describe('TransferMarket', () => {
           skill: 10,
           age: 25,
           wages: 3000,
+          stats: statsTracker.initializePlayerStats(),
+          history: [],
         })),
       }));
     });
@@ -131,6 +149,8 @@ describe('TransferMarket', () => {
             skill: 10,
             age: 25,
             wages: 3000,
+            stats: statsTracker.initializePlayerStats(),
+            history: [],
           })),
         },
       ];
@@ -153,6 +173,8 @@ describe('TransferMarket', () => {
         skill: 15,
         age: 24,
         wages: 8000,
+        stats: statsTracker.initializePlayerStats(),
+        history: [],
       };
 
       buyer = {
@@ -166,6 +188,8 @@ describe('TransferMarket', () => {
           skill: 10,
           age: 25,
           wages: 3000,
+          stats: statsTracker.initializePlayerStats(),
+          history: [],
         })),
       };
 
@@ -182,6 +206,8 @@ describe('TransferMarket', () => {
             skill: 10,
             age: 25,
             wages: 3000,
+            stats: statsTracker.initializePlayerStats(),
+            history: [],
           })),
         ],
       };
@@ -246,6 +272,8 @@ describe('TransferMarket', () => {
           skill: 10,
           age: 25,
           wages: 3000,
+          stats: statsTracker.initializePlayerStats(),
+          history: [],
         })),
       };
 
@@ -268,6 +296,8 @@ describe('TransferMarket', () => {
         skill: 10,
         age: 28,
         wages: 4000,
+        stats: statsTracker.initializePlayerStats(),
+        history: [],
       };
 
       team = {
@@ -283,6 +313,8 @@ describe('TransferMarket', () => {
             skill: 10,
             age: 25,
             wages: 3000,
+            stats: statsTracker.initializePlayerStats(),
+            history: [],
           })),
         ],
       };
@@ -322,6 +354,8 @@ describe('TransferMarket', () => {
           skill: 10,
           age: 25,
           wages: 3000,
+          stats: statsTracker.initializePlayerStats(),
+          history: [],
         })),
       };
 
@@ -339,6 +373,8 @@ describe('TransferMarket', () => {
         skill: 10,
         age: 25,
         wages: 3000,
+        stats: statsTracker.initializePlayerStats(),
+        history: [],
       };
 
       const result = market.sellPlayer(wrongPlayer, team, 100000, [], 1);

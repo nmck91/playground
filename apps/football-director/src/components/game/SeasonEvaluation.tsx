@@ -5,7 +5,7 @@
 
 'use client';
 
-import { BoardObjective } from '@playground/football-director-engine';
+import { BoardObjective, SeasonAward } from '@playground/football-director-engine';
 
 interface SeasonEvaluationProps {
   evaluation: {
@@ -13,13 +13,15 @@ interface SeasonEvaluationProps {
     satisfied: boolean;
     sacked: boolean;
     message: string;
+    brokenRecords?: string[];
+    seasonAwards?: SeasonAward;
   };
   onContinue: () => void;
   onGameOver: () => void;
 }
 
 export function SeasonEvaluation({ evaluation, onContinue, onGameOver }: SeasonEvaluationProps) {
-  const { objective, satisfied, sacked, message } = evaluation;
+  const { objective, satisfied, sacked, message, brokenRecords, seasonAwards } = evaluation;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -68,6 +70,81 @@ export function SeasonEvaluation({ evaluation, onContinue, onGameOver }: SeasonE
               {message}
             </p>
           </div>
+
+          {/* Broken Records */}
+          {brokenRecords && brokenRecords.length > 0 && (
+            <div className="bg-yellow-50 rounded-lg p-6 mb-6 border-2 border-yellow-400">
+              <div className="flex items-center mb-3">
+                <span className="text-2xl mr-2">🏆</span>
+                <h3 className="text-lg font-bold text-yellow-900">
+                  Club Records Broken!
+                </h3>
+              </div>
+              <div className="space-y-2">
+                {brokenRecords.map((record, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center text-sm text-yellow-900 bg-yellow-100 rounded px-3 py-2"
+                  >
+                    <span className="mr-2">⭐</span>
+                    <span className="font-medium">{record}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Season Awards */}
+          {seasonAwards && (seasonAwards.awards.goldenBoot || seasonAwards.awards.goldenGlove || seasonAwards.awards.playerOfYear || seasonAwards.awards.youngPlayerOfYear) && (
+            <div className="bg-purple-50 rounded-lg p-6 mb-6 border-2 border-purple-300">
+              <div className="flex items-center mb-3">
+                <span className="text-2xl mr-2">🏅</span>
+                <h3 className="text-lg font-bold text-purple-900">
+                  Season Awards
+                </h3>
+              </div>
+              <div className="space-y-3">
+                {seasonAwards.awards.goldenBoot && (
+                  <div className="flex items-start gap-3 bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+                    <span className="text-xl">⚽</span>
+                    <div className="flex-1">
+                      <div className="font-semibold text-yellow-900 text-sm">Golden Boot</div>
+                      <div className="text-xs text-yellow-800">{seasonAwards.awards.goldenBoot.playerName} - {seasonAwards.awards.goldenBoot.goals} goals</div>
+                    </div>
+                  </div>
+                )}
+                {seasonAwards.awards.goldenGlove && (
+                  <div className="flex items-start gap-3 bg-blue-50 rounded-lg p-3 border border-blue-200">
+                    <span className="text-xl">🧤</span>
+                    <div className="flex-1">
+                      <div className="font-semibold text-blue-900 text-sm">Golden Glove</div>
+                      <div className="text-xs text-blue-800">{seasonAwards.awards.goldenGlove.playerName} - {seasonAwards.awards.goldenGlove.cleanSheets} clean sheets</div>
+                    </div>
+                  </div>
+                )}
+                {seasonAwards.awards.playerOfYear && (
+                  <div className="flex items-start gap-3 bg-purple-50 rounded-lg p-3 border border-purple-200">
+                    <span className="text-xl">⭐</span>
+                    <div className="flex-1">
+                      <div className="font-semibold text-purple-900 text-sm">Player of the Year</div>
+                      <div className="text-xs text-purple-800">{seasonAwards.awards.playerOfYear.playerName}</div>
+                      <div className="text-xs text-purple-700">{seasonAwards.awards.playerOfYear.reason}</div>
+                    </div>
+                  </div>
+                )}
+                {seasonAwards.awards.youngPlayerOfYear && (
+                  <div className="flex items-start gap-3 bg-green-50 rounded-lg p-3 border border-green-200">
+                    <span className="text-xl">🌟</span>
+                    <div className="flex-1">
+                      <div className="font-semibold text-green-900 text-sm">Young Player of the Year</div>
+                      <div className="text-xs text-green-800">{seasonAwards.awards.youngPlayerOfYear.playerName} (Age {seasonAwards.awards.youngPlayerOfYear.age})</div>
+                      <div className="text-xs text-green-700">{seasonAwards.awards.youngPlayerOfYear.reason}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Game Over Message */}
           {sacked && (
