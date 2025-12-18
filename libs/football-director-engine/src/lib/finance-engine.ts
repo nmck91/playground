@@ -4,16 +4,21 @@
  */
 
 import { Team, FinancialRecord } from './types';
+import { StaffManager } from './staff-manager';
 
 export class FinanceEngine {
   /**
-   * Calculate total weekly wages for a team
+   * Calculate total weekly wages for a team (players + staff)
    */
   calculateWeeklyWages(team: Team): number {
-    if (!team.players || team.players.length === 0) {
-      return 0;
-    }
-    return team.players.reduce((total, player) => total + player.wages, 0);
+    // Player wages
+    const playerWages = team.players?.reduce((total, player) => total + player.wages, 0) || 0;
+
+    // Staff wages
+    const staffManager = new StaffManager();
+    const staffWages = staffManager.getTotalStaffWages(team);
+
+    return playerWages + staffWages;
   }
 
   /**
@@ -21,12 +26,12 @@ export class FinanceEngine {
    * Higher positions earn more from TV money and sponsorships
    */
   calculateWeeklyIncome(position: number): number {
-    // Base income for all clubs
-    const baseIncome = 50000;
+    // Base income for all clubs (increased to support larger squads)
+    const baseIncome = 75000;
 
     // Position-based bonus (top teams get more)
-    // 1st place: +50k, 20th place: +5k
-    const positionBonus = Math.max(0, (21 - position) * 2500);
+    // 1st place: +75k, 20th place: +7.5k
+    const positionBonus = Math.max(0, (21 - position) * 3750);
 
     return baseIncome + positionBonus;
   }
@@ -58,16 +63,17 @@ export class FinanceEngine {
     const transactions: FinancialRecord[] = [];
     let currentBudget = budget;
 
-    // Weekly wages (expense)
+    // Weekly wages (expense) - players + staff
     const wages = this.calculateWeeklyWages(team);
     if (wages > 0) {
+      const staffCount = team.staff?.length || 0;
       transactions.push({
         id: `txn-${Date.now()}-wages`,
         date: new Date(),
         type: 'expense',
         category: 'wages',
         amount: wages,
-        description: `Weekly wages for ${team.players.length} players`,
+        description: `Weekly wages for ${team.players.length} players and ${staffCount} staff`,
         weekNumber,
       });
       currentBudget -= wages;

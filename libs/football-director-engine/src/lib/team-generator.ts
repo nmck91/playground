@@ -4,6 +4,8 @@
  */
 
 import { Team, Player } from './types';
+import { PlayerStatsTracker } from './player-stats-tracker';
+import { StaffManager } from './staff-manager';
 
 export class TeamGenerator {
   private nameCounter = 0;
@@ -21,8 +23,11 @@ export class TeamGenerator {
 
     const skill = Math.floor(minSkill + random * (maxSkill - minSkill + 1));
     const age = 18 + Math.floor(random * 17); // 18-34 years old
-    const baseWage = 2000 + skill * 400; // Higher skill = higher wages
+    const baseWage = 1500 + skill * 250; // Higher skill = higher wages (reduced from 2000 + 400*skill)
     const wages = Math.floor(baseWage * (0.8 + random * 0.4)); // Add variance
+
+    // Initialize player stats
+    const statsTracker = new PlayerStatsTracker();
 
     return {
       id: `player-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -31,6 +36,8 @@ export class TeamGenerator {
       skill: Math.min(20, Math.max(1, skill)), // Clamp to 1-20
       age,
       wages,
+      stats: statsTracker.initializePlayerStats(),
+      history: [],
     };
   }
 
@@ -62,32 +69,56 @@ export class TeamGenerator {
     const random = seed !== undefined ? this.seededRandom(seed) : Math.random();
     const budget = Math.floor(minBudget + random * (maxBudget - minBudget));
 
-    // Generate squad: 1 GK, 4 DEF, 4 MID, 2 FWD (11 players)
+    // Generate squad: realistic squad size (15-18 players)
     const players: Player[] = [];
+    const squadSize = 15 + Math.floor(random * 4); // 15-18 players
+
+    // Base squad: 2 GK, 5 DEF, 5 MID, 3 FWD = 15 players
     const positions: Player['position'][] = [
+      'GK',
       'GK',
       'DEF',
       'DEF',
       'DEF',
       'DEF',
+      'DEF',
       'MID',
       'MID',
       'MID',
       'MID',
+      'MID',
+      'FWD',
       'FWD',
       'FWD',
     ];
+
+    // Add additional players based on squad size
+    if (squadSize >= 16) {
+      positions.push('FWD'); // 16: add 4th forward
+    }
+    if (squadSize >= 17) {
+      positions.push('DEF'); // 17: add 6th defender
+    }
+    if (squadSize >= 18) {
+      positions.push('MID'); // 18: add 6th midfielder
+    }
 
     positions.forEach((position, i) => {
       const playerSeed = seed !== undefined ? seed + i : undefined;
       players.push(this.generatePlayer(position, skillRange, playerSeed));
     });
 
+    // Generate initial staff (1 manager per team)
+    const staffManager = new StaffManager();
+    const managerSeed = seed !== undefined ? seed + 1000 : undefined;
+    const manager = staffManager.generateStaff('manager', managerSeed);
+
     return {
       id: `team-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name,
       budget,
       players,
+      staff: [manager], // Start with just a manager
     };
   }
 

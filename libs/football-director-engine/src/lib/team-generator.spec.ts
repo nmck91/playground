@@ -86,12 +86,13 @@ describe('TeamGenerator', () => {
       expect(team.name).toBe('Test FC');
     });
 
-    it('should generate team with 11 players', () => {
+    it('should generate team with 15-18 players', () => {
       const team = generator.generateTeam('Test FC', 'mid');
-      expect(team.players).toHaveLength(11);
+      expect(team.players.length).toBeGreaterThanOrEqual(15);
+      expect(team.players.length).toBeLessThanOrEqual(18);
     });
 
-    it('should generate correct squad formation (1 GK, 4 DEF, 4 MID, 2 FWD)', () => {
+    it('should generate correct squad formation (2 GK, 5-6 DEF, 5-6 MID, 3-4 FWD)', () => {
       const team = generator.generateTeam('Test FC', 'mid');
 
       const gk = team.players.filter((p) => p.position === 'GK');
@@ -99,10 +100,13 @@ describe('TeamGenerator', () => {
       const mid = team.players.filter((p) => p.position === 'MID');
       const fwd = team.players.filter((p) => p.position === 'FWD');
 
-      expect(gk.length).toBe(1);
-      expect(def.length).toBe(4);
-      expect(mid.length).toBe(4);
-      expect(fwd.length).toBe(2);
+      expect(gk.length).toBe(2);
+      expect(def.length).toBeGreaterThanOrEqual(5);
+      expect(def.length).toBeLessThanOrEqual(6);
+      expect(mid.length).toBeGreaterThanOrEqual(5);
+      expect(mid.length).toBeLessThanOrEqual(6);
+      expect(fwd.length).toBeGreaterThanOrEqual(3);
+      expect(fwd.length).toBeLessThanOrEqual(4);
     });
 
     it('should generate elite team with high skills', () => {
@@ -162,7 +166,8 @@ describe('TeamGenerator', () => {
 
       tiers.forEach((tier) => {
         const team = generator.generateTeam(`${tier} FC`, tier);
-        expect(team.players.length).toBe(11);
+        expect(team.players.length).toBeGreaterThanOrEqual(15);
+        expect(team.players.length).toBeLessThanOrEqual(18);
         expect(team.budget).toBeGreaterThan(0);
       });
     });
@@ -217,11 +222,12 @@ describe('TeamGenerator', () => {
       });
     });
 
-    it('should generate all teams with 11 players', () => {
+    it('should generate all teams with 15-18 players', () => {
       const league = generator.generateLeague();
 
       league.forEach((team) => {
-        expect(team.players).toHaveLength(11);
+        expect(team.players.length).toBeGreaterThanOrEqual(15);
+        expect(team.players.length).toBeLessThanOrEqual(18);
       });
     });
 
