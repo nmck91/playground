@@ -13,7 +13,6 @@ import { TrophyCabinet } from '../components/game/TrophyCabinet';
 import { AchievementToast } from '../components/game/AchievementToast';
 import { NewsFeed } from '../components/game/NewsFeed';
 import { NewsTickerWidget } from '../components/game/NewsTickerWidget';
-import { NewsBadge } from '../components/game/NewsBadge';
 import { TacticsManager } from '../components/game/TacticsManager';
 import { SaveSlotManager } from '../components/saves/SaveSlotManager';
 import Link from 'next/link';
@@ -29,6 +28,7 @@ export default function Dashboard() {
   const [showTrophyCabinet, setShowTrophyCabinet] = useState(false);
   const [showNewsFeed, setShowNewsFeed] = useState(false);
   const [showTactics, setShowTactics] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
 
   // Show highlights after simulation
   useEffect(() => {
@@ -36,6 +36,18 @@ export default function Dashboard() {
       setShowHighlights(true);
     }
   }, [lastSimulationResults]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showMoreMenu && !(event.target as Element).closest('.relative')) {
+        setShowMoreMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [showMoreMenu]);
 
   // Show development report when available
   useEffect(() => {
@@ -209,65 +221,104 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Actions */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-2xl font-semibold text-slate-900 mb-4">
-            Actions
-          </h2>
-          <div className="flex flex-wrap gap-4">
-            <button
-              onClick={actions.simulateNextWeek}
-              disabled={isSeasonComplete}
-              className="bg-teal-500 hover:bg-teal-600 text-white font-medium px-6 py-3 rounded-lg shadow-sm transition-normal disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSeasonComplete ? 'Season Complete' : 'Simulate Next Week'}
-            </button>
+        {/* Primary Actions */}
+        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
+          <button
+            onClick={actions.simulateNextWeek}
+            disabled={isSeasonComplete}
+            className="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold text-lg px-8 py-4 rounded-lg shadow-md transition-normal disabled:opacity-50 disabled:cursor-not-allowed mb-4"
+          >
+            {isSeasonComplete ? '✅ Season Complete' : '▶️ Simulate Next Week'}
+          </button>
+
+          {/* Quick Actions Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <Link
               href="/squad"
-              className="bg-purple-500 hover:bg-purple-600 text-white font-medium px-6 py-3 rounded-lg shadow-sm transition-normal inline-flex items-center"
+              className="bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-medium px-4 py-3 rounded-lg shadow-sm transition-all text-center"
             >
-              👥 Squad Management
+              <div className="text-2xl mb-1">👥</div>
+              <div className="text-sm">Squad</div>
             </Link>
             <Link
               href="/transfers"
-              className="bg-blue-500 hover:bg-blue-600 text-white font-medium px-6 py-3 rounded-lg shadow-sm transition-normal inline-flex items-center"
+              className="bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium px-4 py-3 rounded-lg shadow-sm transition-all text-center"
             >
-              💰 Transfer Market
-            </Link>
-            <Link
-              href="/staff"
-              className="bg-orange-500 hover:bg-orange-600 text-white font-medium px-6 py-3 rounded-lg shadow-sm transition-normal inline-flex items-center"
-            >
-              👔 Staff Management
+              <div className="text-2xl mb-1">💰</div>
+              <div className="text-sm">Transfers</div>
             </Link>
             <button
               onClick={() => setShowTactics(true)}
-              className="bg-purple-500 hover:bg-purple-600 text-white font-medium px-6 py-3 rounded-lg shadow-sm transition-normal"
+              className="bg-gradient-to-br from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-medium px-4 py-3 rounded-lg shadow-sm transition-all text-center"
             >
-              ⚙️ Tactics
+              <div className="text-2xl mb-1">⚙️</div>
+              <div className="text-sm">Tactics</div>
             </button>
-            <button
-              onClick={() => setShowRecords(true)}
-              className="bg-indigo-500 hover:bg-indigo-600 text-white font-medium px-6 py-3 rounded-lg shadow-sm transition-normal"
-            >
-              📊 Club Records
-            </button>
-            <button
-              onClick={() => setShowTrophyCabinet(true)}
-              className="bg-yellow-500 hover:bg-yellow-600 text-white font-medium px-6 py-3 rounded-lg shadow-sm transition-normal"
-            >
-              🏆 Trophy Cabinet
-            </button>
-            <NewsBadge
-              unreadCount={gameState.newsFeed.filter(n => !n.read).length}
-              onClick={() => setShowNewsFeed(true)}
-            />
-            <button
-              onClick={actions.deleteSave}
-              className="bg-red-500 hover:bg-red-600 text-white font-medium px-6 py-3 rounded-lg shadow-sm transition-normal"
-            >
-              Delete Save
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowMoreMenu(!showMoreMenu)}
+                className="w-full bg-gradient-to-br from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-medium px-4 py-3 rounded-lg shadow-sm transition-all text-center"
+              >
+                <div className="text-2xl mb-1">⋯</div>
+                <div className="text-sm">More</div>
+              </button>
+
+              {/* Dropdown Menu */}
+              {showMoreMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-10">
+                  <Link
+                    href="/staff"
+                    className="block px-4 py-3 hover:bg-gray-50 transition-normal border-b border-gray-100"
+                    onClick={() => setShowMoreMenu(false)}
+                  >
+                    <span className="mr-2">👔</span> Staff
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setShowRecords(true);
+                      setShowMoreMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-normal border-b border-gray-100"
+                  >
+                    <span className="mr-2">📊</span> Records
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowTrophyCabinet(true);
+                      setShowMoreMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-normal border-b border-gray-100"
+                  >
+                    <span className="mr-2">🏆</span> Trophies
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowNewsFeed(true);
+                      setShowMoreMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-normal border-b border-gray-100 relative"
+                  >
+                    <span className="mr-2">📰</span> News
+                    {gameState.newsFeed.filter(n => !n.read).length > 0 && (
+                      <span className="absolute right-3 top-3 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+                        {gameState.newsFeed.filter(n => !n.read).length}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm('Delete this save? This cannot be undone.')) {
+                        actions.deleteSave();
+                      }
+                      setShowMoreMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600 font-semibold transition-normal rounded-b-lg"
+                  >
+                    <span className="mr-2">🗑️</span> Delete Save
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
