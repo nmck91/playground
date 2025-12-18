@@ -134,11 +134,11 @@ export function useGameState() {
         gameState.playerTeam,
         currentWeek
       );
-      updatedPlayerTeam = playerRecoveryResult.team;
+      let updatedPlayerTeam = playerRecoveryResult.team;
       recoveredPlayers = playerRecoveryResult.recovered;
 
       // Update AI teams' injuries
-      updatedAITeams = gameState.aiTeams.map((team) => {
+      let updatedAITeams = gameState.aiTeams.map((team) => {
         const recoveryResult = injuryManager.updateWeeklyInjuries(team, currentWeek);
         return recoveryResult.team;
       });
