@@ -143,48 +143,49 @@ export default function SquadPage() {
     <div className="min-h-screen bg-cream-50">
       {/* Header */}
       <header className="bg-teal-500 text-cream-100 shadow-lg">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold">Squad Management</h1>
-              <p className="text-teal-100 mt-2">{gameState.playerTeam.name}</p>
+              <h1 className="text-2xl md:text-4xl font-bold">Squad Management</h1>
+              <p className="text-teal-100 mt-1 text-sm md:text-base">{gameState.playerTeam.name}</p>
             </div>
             <Link
               href="/"
-              className="bg-white text-teal-600 hover:bg-teal-50 font-medium px-6 py-3 rounded-lg shadow-sm transition-normal"
+              className="bg-white text-teal-600 hover:bg-teal-50 font-medium px-3 md:px-6 py-2 md:py-3 rounded-lg shadow-sm transition-normal text-sm md:text-base"
             >
-              ← Back to Dashboard
+              <span className="hidden md:inline">← Back to Dashboard</span>
+              <span className="md:hidden">← Back</span>
             </Link>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">
         {/* Squad Overview */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-2xl font-semibold text-slate-900 mb-4">Squad Overview</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6 md:mb-8">
+          <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-4">Squad Overview</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             <div>
-              <div className="text-sm text-slate-500 mb-1">Total Players</div>
-              <div className="text-2xl font-bold text-slate-900">
+              <div className="text-xs md:text-sm text-slate-500 mb-1">Total Players</div>
+              <div className="text-xl md:text-2xl font-bold text-slate-900">
                 {gameState.playerTeam.players.length} / 25
               </div>
             </div>
             <div>
-              <div className="text-sm text-slate-500 mb-1">Average Skill</div>
-              <div className={`text-2xl font-bold ${getSkillColor(parseFloat(avgSkill))}`}>
+              <div className="text-xs md:text-sm text-slate-500 mb-1">Average Skill</div>
+              <div className={`text-xl md:text-2xl font-bold ${getSkillColor(parseFloat(avgSkill))}`}>
                 {avgSkill} / 20
               </div>
             </div>
             <div>
-              <div className="text-sm text-slate-500 mb-1">Weekly Wages</div>
-              <div className="text-2xl font-bold text-slate-900">
+              <div className="text-xs md:text-sm text-slate-500 mb-1">Weekly Wages</div>
+              <div className="text-xl md:text-2xl font-bold text-slate-900">
                 £{totalWages.toLocaleString()}
               </div>
             </div>
             <div>
-              <div className="text-sm text-slate-500 mb-1">Position Split</div>
-              <div className="text-sm text-slate-700 mt-1">
+              <div className="text-xs md:text-sm text-slate-500 mb-1">Position Split</div>
+              <div className="text-xs md:text-sm text-slate-700 mt-1">
                 GK: {positionCounts.GK} | DEF: {positionCounts.DEF} | MID: {positionCounts.MID} | FWD: {positionCounts.FWD}
               </div>
             </div>
@@ -192,14 +193,15 @@ export default function SquadPage() {
         </div>
 
         {/* Filters and Sorting */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <div className="flex flex-wrap gap-4 items-center">
+        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6 md:mb-8">
+          <div className="space-y-4">
+            {/* Sort Dropdown */}
             <div>
-              <label className="text-sm font-medium text-slate-700 mr-2">Sort by:</label>
+              <label className="block text-sm font-medium text-slate-700 mb-2">Sort by:</label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as SortBy)}
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full md:w-auto border border-gray-300 rounded-md px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
               >
                 <option value="position">Position</option>
                 <option value="skill">Skill</option>
@@ -208,14 +210,16 @@ export default function SquadPage() {
                 <option value="name">Name</option>
               </select>
             </div>
+
+            {/* Position Filter */}
             <div>
-              <label className="text-sm font-medium text-slate-700 mr-2">Filter:</label>
-              <div className="inline-flex gap-2">
+              <label className="block text-sm font-medium text-slate-700 mb-2">Filter by position:</label>
+              <div className="grid grid-cols-5 gap-2">
                 {(['ALL', 'GK', 'DEF', 'MID', 'FWD'] as const).map((pos) => (
                   <button
                     key={pos}
                     onClick={() => setFilterPosition(pos)}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-normal ${
+                    className={`px-3 py-2.5 rounded-md text-sm font-medium transition-normal ${
                       filterPosition === pos
                         ? 'bg-teal-500 text-white'
                         : 'bg-gray-100 text-slate-700 hover:bg-gray-200'
@@ -230,11 +234,11 @@ export default function SquadPage() {
         </div>
 
         {/* Player List */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-semibold text-slate-900 mb-6">
+        <div className="bg-white rounded-lg shadow-md p-4 md:p-6">
+          <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-4 md:mb-6">
             Players ({filteredAndSorted.length})
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             {filteredAndSorted.map((player) => {
               const estimatedValue = transferMarket.calculatePlayerValue(player);
               const canSell = gameState.playerTeam.players.length > 11;
@@ -333,21 +337,21 @@ export default function SquadPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleViewStats(player)}
-                        className="flex-1 bg-purple-500 hover:bg-purple-600 text-white text-sm px-4 py-2 rounded-lg transition-normal"
+                        className="flex-1 bg-purple-500 hover:bg-purple-600 text-white text-xs md:text-sm px-3 md:px-4 py-2.5 md:py-2 rounded-lg transition-normal font-medium"
                       >
-                        View Stats
+                        📊 Stats
                       </button>
                       <button
                         onClick={() => handleSellClick(player)}
                         disabled={!canSell}
-                        className={`flex-1 text-sm px-4 py-2 rounded-lg transition-normal ${
+                        className={`flex-1 text-xs md:text-sm px-3 md:px-4 py-2.5 md:py-2 rounded-lg transition-normal font-medium ${
                           canSell
                             ? 'bg-blue-500 hover:bg-blue-600 text-white'
                             : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                         }`}
                         title={!canSell ? 'Cannot sell (minimum 11 players required)' : ''}
                       >
-                        {canSell ? 'Sell' : 'Cannot Sell'}
+                        {canSell ? '💰 Sell' : '🔒 Locked'}
                       </button>
                     </div>
                   </div>
