@@ -39,7 +39,7 @@
     "@nx/eslint-plugin": "^22.3.2",
     "@nx/jest": "^22.3.2",
     "@nx/js": "22.2.7",
-    "@nx/next": "^22.2.7",
+    "@nx/next": "^22.3.2",
     "@nx/playwright": "^22.3.2",
     "@nx/web": "^22.3.2",
     "@nx/workspace": "^22.3.2",
