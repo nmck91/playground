@@ -30,10 +30,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'npm'
+          # Temporarily disable cache to force clean install
+          # cache: 'npm'
 
       # Upgrade to npm 11.x to match local environment
       - run: npm install -g npm@11
+
+      # Clean npm cache before install
+      - run: npm cache clean --force
 
       - run: npm ci
       - run: npx playwright install --with-deps
