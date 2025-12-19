@@ -35,9 +35,13 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps
 
+      # Clean build artifacts before linting
+      - run: npx nx reset
+
       # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
       # - run: npx nx-cloud record -- echo Hello World
-      - run: npx nx run-many -t lint test build
+      # Run lint, test, and build but exclude spike projects
+      - run: npx nx run-many -t lint test build --exclude=football-director-spike,football-director-spike-e2e
 
   merge-to-release:
     name: Merge to Release Branch

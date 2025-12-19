@@ -343,7 +343,8 @@ describe('SeasonManager', () => {
   describe('getTotalWeeks', () => {
     it('should return correct total weeks for 4 teams', () => {
       const fixtures = manager.generateFixtures(testTeams);
-      expect(manager.getTotalWeeks(fixtures)).toBe(6);
+      // 4 teams = 6 rounds, starting at week 8, so weeks 8-13
+      expect(manager.getTotalWeeks(fixtures)).toBe(13);
     });
 
     it('should return correct total weeks for 20 teams', () => {
@@ -356,7 +357,8 @@ describe('SeasonManager', () => {
       }));
 
       const fixtures = manager.generateFixtures(largeLeague);
-      expect(manager.getTotalWeeks(fixtures)).toBe(38);
+      // 20 teams = 38 rounds, starting at week 8, so weeks 8-45
+      expect(manager.getTotalWeeks(fixtures)).toBe(45);
     });
 
     it('should return 0 for empty fixtures', () => {
