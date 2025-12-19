@@ -5,7 +5,28 @@
 
 import { Player, Team, TransferListing } from './types';
 
+// Transfer window periods
+const PRE_SEASON_TRANSFER_START = 1;
+const PRE_SEASON_TRANSFER_END = 8;
+const WINTER_TRANSFER_START = 28;
+const WINTER_TRANSFER_END = 32;
+
 export class TransferMarket {
+  /**
+   * Check if transfers are allowed in the current week
+   */
+  isTransferWindowOpen(currentWeek: number): boolean {
+    // Pre-season transfer window: weeks 1-8
+    if (currentWeek >= PRE_SEASON_TRANSFER_START && currentWeek <= PRE_SEASON_TRANSFER_END) {
+      return true;
+    }
+    // Winter transfer window: weeks 28-32 (mid-season)
+    if (currentWeek >= WINTER_TRANSFER_START && currentWeek <= WINTER_TRANSFER_END) {
+      return true;
+    }
+    return false;
+  }
+
   /**
    * Calculate a player's market value based on skill and age
    */
@@ -86,7 +107,8 @@ export class TransferMarket {
     listing: TransferListing,
     buyerTeam: Team,
     sellerTeam: Team,
-    currentListings: TransferListing[]
+    currentListings: TransferListing[],
+    currentWeek: number
   ): {
     success: boolean;
     message: string;
@@ -94,6 +116,14 @@ export class TransferMarket {
     updatedSellerTeam?: Team;
     updatedListings?: TransferListing[];
   } {
+    // Check transfer window
+    if (!this.isTransferWindowOpen(currentWeek)) {
+      return {
+        success: false,
+        message: 'Transfer window is closed',
+      };
+    }
+
     // Validate budget
     if (buyerTeam.budget < listing.askingPrice) {
       return {
@@ -159,6 +189,14 @@ export class TransferMarket {
     updatedTeam?: Team;
     updatedListings?: TransferListing[];
   } {
+    // Check transfer window
+    if (!this.isTransferWindowOpen(currentWeek)) {
+      return {
+        success: false,
+        message: 'Transfer window is closed',
+      };
+    }
+
     // Validate squad size (min 11 players)
     if (sellingTeam.players.length <= 11) {
       return {
@@ -210,13 +248,19 @@ export class TransferMarket {
    */
   simulateAITransfers(
     aiTeams: Team[],
-    currentListings: TransferListing[]
+    currentListings: TransferListing[],
+    currentWeek: number
   ): {
     updatedTeams: Team[];
     updatedListings: TransferListing[];
   } {
     let updatedTeams = [...aiTeams];
     let updatedListings = [...currentListings];
+
+    // Only simulate transfers during transfer windows
+    if (!this.isTransferWindowOpen(currentWeek)) {
+      return { updatedTeams, updatedListings };
+    }
 
     // 30% chance each AI team attempts a transfer
     aiTeams.forEach((team) => {
@@ -233,7 +277,7 @@ export class TransferMarket {
           const sellerTeam = updatedTeams.find((t) => t.id === randomListing.sellingTeamId);
 
           if (sellerTeam) {
-            const result = this.buyPlayer(randomListing, team, sellerTeam, updatedListings);
+            const result = this.buyPlayer(randomListing, team, sellerTeam, updatedListings, currentWeek);
 
             if (result.success && result.updatedBuyerTeam && result.updatedSellerTeam) {
               // Update teams array

@@ -146,7 +146,7 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Season Info */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
             <div>
               <div className="text-sm text-slate-500 mb-1">Season</div>
               <div className="text-2xl font-bold text-slate-900">
@@ -157,6 +157,36 @@ export default function Dashboard() {
               <div className="text-sm text-slate-500 mb-1">Week</div>
               <div className="text-2xl font-bold text-slate-900">
                 {gameState.season.currentWeek} / {gameState.season.totalWeeks}
+              </div>
+              <div className="text-xs mt-1">
+                {gameState.season.phase === 'pre-season' ? (
+                  <span className="text-purple-600 font-semibold">🏋️ Pre-Season</span>
+                ) : gameState.season.phase === 'competitive' ? (
+                  <span className="text-green-600 font-semibold">⚽ Match Week</span>
+                ) : (
+                  <span className="text-blue-600 font-semibold">🏖️ Off-Season</span>
+                )}
+              </div>
+            </div>
+            <div>
+              <div className="text-sm text-slate-500 mb-1">Transfer Window</div>
+              <div className="text-lg font-bold">
+                {gameState.season.transferWindow === 'open' ? (
+                  <span className="text-green-600">✅ Open</span>
+                ) : (
+                  <span className="text-red-600">🔒 Closed</span>
+                )}
+              </div>
+              <div className="text-xs mt-1 text-slate-600">
+                {gameState.season.transferWindow === 'closed' && gameState.season.phase === 'competitive' && gameState.season.currentWeek < 28 && (
+                  <span>Winter: Weeks 28-32</span>
+                )}
+                {gameState.season.transferWindow === 'open' && gameState.season.phase === 'pre-season' && (
+                  <span>Closes: Week 9</span>
+                )}
+                {gameState.season.transferWindow === 'open' && gameState.season.phase === 'competitive' && (
+                  <span>Closes: Week 33</span>
+                )}
               </div>
             </div>
             <div>
@@ -228,7 +258,15 @@ export default function Dashboard() {
             disabled={isSeasonComplete}
             className="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold text-lg px-8 py-4 rounded-lg shadow-md transition-normal disabled:opacity-50 disabled:cursor-not-allowed mb-4"
           >
-            {isSeasonComplete ? '✅ Season Complete' : '▶️ Simulate Next Week'}
+            {isSeasonComplete
+              ? '✅ Season Complete'
+              : gameState.season.phase === 'pre-season' && [4, 5, 6].includes(gameState.season.currentWeek)
+              ? '⚽ Play Friendly'
+              : gameState.season.phase === 'pre-season'
+              ? '▶️ Continue Pre-Season'
+              : gameState.season.phase === 'off-season'
+              ? '▶️ Continue Off-Season'
+              : '▶️ Simulate Next Week'}
           </button>
 
           {/* Quick Actions Grid */}

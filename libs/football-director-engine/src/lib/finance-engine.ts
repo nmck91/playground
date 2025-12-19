@@ -3,8 +3,13 @@
  * Manages financial calculations and transactions
  */
 
-import { Team, FinancialRecord } from './types';
+import { Team, FinancialRecord, SeasonPhase } from './types';
 import { StaffManager } from './staff-manager';
+
+const PRE_SEASON_WEEKS = 7;
+const COMPETITIVE_START = 8;
+const COMPETITIVE_WEEKS = 38;
+const COMPETITIVE_END = COMPETITIVE_START + COMPETITIVE_WEEKS - 1; // Week 45
 
 export class FinanceEngine {
   /**
@@ -22,10 +27,11 @@ export class FinanceEngine {
   }
 
   /**
-   * Calculate weekly income based on league position
+   * Calculate weekly income based on league position and season phase
    * Higher positions earn more from TV money and sponsorships
+   * Pre-season and off-season income is reduced (40% of competitive season)
    */
-  calculateWeeklyIncome(position: number): number {
+  calculateWeeklyIncome(position: number, currentWeek: number): number {
     // Base income for all clubs (increased to support larger squads)
     const baseIncome = 75000;
 
@@ -33,7 +39,14 @@ export class FinanceEngine {
     // 1st place: +75k, 20th place: +7.5k
     const positionBonus = Math.max(0, (21 - position) * 3750);
 
-    return baseIncome + positionBonus;
+    const fullIncome = baseIncome + positionBonus;
+
+    // During pre-season or off-season, income is reduced (no competitive matches, reduced commercial activity)
+    if (currentWeek <= PRE_SEASON_WEEKS || currentWeek > COMPETITIVE_END) {
+      return Math.round(fullIncome * 0.4);
+    }
+
+    return fullIncome;
   }
 
   /**
@@ -80,14 +93,20 @@ export class FinanceEngine {
     }
 
     // Weekly income (TV money, sponsorships)
-    const weeklyIncome = this.calculateWeeklyIncome(position);
+    const weeklyIncome = this.calculateWeeklyIncome(position, weekNumber);
+    let phaseDescription = '';
+    if (weekNumber <= PRE_SEASON_WEEKS) {
+      phaseDescription = ' (pre-season)';
+    } else if (weekNumber > COMPETITIVE_END) {
+      phaseDescription = ' (off-season)';
+    }
     transactions.push({
       id: `txn-${Date.now()}-income`,
       date: new Date(),
       type: 'income',
       category: 'prize-money',
       amount: weeklyIncome,
-      description: `Weekly income (position: ${position})`,
+      description: `Weekly income (position: ${position})${phaseDescription}`,
       weekNumber,
     });
     currentBudget += weeklyIncome;

@@ -124,12 +124,22 @@ export interface LeagueTable {
   points: number;
 }
 
+export type SeasonPhase = 'pre-season' | 'competitive' | 'off-season';
+
+export type TransferWindowStatus = 'open' | 'closed';
+
 export interface Season {
   year: number;
-  currentWeek: number; // 1-38
-  totalWeeks: number; // 38
+  currentWeek: number; // 1-52
+  totalWeeks: number; // 52 (7 pre-season + 38 competitive + 7 off-season)
+  competitiveWeeks: number; // 38
+  preSeasonWeeks: number; // 7
   status: 'in-progress' | 'completed';
+  phase: SeasonPhase; // pre-season (1-7), competitive (8-45), off-season (46-52)
+  transferWindow: TransferWindowStatus; // Pre-season: weeks 1-8, Winter: weeks 28-32
 }
+
+export type MatchType = 'friendly' | 'competitive';
 
 export interface Fixture {
   id: string;
@@ -137,6 +147,7 @@ export interface Fixture {
   homeTeamId: string;
   awayTeamId: string;
   played: boolean;
+  matchType: MatchType; // friendly (weeks 4-6) or competitive (weeks 8-45)
   result?: MatchResult;
 }
 

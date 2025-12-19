@@ -44,8 +44,10 @@ export class SaveService {
     const playerTeam = allTeams[0];
     const aiTeams = allTeams.slice(1);
 
-    // Generate fixtures
-    const fixtures = seasonManager.generateFixtures(allTeams);
+    // Generate fixtures (competitive + friendlies)
+    const competitiveFixtures = seasonManager.generateFixtures(allTeams);
+    const friendlyFixtures = seasonManager.generateFriendlyFixtures(allTeams);
+    const fixtures = [...friendlyFixtures, ...competitiveFixtures];
 
     // Initialize league table
     const leagueTable = tableManager.initializeTable(allTeams);
@@ -60,12 +62,16 @@ export class SaveService {
       transactions: [],
     };
 
-    // Initial season
+    // Initial season (52 weeks: 7 pre-season + 38 competitive + 7 off-season)
     const season = {
       year: 2024,
       currentWeek: 1,
-      totalWeeks: seasonManager.getTotalWeeks(fixtures),
+      totalWeeks: 52,
+      competitiveWeeks: 38,
+      preSeasonWeeks: 7,
       status: 'in-progress' as const,
+      phase: 'pre-season' as const,
+      transferWindow: 'open' as const,
     };
 
     // Generate initial transfer market
@@ -288,6 +294,28 @@ export class SaveService {
     // Migration: Add staffMarket if it doesn't exist (for old saves)
     if (!gameState.staffMarket) {
       gameState.staffMarket = staffManager.generateStaffMarket(gameState.season.currentWeek, 15);
+    }
+
+    // Migration: Update season to 52-week system (for old saves)
+    const seasonManager = new SeasonManager();
+    if (!gameState.season.competitiveWeeks || !gameState.season.phase || !gameState.season.transferWindow || !gameState.season.preSeasonWeeks) {
+      const currentWeek = gameState.season.currentWeek;
+      gameState.season = {
+        ...gameState.season,
+        totalWeeks: 52,
+        competitiveWeeks: 38,
+        preSeasonWeeks: 7,
+        phase: seasonManager.getSeasonPhase(currentWeek),
+        transferWindow: seasonManager.getTransferWindowStatus(currentWeek),
+      };
+    }
+
+    // Migration: Add matchType to existing fixtures (for old saves)
+    if (gameState.fixtures.length > 0 && !gameState.fixtures[0].matchType) {
+      gameState.fixtures = gameState.fixtures.map(fixture => ({
+        ...fixture,
+        matchType: (fixture.week >= 4 && fixture.week <= 6) ? 'friendly' as const : 'competitive' as const,
+      }));
     }
 
     return gameState;

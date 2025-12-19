@@ -127,15 +127,14 @@ export function useGameState() {
       const injuryManager = new InjuryManager();
 
       const currentWeek = gameState.season.currentWeek;
+      const hasMatches = seasonManager.hasMatchesThisWeek(currentWeek);
 
       // 0. Process weekly injury recoveries and suspension expirations
-      let recoveredPlayers: string[] = [];
       const playerRecoveryResult = injuryManager.updateWeeklyInjuries(
         gameState.playerTeam,
         currentWeek
       );
       let updatedPlayerTeam = playerRecoveryResult.team;
-      recoveredPlayers = playerRecoveryResult.recovered;
 
       // Update AI teams' injuries
       let updatedAITeams = gameState.aiTeams.map((team) => {
@@ -143,13 +142,20 @@ export function useGameState() {
         return recoveryResult.team;
       });
 
-      // 1. Simulate all matches for this week
-      const { results, updatedFixtures } = seasonManager.simulateWeek(
-        gameState.fixtures,
-        [gameState.playerTeam, ...gameState.aiTeams],
-        currentWeek,
-        simulator
-      );
+      // 1. Simulate all matches for this week (only during competitive season)
+      let results: MatchResult[] = [];
+      let updatedFixtures = gameState.fixtures;
+
+      if (hasMatches) {
+        const simulationResult = seasonManager.simulateWeek(
+          gameState.fixtures,
+          [gameState.playerTeam, ...gameState.aiTeams],
+          currentWeek,
+          simulator
+        );
+        results = simulationResult.results;
+        updatedFixtures = simulationResult.updatedFixtures;
+      }
 
       // 1b. Update player stats and process injuries/suspensions
       results.forEach((result) => {
@@ -230,17 +236,20 @@ export function useGameState() {
         updatedPlayerTeam.id
       );
 
-      // Check if player has home match this week
-      const playerFixtures = seasonManager.getFixturesForWeek(
-        updatedFixtures,
-        currentWeek
-      );
-      const playerHomeMatch = playerFixtures.find(
-        (f) => f.homeTeamId === updatedPlayerTeam.id
-      );
-      const matchDayIncome = financeEngine.calculateMatchDayIncome(
-        !!playerHomeMatch
-      );
+      // Check if player has home match this week (only during competitive season)
+      let matchDayIncome = 0;
+      if (hasMatches) {
+        const playerFixtures = seasonManager.getFixturesForWeek(
+          updatedFixtures,
+          currentWeek
+        );
+        const playerHomeMatch = playerFixtures.find(
+          (f) => f.homeTeamId === updatedPlayerTeam.id
+        );
+        matchDayIncome = financeEngine.calculateMatchDayIncome(
+          !!playerHomeMatch
+        );
+      }
 
       const { newBudget, transactions } = financeEngine.processWeeklyFinances(
         gameState.finances.budget,
@@ -250,11 +259,12 @@ export function useGameState() {
         currentWeek
       );
 
-      // 4. Simulate AI transfers and refresh market
+      // 4. Simulate AI transfers and refresh market (only during transfer windows)
       const transferMarket = new TransferMarket();
       const { updatedTeams, updatedListings } = transferMarket.simulateAITransfers(
         updatedAITeams,
-        gameState.transferMarket
+        gameState.transferMarket,
+        currentWeek
       );
 
       // Generate new listings every week (more listings to keep market active)
@@ -263,7 +273,8 @@ export function useGameState() {
       finalMarket = [...updatedListings, ...newListings];
 
       // 5. Update game state
-      const isComplete = seasonManager.isSeasonComplete(updatedFixtures);
+      // Season is complete when we've finished week 52 (7 pre-season + 38 competitive + 7 off-season)
+      const isComplete = currentWeek >= 52;
 
       // Store simulation results for highlights
       setLastSimulationResults(results);
@@ -461,14 +472,17 @@ export function useGameState() {
       weeklyNews = newsGenerator.pruneOldNews(weeklyNews, gameState.season.year);
 
       // Build updated game state
+      const nextWeek = currentWeek + 1;
       const updatedGameState: GameState = {
         ...gameState,
         playerTeam: finalPlayerTeam,
         aiTeams: finalAITeams,
         season: {
           ...gameState.season,
-          currentWeek: isComplete ? currentWeek : currentWeek + 1,
+          currentWeek: isComplete ? currentWeek : nextWeek,
           status: isComplete ? 'completed' : 'in-progress',
+          phase: isComplete ? gameState.season.phase : seasonManager.getSeasonPhase(nextWeek),
+          transferWindow: isComplete ? gameState.season.transferWindow : seasonManager.getTransferWindowStatus(nextWeek),
         },
         fixtures: updatedFixtures,
         leagueTable: updatedTable,
@@ -536,7 +550,8 @@ export function useGameState() {
           listing,
           gameState.playerTeam,
           sellerTeam,
-          gameState.transferMarket
+          gameState.transferMarket,
+          gameState.season.currentWeek
         );
 
         if (!result.success) {
@@ -749,13 +764,15 @@ export function useGameState() {
       const tableManager = new LeagueTableManager();
       const transferMarket = new TransferMarket();
 
-      // Generate new season fixtures
-      const newFixtures = seasonManager.generateFixtures([gameState.playerTeam, ...gameState.aiTeams]);
+      // Generate new season fixtures (competitive + friendlies)
+      const competitiveFixtures = seasonManager.generateFixtures([gameState.playerTeam, ...gameState.aiTeams]);
+      const friendlyFixtures = seasonManager.generateFriendlyFixtures([gameState.playerTeam, ...gameState.aiTeams]);
+      const newFixtures = [...friendlyFixtures, ...competitiveFixtures];
 
       // Reset league table for new season
       const newTable = tableManager.initializeTable([gameState.playerTeam, ...gameState.aiTeams]);
 
-      // Generate fresh transfer market for new season
+      // Generate fresh transfer market for new season (week 1 = pre-season, transfer window open)
       const newMarket = transferMarket.generateMarket(gameState.aiTeams, 1, 15);
 
       // Clear modal states
@@ -769,8 +786,12 @@ export function useGameState() {
         season: {
           year: gameState.season.year + 1,
           currentWeek: 1,
-          totalWeeks: seasonManager.getTotalWeeks(newFixtures),
+          totalWeeks: 52,
+          competitiveWeeks: 38,
+          preSeasonWeeks: 7,
           status: 'in-progress',
+          phase: 'pre-season',
+          transferWindow: 'open',
         },
         fixtures: newFixtures,
         leagueTable: newTable,
