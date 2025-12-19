@@ -110,7 +110,7 @@ export class StaffManager {
   /**
    * Generate staff market (available for hire)
    */
-  generateStaffMarket(currentWeek: number, count: number = 15): Staff[] {
+  generateStaffMarket(currentWeek: number, count = 15): Staff[] {
     const market: Staff[] = [];
     const seed = currentWeek * 1000;
 

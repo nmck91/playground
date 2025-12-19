@@ -66,7 +66,7 @@ export class TransferMarket {
   generateMarket(
     aiTeams: Team[],
     currentWeek: number,
-    listingsPerWeek: number = 10
+    listingsPerWeek = 10
   ): TransferListing[] {
     const listings: TransferListing[] = [];
 

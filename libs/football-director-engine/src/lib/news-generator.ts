@@ -97,7 +97,7 @@ export class NewsGenerator {
     buyerTeamName: string,
     week: number,
     season: number,
-    isSale: boolean = false
+    isSale = false
   ): NewsArticle {
     const now = new Date();
     const importance: NewsImportance = listing.askingPrice > 200000 ? 'high' : listing.askingPrice > 100000 ? 'medium' : 'low';

@@ -42,7 +42,7 @@ export class MatchSimulator {
   /**
    * Simulate a single match between two teams
    */
-  simulateMatch(match: Match, currentWeek: number = 1, seed?: number): MatchResult {
+  simulateMatch(match: Match, currentWeek = 1, seed?: number): MatchResult {
     const homeStrength = this.calculateTeamStrength(match.homeTeam, currentWeek);
     const awayStrength = this.calculateTeamStrength(match.awayTeam, currentWeek);
 
