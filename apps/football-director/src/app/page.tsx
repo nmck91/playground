@@ -88,15 +88,43 @@ export default function Dashboard() {
     );
   }
 
-  const playerPosition =
-    gameState.leagueTable
-      .sort((a, b) => {
-        if (b.points !== a.points) return b.points - a.points;
-        if (b.goalDifference !== a.goalDifference)
-          return b.goalDifference - a.goalDifference;
-        return b.goalsFor - a.goalsFor;
-      })
-      .findIndex((entry) => entry.teamId === gameState.playerTeam.id) + 1;
+  const sortedTable = gameState.leagueTable.sort((a, b) => {
+    if (b.points !== a.points) return b.points - a.points;
+    if (b.goalDifference !== a.goalDifference)
+      return b.goalDifference - a.goalDifference;
+    return b.goalsFor - a.goalsFor;
+  });
+
+  const playerPosition = sortedTable.findIndex((entry) => entry.teamId === gameState.playerTeam.id) + 1;
+
+  // Get condensed table (5 teams centered around player position)
+  const getCondensedTable = () => {
+    const totalTeams = sortedTable.length;
+    let startIndex = 0;
+    let endIndex = 5;
+
+    if (playerPosition === 1) {
+      // At top: show top 5
+      startIndex = 0;
+      endIndex = 5;
+    } else if (playerPosition === 2) {
+      // 2nd place: show 1 above, 3 below
+      startIndex = 0;
+      endIndex = 5;
+    } else if (playerPosition >= totalTeams - 1) {
+      // At bottom or 2nd from bottom: show bottom 5
+      startIndex = Math.max(0, totalTeams - 5);
+      endIndex = totalTeams;
+    } else {
+      // Middle: show 2 above, player, 2 below
+      startIndex = Math.max(0, playerPosition - 3);
+      endIndex = Math.min(totalTeams, startIndex + 5);
+    }
+
+    return sortedTable.slice(startIndex, endIndex);
+  };
+
+  const condensedTable = getCondensedTable();
 
   const isSeasonComplete = gameState.season.status === 'completed';
 
@@ -377,100 +405,103 @@ export default function Dashboard() {
         />
 
         {/* League Table */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h2 className="text-2xl font-semibold text-slate-900 mb-6">
-            League Table
-          </h2>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b-2 border-gray-200">
-                  <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700">
-                    Pos
-                  </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">
-                    Team
-                  </th>
-                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
-                    P
-                  </th>
-                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
-                    W
-                  </th>
-                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
-                    D
-                  </th>
-                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
-                    L
-                  </th>
-                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
-                    GF
-                  </th>
-                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
-                    GA
-                  </th>
-                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
-                    GD
-                  </th>
-                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
-                    Pts
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {gameState.leagueTable
-                  .sort((a, b) => {
-                    if (b.points !== a.points) return b.points - a.points;
-                    if (b.goalDifference !== a.goalDifference)
-                      return b.goalDifference - a.goalDifference;
-                    return b.goalsFor - a.goalsFor;
-                  })
-                  .map((entry, index) => (
-                    <tr
-                      key={entry.teamId}
-                      className={`border-b border-gray-100 ${
-                        entry.teamId === gameState.playerTeam.id
-                          ? 'bg-teal-50 font-semibold'
-                          : ''
-                      }`}
-                    >
-                      <td className="py-3 px-2 text-sm text-slate-700">
-                        {index + 1}
-                      </td>
-                      <td className="py-3 px-4 text-sm text-slate-900">
-                        {entry.teamName}
-                      </td>
-                      <td className="text-center py-3 px-2 text-sm text-slate-700">
-                        {entry.played}
-                      </td>
-                      <td className="text-center py-3 px-2 text-sm text-slate-700">
-                        {entry.won}
-                      </td>
-                      <td className="text-center py-3 px-2 text-sm text-slate-700">
-                        {entry.drawn}
-                      </td>
-                      <td className="text-center py-3 px-2 text-sm text-slate-700">
-                        {entry.lost}
-                      </td>
-                      <td className="text-center py-3 px-2 text-sm text-slate-700">
-                        {entry.goalsFor}
-                      </td>
-                      <td className="text-center py-3 px-2 text-sm text-slate-700">
-                        {entry.goalsAgainst}
-                      </td>
-                      <td className="text-center py-3 px-2 text-sm text-slate-700">
-                        {entry.goalDifference > 0 ? '+' : ''}
-                        {entry.goalDifference}
-                      </td>
-                      <td className="text-center py-3 px-2 text-sm font-bold text-teal-600">
-                        {entry.points}
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+        <Link href="/table" className="block">
+          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-semibold text-slate-900">
+                League Table
+              </h2>
+              <span className="text-sm text-teal-600 hover:text-teal-700 font-medium">
+                View Full Table →
+              </span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b-2 border-gray-200">
+                    <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700">
+                      Pos
+                    </th>
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">
+                      Team
+                    </th>
+                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                      P
+                    </th>
+                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                      W
+                    </th>
+                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                      D
+                    </th>
+                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                      L
+                    </th>
+                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                      GF
+                    </th>
+                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                      GA
+                    </th>
+                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                      GD
+                    </th>
+                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                      Pts
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {condensedTable.map((entry) => {
+                    const position = sortedTable.findIndex(t => t.teamId === entry.teamId) + 1;
+                    return (
+                      <tr
+                        key={entry.teamId}
+                        className={`border-b border-gray-100 ${
+                          entry.teamId === gameState.playerTeam.id
+                            ? 'bg-teal-50 font-semibold'
+                            : ''
+                        }`}
+                      >
+                        <td className="py-3 px-2 text-sm text-slate-700">
+                          {position}
+                        </td>
+                        <td className="py-3 px-4 text-sm text-slate-900">
+                          {entry.teamName}
+                        </td>
+                        <td className="text-center py-3 px-2 text-sm text-slate-700">
+                          {entry.played}
+                        </td>
+                        <td className="text-center py-3 px-2 text-sm text-slate-700">
+                          {entry.won}
+                        </td>
+                        <td className="text-center py-3 px-2 text-sm text-slate-700">
+                          {entry.drawn}
+                        </td>
+                        <td className="text-center py-3 px-2 text-sm text-slate-700">
+                          {entry.lost}
+                        </td>
+                        <td className="text-center py-3 px-2 text-sm text-slate-700">
+                          {entry.goalsFor}
+                        </td>
+                        <td className="text-center py-3 px-2 text-sm text-slate-700">
+                          {entry.goalsAgainst}
+                        </td>
+                        <td className="text-center py-3 px-2 text-sm text-slate-700">
+                          {entry.goalDifference > 0 ? '+' : ''}
+                          {entry.goalDifference}
+                        </td>
+                        <td className="text-center py-3 px-2 text-sm font-bold text-teal-600">
+                          {entry.points}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+        </Link>
       </main>
 
       {/* Match Highlights Modal */}
