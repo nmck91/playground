@@ -197,6 +197,7 @@ describe('PlayerDevelopment', () => {
           createTestPlayer(30, 15),
           createTestPlayer(35, 12),
         ],
+        staff: [],
       };
 
       const { team: developed, reports } = playerDev.developTeam(team, 100);
@@ -215,6 +216,7 @@ describe('PlayerDevelopment', () => {
         name: 'Test FC',
         budget: 1000000,
         players: [createTestPlayer(22, 12)],
+        staff: [],
       };
 
       const { team: developed } = playerDev.developTeam(team, 100);
@@ -233,6 +235,7 @@ describe('PlayerDevelopment', () => {
           createTestPlayer(20, 10),
           createTestPlayer(28, 16),
         ],
+        staff: [],
       };
 
       const { reports } = playerDev.developTeam(team, 100);
@@ -248,6 +251,7 @@ describe('PlayerDevelopment', () => {
         name: 'Test FC',
         budget: 1000000,
         players: [createTestPlayer(22, 12)],
+        staff: [],
       };
 
       const result1 = playerDev.developTeam(team, 42);
@@ -265,12 +269,14 @@ describe('PlayerDevelopment', () => {
           name: 'Team A',
           budget: 1000000,
           players: [createTestPlayer(22, 12)],
+          staff: [],
         },
         {
           id: 'team-2',
           name: 'Team B',
           budget: 1000000,
           players: [createTestPlayer(28, 15)],
+          staff: [],
         },
       ];
 
@@ -289,12 +295,14 @@ describe('PlayerDevelopment', () => {
           name: 'Team A',
           budget: 1000000,
           players: [createTestPlayer(22, 12)],
+          staff: [],
         },
         {
           id: 'team-2',
           name: 'Team B',
           budget: 1000000,
           players: [createTestPlayer(28, 15)],
+          staff: [],
         },
       ];
 

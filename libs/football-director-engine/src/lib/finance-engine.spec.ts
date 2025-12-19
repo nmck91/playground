@@ -52,6 +52,7 @@ describe('FinanceEngine', () => {
       name: 'Test FC',
       budget: 1000000,
       players: testPlayers,
+      staff: [],
     };
   });
 
@@ -67,6 +68,7 @@ describe('FinanceEngine', () => {
         name: 'Empty FC',
         budget: 500000,
         players: [],
+        staff: [],
       };
 
       const wages = engine.calculateWeeklyWages(emptyTeam);
@@ -90,6 +92,7 @@ describe('FinanceEngine', () => {
             history: [],
           },
         ],
+        staff: [],
       };
 
       const wages = engine.calculateWeeklyWages(singlePlayerTeam);
@@ -99,32 +102,32 @@ describe('FinanceEngine', () => {
 
   describe('calculateWeeklyIncome', () => {
     it('should give higher income for 1st place', () => {
-      const income1st = engine.calculateWeeklyIncome(1);
-      const income10th = engine.calculateWeeklyIncome(10);
+      const income1st = engine.calculateWeeklyIncome(1, 1);
+      const income10th = engine.calculateWeeklyIncome(10, 1);
 
       expect(income1st).toBeGreaterThan(income10th);
     });
 
     it('should calculate correct income for 1st place', () => {
-      const income = engine.calculateWeeklyIncome(1);
+      const income = engine.calculateWeeklyIncome(1, 1);
       // Base 50k + (21-1)*2500 = 50k + 50k = 100k
       expect(income).toBe(100000);
     });
 
     it('should calculate correct income for 10th place', () => {
-      const income = engine.calculateWeeklyIncome(10);
+      const income = engine.calculateWeeklyIncome(10, 1);
       // Base 50k + (21-10)*2500 = 50k + 27.5k = 77.5k
       expect(income).toBe(77500);
     });
 
     it('should calculate correct income for 20th place', () => {
-      const income = engine.calculateWeeklyIncome(20);
+      const income = engine.calculateWeeklyIncome(20, 1);
       // Base 50k + (21-20)*2500 = 50k + 2.5k = 52.5k
       expect(income).toBe(52500);
     });
 
     it('should give base income for positions beyond 20', () => {
-      const income = engine.calculateWeeklyIncome(25);
+      const income = engine.calculateWeeklyIncome(25, 1);
       // Base 50k + max(0, (21-25)*2500) = 50k
       expect(income).toBe(50000);
     });
@@ -202,6 +205,7 @@ describe('FinanceEngine', () => {
         name: 'Empty FC',
         budget: 500000,
         players: [],
+        staff: [],
       };
 
       const result = engine.processWeeklyFinances(

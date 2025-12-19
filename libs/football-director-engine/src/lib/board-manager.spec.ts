@@ -29,6 +29,7 @@ describe('BoardManager', () => {
         stats: statsTracker.initializePlayerStats(),
         history: [],
       })),
+      staff: [],
     };
   };
 

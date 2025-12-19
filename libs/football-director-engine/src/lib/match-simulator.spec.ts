@@ -20,12 +20,13 @@ describe('MatchSimulator', () => {
       name: 'Strong FC',
       budget: 1000000,
       players: [
-        { id: 'p1', name: 'Player 1', position: 'GK', skill: 15, age: 25, wages: 5000 },
-        { id: 'p2', name: 'Player 2', position: 'DEF', skill: 15, age: 24, wages: 5000 },
-        { id: 'p3', name: 'Player 3', position: 'DEF', skill: 15, age: 26, wages: 5000 },
-        { id: 'p4', name: 'Player 4', position: 'MID', skill: 15, age: 23, wages: 5000 },
-        { id: 'p5', name: 'Player 5', position: 'FWD', skill: 15, age: 27, wages: 5000 },
+        { id: 'p1', name: 'Player 1', position: 'GK', skill: 15, age: 25, wages: 5000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
+        { id: 'p2', name: 'Player 2', position: 'DEF', skill: 15, age: 24, wages: 5000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
+        { id: 'p3', name: 'Player 3', position: 'DEF', skill: 15, age: 26, wages: 5000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
+        { id: 'p4', name: 'Player 4', position: 'MID', skill: 15, age: 23, wages: 5000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
+        { id: 'p5', name: 'Player 5', position: 'FWD', skill: 15, age: 27, wages: 5000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
       ],
+      staff: [],
     };
 
     // Weak team (average skill 5)
@@ -34,12 +35,13 @@ describe('MatchSimulator', () => {
       name: 'Weak United',
       budget: 100000,
       players: [
-        { id: 'p6', name: 'Player 6', position: 'GK', skill: 5, age: 22, wages: 1000 },
-        { id: 'p7', name: 'Player 7', position: 'DEF', skill: 5, age: 21, wages: 1000 },
-        { id: 'p8', name: 'Player 8', position: 'DEF', skill: 5, age: 23, wages: 1000 },
-        { id: 'p9', name: 'Player 9', position: 'MID', skill: 5, age: 24, wages: 1000 },
-        { id: 'p10', name: 'Player 10', position: 'FWD', skill: 5, age: 20, wages: 1000 },
+        { id: 'p6', name: 'Player 6', position: 'GK', skill: 5, age: 22, wages: 1000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
+        { id: 'p7', name: 'Player 7', position: 'DEF', skill: 5, age: 21, wages: 1000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
+        { id: 'p8', name: 'Player 8', position: 'DEF', skill: 5, age: 23, wages: 1000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
+        { id: 'p9', name: 'Player 9', position: 'MID', skill: 5, age: 24, wages: 1000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
+        { id: 'p10', name: 'Player 10', position: 'FWD', skill: 5, age: 20, wages: 1000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
       ],
+      staff: [],
     };
 
     // Medium team (average skill 10)
@@ -48,34 +50,38 @@ describe('MatchSimulator', () => {
       name: 'Medium City',
       budget: 500000,
       players: [
-        { id: 'p11', name: 'Player 11', position: 'GK', skill: 10, age: 25, wages: 3000 },
-        { id: 'p12', name: 'Player 12', position: 'DEF', skill: 10, age: 24, wages: 3000 },
-        { id: 'p13', name: 'Player 13', position: 'MID', skill: 10, age: 26, wages: 3000 },
-        { id: 'p14', name: 'Player 14', position: 'FWD', skill: 10, age: 23, wages: 3000 },
+        { id: 'p11', name: 'Player 11', position: 'GK', skill: 10, age: 25, wages: 3000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
+        { id: 'p12', name: 'Player 12', position: 'DEF', skill: 10, age: 24, wages: 3000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
+        { id: 'p13', name: 'Player 13', position: 'MID', skill: 10, age: 26, wages: 3000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
+        { id: 'p14', name: 'Player 14', position: 'FWD', skill: 10, age: 23, wages: 3000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
       ],
+      staff: [],
     };
   });
 
   describe('calculateTeamStrength', () => {
     it('should calculate correct average skill for a team', () => {
-      const strength = simulator.calculateTeamStrength(strongTeam);
-      expect(strength).toBe(15);
+      const strength = simulator.calculateTeamStrength(strongTeam, 1);
+      // 15 * 0.9 (no manager penalty) = 13.5
+      expect(strength).toBe(13.5);
     });
 
     it('should calculate correct average for different skill levels', () => {
-      const weakStrength = simulator.calculateTeamStrength(weakTeam);
-      expect(weakStrength).toBe(5);
+      const weakStrength = simulator.calculateTeamStrength(weakTeam, 1);
+      // 5 * 0.9 (no manager penalty) = 4.5
+      expect(weakStrength).toBe(4.5);
     });
 
     it('should handle team with no players', () => {
       const emptyTeam: Team = { ...strongTeam, players: [] };
-      const strength = simulator.calculateTeamStrength(emptyTeam);
+      const strength = simulator.calculateTeamStrength(emptyTeam, 1);
       expect(strength).toBe(0);
     });
 
     it('should handle team with varying skill levels', () => {
-      const strength = simulator.calculateTeamStrength(mediumTeam);
-      expect(strength).toBe(10);
+      const strength = simulator.calculateTeamStrength(mediumTeam, 1);
+      // 10 * 0.9 (no manager penalty) = 9
+      expect(strength).toBe(9);
     });
   });
 
@@ -226,7 +232,8 @@ describe('MatchSimulator', () => {
         id: 'team-4',
         name: 'Team 4',
         budget: 500000,
-        players: [{ id: 'p20', name: 'Player 20', position: 'FWD', skill: 10, age: 25, wages: 3000 }],
+        players: [{ id: 'p20', name: 'Player 20', position: 'FWD', skill: 10, age: 25, wages: 3000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] }],
+        staff: [],
       };
 
       const teams = [strongTeam, weakTeam, mediumTeam, team4];
@@ -245,11 +252,12 @@ describe('MatchSimulator', () => {
           name: `Team ${i}`,
           budget: 500000,
           players: [
-            { id: `p${i}-1`, name: `Player ${i}-1`, position: 'GK', skill: 10, age: 25, wages: 3000 },
-            { id: `p${i}-2`, name: `Player ${i}-2`, position: 'DEF', skill: 10, age: 24, wages: 3000 },
-            { id: `p${i}-3`, name: `Player ${i}-3`, position: 'MID', skill: 10, age: 26, wages: 3000 },
-            { id: `p${i}-4`, name: `Player ${i}-4`, position: 'FWD', skill: 10, age: 23, wages: 3000 },
+            { id: `p${i}-1`, name: `Player ${i}-1`, position: 'GK', skill: 10, age: 25, wages: 3000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
+            { id: `p${i}-2`, name: `Player ${i}-2`, position: 'DEF', skill: 10, age: 24, wages: 3000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
+            { id: `p${i}-3`, name: `Player ${i}-3`, position: 'MID', skill: 10, age: 26, wages: 3000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
+            { id: `p${i}-4`, name: `Player ${i}-4`, position: 'FWD', skill: 10, age: 23, wages: 3000, stats: { appearances: 0, goals: 0, assists: 0, cleanSheets: 0, yellowCards: 0, redCards: 0, careerAppearances: 0, careerGoals: 0, careerAssists: 0, careerCleanSheets: 0 }, history: [] },
           ],
+          staff: [],
         });
       }
 

@@ -47,24 +47,28 @@ describe('SeasonManager', () => {
         name: 'Team A',
         budget: 1000000,
         players: createPlayers(),
+        staff: [],
       },
       {
         id: 'team-2',
         name: 'Team B',
         budget: 900000,
         players: createPlayers(),
+        staff: [],
       },
       {
         id: 'team-3',
         name: 'Team C',
         budget: 800000,
         players: createPlayers(),
+        staff: [],
       },
       {
         id: 'team-4',
         name: 'Team D',
         budget: 700000,
         players: createPlayers(),
+        staff: [],
       },
     ];
   });
@@ -84,6 +88,7 @@ describe('SeasonManager', () => {
         name: `Team ${i}`,
         budget: 1000000,
         players: [],
+        staff: [],
       }));
 
       const fixtures = manager.generateFixtures(largeLeague);
@@ -115,10 +120,11 @@ describe('SeasonManager', () => {
     it('should distribute fixtures across correct number of weeks', () => {
       const fixtures = manager.generateFixtures(testTeams);
 
-      // 4 teams = (4-1)*2 = 6 weeks
+      // 4 teams = (4-1)*2 = 6 weeks, starting from week 8
       const weeks = new Set(fixtures.map((f) => f.week));
       expect(weeks.size).toBe(6);
-      expect(Math.max(...weeks)).toBe(6);
+      expect(Math.max(...weeks)).toBe(13); // weeks 8-13
+      expect(Math.min(...weeks)).toBe(8); // starts at week 8
     });
 
     it('should mark all fixtures as unplayed initially', () => {
@@ -163,18 +169,18 @@ describe('SeasonManager', () => {
     });
 
     it('should return fixtures for specific week', () => {
-      const week1Fixtures = manager.getFixturesForWeek(fixtures, 1);
+      const week8Fixtures = manager.getFixturesForWeek(fixtures, 8);
 
-      week1Fixtures.forEach((fixture) => {
-        expect(fixture.week).toBe(1);
+      week8Fixtures.forEach((fixture) => {
+        expect(fixture.week).toBe(8);
       });
     });
 
     it('should return correct number of fixtures per week for 4 teams', () => {
-      const week1Fixtures = manager.getFixturesForWeek(fixtures, 1);
+      const week8Fixtures = manager.getFixturesForWeek(fixtures, 8);
 
       // 4 teams = 2 matches per week
-      expect(week1Fixtures.length).toBe(2);
+      expect(week8Fixtures.length).toBe(2);
     });
 
     it('should return empty array for non-existent week', () => {
@@ -185,7 +191,8 @@ describe('SeasonManager', () => {
     it('should return all fixtures for valid weeks', () => {
       let totalFixtures = 0;
 
-      for (let week = 1; week <= 6; week++) {
+      // Weeks 8-13 for 4 teams (6 weeks total)
+      for (let week = 8; week <= 13; week++) {
         const weekFixtures = manager.getFixturesForWeek(fixtures, week);
         totalFixtures += weekFixtures.length;
       }
@@ -202,36 +209,36 @@ describe('SeasonManager', () => {
     });
 
     it('should simulate all matches for a week', () => {
-      const result = manager.simulateWeek(fixtures, testTeams, 1, simulator);
+      const result = manager.simulateWeek(fixtures, testTeams, 8, simulator);
 
-      expect(result.results.length).toBe(2); // 2 matches in week 1
+      expect(result.results.length).toBe(2); // 2 matches in week 8
       expect(result.updatedFixtures.length).toBe(fixtures.length);
     });
 
     it('should mark fixtures as played', () => {
-      const result = manager.simulateWeek(fixtures, testTeams, 1, simulator);
+      const result = manager.simulateWeek(fixtures, testTeams, 8, simulator);
 
-      const week1Fixtures = manager.getFixturesForWeek(result.updatedFixtures, 1);
+      const week8Fixtures = manager.getFixturesForWeek(result.updatedFixtures, 8);
 
-      week1Fixtures.forEach((fixture) => {
+      week8Fixtures.forEach((fixture) => {
         expect(fixture.played).toBe(true);
         expect(fixture.result).toBeDefined();
       });
     });
 
     it('should not affect other weeks', () => {
-      const result = manager.simulateWeek(fixtures, testTeams, 1, simulator);
+      const result = manager.simulateWeek(fixtures, testTeams, 8, simulator);
 
-      const week2Fixtures = manager.getFixturesForWeek(result.updatedFixtures, 2);
+      const week9Fixtures = manager.getFixturesForWeek(result.updatedFixtures, 9);
 
-      week2Fixtures.forEach((fixture) => {
+      week9Fixtures.forEach((fixture) => {
         expect(fixture.played).toBe(false);
       });
     });
 
     it('should produce deterministic results with seed', () => {
-      const result1 = manager.simulateWeek(fixtures, testTeams, 1, simulator, 123);
-      const result2 = manager.simulateWeek(fixtures, testTeams, 1, simulator, 123);
+      const result1 = manager.simulateWeek(fixtures, testTeams, 8, simulator, 123);
+      const result2 = manager.simulateWeek(fixtures, testTeams, 8, simulator, 123);
 
       expect(result1.results).toEqual(result2.results);
     });
@@ -240,24 +247,25 @@ describe('SeasonManager', () => {
       const invalidFixtures: Fixture[] = [
         {
           id: 'invalid-1',
-          week: 1,
+          week: 8,
           homeTeamId: 'unknown-team',
           awayTeamId: 'team-2',
           played: false,
+          matchType: 'competitive',
         },
       ];
 
       expect(() =>
-        manager.simulateWeek(invalidFixtures, testTeams, 1, simulator)
+        manager.simulateWeek(invalidFixtures, testTeams, 8, simulator)
       ).toThrow('Team not found');
     });
 
     it('should attach results to correct fixtures', () => {
-      const result = manager.simulateWeek(fixtures, testTeams, 1, simulator);
+      const result = manager.simulateWeek(fixtures, testTeams, 8, simulator);
 
-      const week1Fixtures = manager.getFixturesForWeek(result.updatedFixtures, 1);
+      const week8Fixtures = manager.getFixturesForWeek(result.updatedFixtures, 8);
 
-      week1Fixtures.forEach((fixture) => {
+      week8Fixtures.forEach((fixture) => {
         expect(fixture.result).toBeDefined();
         expect(fixture.result!.homeScore).toBeGreaterThanOrEqual(0);
         expect(fixture.result!.awayScore).toBeGreaterThanOrEqual(0);
@@ -277,15 +285,15 @@ describe('SeasonManager', () => {
     });
 
     it('should return false when some matches played', () => {
-      const result = manager.simulateWeek(fixtures, testTeams, 1, simulator);
+      const result = manager.simulateWeek(fixtures, testTeams, 8, simulator);
       expect(manager.isSeasonComplete(result.updatedFixtures)).toBe(false);
     });
 
     it('should return true when all matches played', () => {
       let updatedFixtures = fixtures;
 
-      // Simulate all 6 weeks
-      for (let week = 1; week <= 6; week++) {
+      // Simulate all 6 weeks (weeks 8-13 for 4 teams)
+      for (let week = 8; week <= 13; week++) {
         const result = manager.simulateWeek(updatedFixtures, testTeams, week, simulator);
         updatedFixtures = result.updatedFixtures;
       }
@@ -305,29 +313,30 @@ describe('SeasonManager', () => {
       fixtures = manager.generateFixtures(testTeams);
     });
 
-    it('should return 1 for new season', () => {
-      expect(manager.getCurrentWeek(fixtures)).toBe(1);
+    it('should return 8 for new season', () => {
+      expect(manager.getCurrentWeek(fixtures)).toBe(8);
     });
 
     it('should return next unplayed week', () => {
-      let updatedFixtures = manager.simulateWeek(fixtures, testTeams, 1, simulator)
+      let updatedFixtures = manager.simulateWeek(fixtures, testTeams, 8, simulator)
         .updatedFixtures;
-      expect(manager.getCurrentWeek(updatedFixtures)).toBe(2);
+      expect(manager.getCurrentWeek(updatedFixtures)).toBe(9);
 
-      updatedFixtures = manager.simulateWeek(updatedFixtures, testTeams, 2, simulator)
+      updatedFixtures = manager.simulateWeek(updatedFixtures, testTeams, 9, simulator)
         .updatedFixtures;
-      expect(manager.getCurrentWeek(updatedFixtures)).toBe(3);
+      expect(manager.getCurrentWeek(updatedFixtures)).toBe(10);
     });
 
-    it('should return 1 for completed season', () => {
+    it('should return 8 for completed season', () => {
       let updatedFixtures = fixtures;
 
-      for (let week = 1; week <= 6; week++) {
+      // Simulate all 6 weeks (weeks 8-13 for 4 teams)
+      for (let week = 8; week <= 13; week++) {
         updatedFixtures = manager.simulateWeek(updatedFixtures, testTeams, week, simulator)
           .updatedFixtures;
       }
 
-      expect(manager.getCurrentWeek(updatedFixtures)).toBe(1);
+      expect(manager.getCurrentWeek(updatedFixtures)).toBe(8);
     });
   });
 
@@ -343,6 +352,7 @@ describe('SeasonManager', () => {
         name: `Team ${i}`,
         budget: 1000000,
         players: [],
+        staff: [],
       }));
 
       const fixtures = manager.generateFixtures(largeLeague);

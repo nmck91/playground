@@ -17,18 +17,21 @@ describe('LeagueTableManager', () => {
         name: 'Team A',
         budget: 1000000,
         players: [],
+        staff: [],
       },
       {
         id: 'team-2',
         name: 'Team B',
         budget: 900000,
         players: [],
+        staff: [],
       },
       {
         id: 'team-3',
         name: 'Team C',
         budget: 800000,
         players: [],
+        staff: [],
       },
     ];
   });

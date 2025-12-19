@@ -43,6 +43,7 @@ describe('TransferMarket', () => {
       name: 'Test FC',
       budget: 1000000,
       players: [testPlayer],
+      staff: [],
     };
   });
 
@@ -114,6 +115,7 @@ describe('TransferMarket', () => {
           stats: statsTracker.initializePlayerStats(),
           history: [],
         })),
+        staff: [],
       }));
     });
 
@@ -152,6 +154,7 @@ describe('TransferMarket', () => {
             stats: statsTracker.initializePlayerStats(),
             history: [],
           })),
+          staff: [],
         },
       ];
 
@@ -191,6 +194,7 @@ describe('TransferMarket', () => {
           stats: statsTracker.initializePlayerStats(),
           history: [],
         })),
+        staff: [],
       };
 
       seller = {
@@ -210,6 +214,7 @@ describe('TransferMarket', () => {
             history: [],
           })),
         ],
+        staff: [],
       };
 
       listing = {
@@ -223,7 +228,7 @@ describe('TransferMarket', () => {
     });
 
     it('should successfully buy player with sufficient budget', () => {
-      const result = market.buyPlayer(listing, buyer, seller, [listing]);
+      const result = market.buyPlayer(listing, buyer, seller, [listing], 5);
 
       expect(result.success).toBe(true);
       expect(result.updatedBuyerTeam).toBeDefined();
@@ -232,7 +237,7 @@ describe('TransferMarket', () => {
     });
 
     it('should update buyer squad and budget', () => {
-      const result = market.buyPlayer(listing, buyer, seller, [listing]);
+      const result = market.buyPlayer(listing, buyer, seller, [listing], 5);
 
       expect(result.updatedBuyerTeam!.players).toHaveLength(12);
       expect(result.updatedBuyerTeam!.budget).toBe(200000); // 500k - 300k
@@ -240,7 +245,7 @@ describe('TransferMarket', () => {
     });
 
     it('should update seller squad and budget', () => {
-      const result = market.buyPlayer(listing, buyer, seller, [listing]);
+      const result = market.buyPlayer(listing, buyer, seller, [listing], 5);
 
       expect(result.updatedSellerTeam!.players).toHaveLength(11);
       expect(result.updatedSellerTeam!.budget).toBe(500000); // 200k + 300k
@@ -248,14 +253,14 @@ describe('TransferMarket', () => {
     });
 
     it('should remove listing from market', () => {
-      const result = market.buyPlayer(listing, buyer, seller, [listing]);
+      const result = market.buyPlayer(listing, buyer, seller, [listing], 5);
 
       expect(result.updatedListings).toHaveLength(0);
     });
 
     it('should fail with insufficient budget', () => {
       const poorBuyer = { ...buyer, budget: 100000 };
-      const result = market.buyPlayer(listing, poorBuyer, seller, [listing]);
+      const result = market.buyPlayer(listing, poorBuyer, seller, [listing], 5);
 
       expect(result.success).toBe(false);
       expect(result.message).toContain('Insufficient budget');
@@ -277,7 +282,7 @@ describe('TransferMarket', () => {
         })),
       };
 
-      const result = market.buyPlayer(listing, fullSquad, seller, [listing]);
+      const result = market.buyPlayer(listing, fullSquad, seller, [listing], 5);
 
       expect(result.success).toBe(false);
       expect(result.message).toContain('Squad full');
@@ -317,6 +322,7 @@ describe('TransferMarket', () => {
             history: [],
           })),
         ],
+        staff: [],
       };
     });
 
@@ -400,7 +406,10 @@ describe('TransferMarket', () => {
           skill: 10,
           age: 25,
           wages: 3000,
+          stats: statsTracker.initializePlayerStats(),
+          history: [],
         })),
+        staff: [],
       }));
 
       listings = [
@@ -413,6 +422,8 @@ describe('TransferMarket', () => {
             skill: 12,
             age: 24,
             wages: 4000,
+            stats: statsTracker.initializePlayerStats(),
+            history: [],
           },
           sellingTeamId: 'team-0',
           sellingTeamName: 'Team 0',
@@ -423,7 +434,7 @@ describe('TransferMarket', () => {
     });
 
     it('should return updated teams and listings', () => {
-      const result = market.simulateAITransfers(aiTeams, listings);
+      const result = market.simulateAITransfers(aiTeams, listings, 5);
 
       expect(result.updatedTeams).toBeDefined();
       expect(result.updatedListings).toBeDefined();
@@ -432,7 +443,7 @@ describe('TransferMarket', () => {
 
     it('should not modify teams if no transfers occur', () => {
       const emptyListings: TransferListing[] = [];
-      const result = market.simulateAITransfers(aiTeams, emptyListings);
+      const result = market.simulateAITransfers(aiTeams, emptyListings, 5);
 
       expect(result.updatedTeams.length).toBe(aiTeams.length);
       expect(result.updatedListings.length).toBe(0);
