@@ -32,6 +32,9 @@ jobs:
           node-version: 22
           cache: 'npm'
 
+      # Upgrade to npm 11.x to match local environment
+      - run: npm install -g npm@11
+
       - run: npm ci
       - run: npx playwright install --with-deps
 
