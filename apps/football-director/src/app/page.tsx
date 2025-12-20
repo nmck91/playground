@@ -340,6 +340,20 @@ export default function Dashboard() {
               {showMoreMenu && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-10">
                   <Link
+                    href="/table"
+                    className="block px-4 py-3 hover:bg-gray-50 transition-normal border-b border-gray-100"
+                    onClick={() => setShowMoreMenu(false)}
+                  >
+                    <span className="mr-2">📋</span> Table
+                  </Link>
+                  <Link
+                    href="/stats"
+                    className="block px-4 py-3 hover:bg-gray-50 transition-normal border-b border-gray-100"
+                    onClick={() => setShowMoreMenu(false)}
+                  >
+                    <span className="mr-2">📊</span> Stats
+                  </Link>
+                  <Link
                     href="/staff"
                     className="block px-4 py-3 hover:bg-gray-50 transition-normal border-b border-gray-100"
                     onClick={() => setShowMoreMenu(false)}
@@ -353,7 +367,7 @@ export default function Dashboard() {
                     }}
                     className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-normal border-b border-gray-100"
                   >
-                    <span className="mr-2">📊</span> Records
+                    <span className="mr-2">🏅</span> Records
                   </button>
                   <button
                     onClick={() => {
