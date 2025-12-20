@@ -150,20 +150,21 @@ export default function FixturesPage() {
     <div className="min-h-screen bg-cream-50">
       {/* Header */}
       <header className="bg-teal-500 text-cream-100 shadow-lg">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/"
-              className="text-cream-100 hover:text-white transition-normal"
-            >
-              ← Back
-            </Link>
+        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">
+          <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold">Fixtures</h1>
-              <p className="text-teal-100 mt-2">
+              <h1 className="text-2xl md:text-4xl font-bold">Fixtures</h1>
+              <p className="text-teal-100 mt-1 md:mt-2 text-sm md:text-base">
                 Season {gameState.season.year} - Week {gameState.season.currentWeek}
               </p>
             </div>
+            <Link
+              href="/"
+              className="bg-white text-teal-600 hover:bg-teal-50 font-medium px-3 md:px-6 py-2 md:py-3 rounded-lg shadow-sm transition-normal text-sm md:text-base"
+            >
+              <span className="hidden md:inline">← Back to Dashboard</span>
+              <span className="md:hidden">← Back</span>
+            </Link>
           </div>
         </div>
       </header>
