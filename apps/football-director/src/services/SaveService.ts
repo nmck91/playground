@@ -131,7 +131,7 @@ export class SaveService {
       this.migrateOldSave();
 
       const serialized = localStorage.getItem(SAVES_KEY);
-      if (!serialized) {
+      if (!serialized || serialized.trim() === '') {
         return {};
       }
 
@@ -465,7 +465,7 @@ export class SaveService {
       const newSaves = localStorage.getItem(SAVES_KEY);
 
       // Only migrate if old save exists and new saves don't
-      if (oldSave && !newSaves) {
+      if (oldSave && oldSave.trim() !== '' && !newSaves) {
         const gameState = JSON.parse(oldSave);
 
         // Convert dates
