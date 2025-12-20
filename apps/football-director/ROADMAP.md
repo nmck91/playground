@@ -918,6 +918,15 @@ This document outlines potential features and improvements for the Football Dire
 - Season awards
 - Trophy display
 
+### ✅ Fixtures Page
+- View all upcoming and past fixtures
+- Filter by competition type (All/League/Friendlies)
+- Form guide badges showing last 5 results (W/D/L)
+- Color-coded results (Green=Win, Orange=Draw, Red=Loss)
+- Highlight player's team fixtures
+- Mobile-responsive layout
+- Quick access from dashboard
+
 ---
 
 ## Implementation Priority
@@ -960,4 +969,4 @@ When implementing features from this roadmap:
 
 ---
 
-*Last Updated: 2025-12-19*
+*Last Updated: 2025-12-20*
