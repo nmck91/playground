@@ -1,7 +1,7 @@
 'use client';
 
 import { useGameState } from '../../hooks/useGameState';
-import { Player, Team } from '@playground/football-director-engine';
+import { Player } from '@playground/football-director-engine';
 import Link from 'next/link';
 import { useState } from 'react';
 
