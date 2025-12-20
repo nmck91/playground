@@ -298,7 +298,7 @@ export default function Dashboard() {
           </button>
 
           {/* Quick Actions Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             <Link
               href="/squad"
               className="bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-medium px-4 py-3 rounded-lg shadow-sm transition-all text-center"
@@ -312,6 +312,13 @@ export default function Dashboard() {
             >
               <div className="text-2xl mb-1">💰</div>
               <div className="text-sm">Transfers</div>
+            </Link>
+            <Link
+              href="/fixtures"
+              className="bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium px-4 py-3 rounded-lg shadow-sm transition-all text-center"
+            >
+              <div className="text-2xl mb-1">📅</div>
+              <div className="text-sm">Fixtures</div>
             </Link>
             <button
               onClick={() => setShowTactics(true)}
