@@ -17,6 +17,8 @@ import { TacticsManager } from '../components/game/TacticsManager';
 import { SaveSlotManager } from '../components/saves/SaveSlotManager';
 import { YouthAcademyModal } from '../components/game/YouthAcademyModal';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
+import { CollapsibleSection } from '../components/ui/CollapsibleSection';
+import { GradientButton } from '../components/ui/GradientButton';
 import Link from 'next/link';
 
 export default function Dashboard() {
@@ -178,242 +180,166 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8 pb-safe">
-        {/* Season Info */}
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-6 mb-8 border border-gray-200 dark:border-dark-border-primary">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
-            <div>
-              <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Season</div>
-              <div className="text-2xl font-bold text-slate-900 dark:text-dark-text-primary">
-                {gameState.season.year}
-              </div>
-            </div>
-            <div>
-              <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Week</div>
-              <div className="text-2xl font-bold text-slate-900 dark:text-dark-text-primary">
-                {gameState.season.currentWeek} / {gameState.season.totalWeeks}
-              </div>
-              <div className="text-xs mt-1">
-                {gameState.season.phase === 'pre-season' ? (
-                  <span className="text-purple-600 font-semibold">🏋️ Pre-Season</span>
-                ) : gameState.season.phase === 'competitive' ? (
-                  <span className="text-green-600 font-semibold">⚽ Match Week</span>
-                ) : (
-                  <span className="text-blue-600 font-semibold">🏖️ Off-Season</span>
-                )}
-              </div>
-            </div>
-            <div>
-              <div className="text-sm text-slate-500 mb-1">Transfer Window</div>
-              <div className="text-lg font-bold">
-                {gameState.season.transferWindow === 'open' ? (
-                  <span className="text-green-600">✅ Open</span>
-                ) : (
-                  <span className="text-red-600">🔒 Closed</span>
-                )}
-              </div>
-              <div className="text-xs mt-1 text-slate-600">
-                {gameState.season.transferWindow === 'closed' && gameState.season.phase === 'competitive' && gameState.season.currentWeek < 28 && (
-                  <span>Winter: Weeks 28-32</span>
-                )}
-                {gameState.season.transferWindow === 'open' && gameState.season.phase === 'pre-season' && (
-                  <span>Closes: Week 9</span>
-                )}
-                {gameState.season.transferWindow === 'open' && gameState.season.phase === 'competitive' && (
-                  <span>Closes: Week 33</span>
-                )}
-              </div>
-            </div>
-            <div>
-              <div className="text-sm text-slate-500 mb-1">League Position</div>
-              <div className="text-2xl font-bold text-teal-600">
-                {playerPosition}
-                {playerPosition === 1 && '🏆'}
-              </div>
-            </div>
-            <div>
-              <div className="text-sm text-slate-500 mb-1">Budget</div>
-              <div className="text-2xl font-bold text-slate-900">
-                £{gameState.finances.budget.toLocaleString()}
-              </div>
-            </div>
+      <main className="max-w-7xl mx-auto px-4 py-6 pb-safe">
+        {/* Hero: League Position (Priority #1 on mobile) */}
+        <div className="bg-gradient-to-br from-teal-500 to-teal-600 dark:from-dark-teal-600 dark:to-dark-teal-600 rounded-xl p-6 text-white shadow-lg mb-4">
+          <div className="text-sm font-medium text-teal-100 dark:text-dark-text-secondary mb-1">League Position</div>
+          <div className="text-5xl font-bold mb-2">
+            {playerPosition}
+            {playerPosition === 1 && ' 🏆'}
+          </div>
+          <div className="text-teal-100 dark:text-dark-text-secondary">
+            {gameState.playerTeam.name} • Season {gameState.season.year}
           </div>
         </div>
 
-        {/* Board Status */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-2xl font-semibold text-slate-900 mb-4">
-            Board Status
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div>
-              <div className="text-sm text-slate-500 mb-1">Season Objective</div>
-              <div className="text-base font-medium text-slate-900 mb-2">
-                {gameState.boardStatus.currentObjective?.description}
-              </div>
-              <div className={`text-sm font-semibold ${getObjectiveStatusColor(gameState.boardStatus.currentObjective?.status || '')}`}>
-                Status: {gameState.boardStatus.currentObjective?.status.toUpperCase().replace('-', ' ')}
-              </div>
+        {/* Secondary Stats (2 columns on mobile, 4 on desktop) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-4 border border-gray-200 dark:border-dark-border-primary">
+            <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Week</div>
+            <div className="text-2xl font-bold text-slate-900 dark:text-dark-text-primary">
+              {gameState.season.currentWeek}/{gameState.season.totalWeeks}
             </div>
-            <div>
-              <div className="text-sm text-slate-500 mb-1">Board Satisfaction</div>
-              <div className="flex items-center gap-3">
-                <div className="flex-1 bg-gray-200 rounded-full h-4">
-                  <div
-                    className={`h-4 rounded-full transition-all ${
-                      gameState.boardStatus.satisfaction >= 60
-                        ? 'bg-green-500'
-                        : gameState.boardStatus.satisfaction >= 35
-                        ? 'bg-orange-500'
-                        : 'bg-red-500'
-                    }`}
-                    style={{ width: `${gameState.boardStatus.satisfaction}%` }}
-                  />
-                </div>
-                <div className="text-lg font-bold text-slate-900">
-                  {gameState.boardStatus.satisfaction}%
-                </div>
-              </div>
-            </div>
-            <div>
-              <div className="text-sm text-slate-500 mb-1">Job Security</div>
-              <div className={`text-2xl font-bold ${getJobSecurityColor(gameState.boardStatus.jobSecurity)}`}>
-                {gameState.boardStatus.jobSecurity === 'safe' && '✅ SAFE'}
-                {gameState.boardStatus.jobSecurity === 'under-pressure' && '⚠️ UNDER PRESSURE'}
-                {gameState.boardStatus.jobSecurity === 'critical' && '🚨 CRITICAL'}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Primary Actions */}
-        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6">
-          <button
-            onClick={actions.simulateNextWeek}
-            disabled={isSeasonComplete}
-            className="w-full bg-teal-500 hover:bg-teal-600 text-white font-bold text-lg px-8 py-4 rounded-lg shadow-md transition-normal disabled:opacity-50 disabled:cursor-not-allowed mb-4"
-          >
-            {isSeasonComplete
-              ? '✅ Season Complete'
-              : gameState.season.phase === 'pre-season' && [4, 5, 6].includes(gameState.season.currentWeek)
-              ? '⚽ Play Friendly'
-              : gameState.season.phase === 'pre-season'
-              ? '▶️ Continue Pre-Season'
-              : gameState.season.phase === 'off-season'
-              ? '▶️ Continue Off-Season'
-              : '▶️ Simulate Next Week'}
-          </button>
-
-          {/* Quick Actions Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <Link
-              href="/squad"
-              className="bg-gradient-to-br from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white font-medium px-4 py-3 rounded-lg shadow-sm transition-all text-center"
-            >
-              <div className="text-2xl mb-1">👥</div>
-              <div className="text-sm">Squad</div>
-            </Link>
-            <Link
-              href="/transfers"
-              className="bg-gradient-to-br from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium px-4 py-3 rounded-lg shadow-sm transition-all text-center"
-            >
-              <div className="text-2xl mb-1">💰</div>
-              <div className="text-sm">Transfers</div>
-            </Link>
-            <Link
-              href="/fixtures"
-              className="bg-gradient-to-br from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white font-medium px-4 py-3 rounded-lg shadow-sm transition-all text-center"
-            >
-              <div className="text-2xl mb-1">📅</div>
-              <div className="text-sm">Fixtures</div>
-            </Link>
-            <button
-              onClick={() => setShowTactics(true)}
-              className="bg-gradient-to-br from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-medium px-4 py-3 rounded-lg shadow-sm transition-all text-center"
-            >
-              <div className="text-2xl mb-1">⚙️</div>
-              <div className="text-sm">Tactics</div>
-            </button>
-            <div className="relative">
-              <button
-                onClick={() => setShowMoreMenu(!showMoreMenu)}
-                className="w-full bg-gradient-to-br from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-medium px-4 py-3 rounded-lg shadow-sm transition-all text-center"
-              >
-                <div className="text-2xl mb-1">⋯</div>
-                <div className="text-sm">More</div>
-              </button>
-
-              {/* Dropdown Menu */}
-              {showMoreMenu && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 z-10">
-                  <Link
-                    href="/table"
-                    className="block px-4 py-3 hover:bg-gray-50 transition-normal border-b border-gray-100"
-                    onClick={() => setShowMoreMenu(false)}
-                  >
-                    <span className="mr-2">📋</span> Table
-                  </Link>
-                  <Link
-                    href="/stats"
-                    className="block px-4 py-3 hover:bg-gray-50 transition-normal border-b border-gray-100"
-                    onClick={() => setShowMoreMenu(false)}
-                  >
-                    <span className="mr-2">📊</span> Stats
-                  </Link>
-                  <Link
-                    href="/staff"
-                    className="block px-4 py-3 hover:bg-gray-50 transition-normal border-b border-gray-100"
-                    onClick={() => setShowMoreMenu(false)}
-                  >
-                    <span className="mr-2">👔</span> Staff
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setShowRecords(true);
-                      setShowMoreMenu(false);
-                    }}
-                    className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-normal border-b border-gray-100"
-                  >
-                    <span className="mr-2">🏅</span> Records
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowTrophyCabinet(true);
-                      setShowMoreMenu(false);
-                    }}
-                    className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-normal border-b border-gray-100"
-                  >
-                    <span className="mr-2">🏆</span> Trophies
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowNewsFeed(true);
-                      setShowMoreMenu(false);
-                    }}
-                    className="w-full text-left px-4 py-3 hover:bg-gray-50 transition-normal border-b border-gray-100 relative"
-                  >
-                    <span className="mr-2">📰</span> News
-                    {gameState.newsFeed.filter(n => !n.read).length > 0 && (
-                      <span className="absolute right-3 top-3 bg-red-500 text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
-                        {gameState.newsFeed.filter(n => !n.read).length}
-                      </span>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm('Delete this save? This cannot be undone.')) {
-                        actions.deleteSave();
-                      }
-                      setShowMoreMenu(false);
-                    }}
-                    className="w-full text-left px-4 py-3 hover:bg-red-50 text-red-600 font-semibold transition-normal rounded-b-lg"
-                  >
-                    <span className="mr-2">🗑️</span> Delete Save
-                  </button>
-                </div>
+            <div className="text-xs mt-1">
+              {gameState.season.phase === 'pre-season' ? (
+                <span className="text-purple-600 dark:text-purple-400 font-semibold">🏋️ Pre-Season</span>
+              ) : gameState.season.phase === 'competitive' ? (
+                <span className="text-green-600 dark:text-green-400 font-semibold">⚽ Match Week</span>
+              ) : (
+                <span className="text-blue-600 dark:text-blue-400 font-semibold">🏖️ Off-Season</span>
               )}
             </div>
           </div>
+
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-4 border border-gray-200 dark:border-dark-border-primary">
+            <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Budget</div>
+            <div className="text-2xl font-bold text-slate-900 dark:text-dark-text-primary">
+              £{(gameState.finances.budget / 1000000).toFixed(1)}M
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-4 border border-gray-200 dark:border-dark-border-primary">
+            <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Transfers</div>
+            <div className="text-lg font-bold">
+              {gameState.season.transferWindow === 'open' ? (
+                <span className="text-green-600 dark:text-green-400">✅ Open</span>
+              ) : (
+                <span className="text-red-600 dark:text-red-400">🔒 Closed</span>
+              )}
+            </div>
+          </div>
+
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-4 border border-gray-200 dark:border-dark-border-primary">
+            <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Job Security</div>
+            <div className="text-base font-bold">
+              {gameState.boardStatus.jobSecurity === 'safe' && <span className="text-green-600 dark:text-green-400">✅ Safe</span>}
+              {gameState.boardStatus.jobSecurity === 'under-pressure' && <span className="text-orange-600 dark:text-orange-400">⚠️ Pressure</span>}
+              {gameState.boardStatus.jobSecurity === 'critical' && <span className="text-red-600 dark:text-red-400">🚨 Critical</span>}
+            </div>
+          </div>
+        </div>
+
+        {/* Simulate Button (Full-Width, Bold) */}
+        <button
+          onClick={actions.simulateNextWeek}
+          disabled={isSeasonComplete}
+          className="w-full h-16 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 dark:from-green-600 dark:to-emerald-700 text-white text-lg font-bold rounded-xl shadow-lg active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-6"
+        >
+          {isSeasonComplete
+            ? '✅ Season Complete'
+            : gameState.season.phase === 'pre-season' && [4, 5, 6].includes(gameState.season.currentWeek)
+            ? '⚽ Play Friendly'
+            : gameState.season.phase === 'pre-season'
+            ? '▶️ Continue Pre-Season'
+            : gameState.season.phase === 'off-season'
+            ? '▶️ Continue Off-Season'
+            : '⚽ Simulate Next Week'}
+        </button>
+
+        {/* Quick Actions (Vertical on mobile, grid on desktop) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+          <GradientButton
+            icon="👥"
+            label="Squad"
+            href="/squad"
+            gradient="from-gradient-squad-from to-gradient-squad-to"
+          />
+          <GradientButton
+            icon="⚽"
+            label="Matches"
+            href="/fixtures"
+            gradient="from-gradient-matches-from to-gradient-matches-to"
+          />
+          <GradientButton
+            icon="💰"
+            label="Transfers"
+            href="/transfers"
+            gradient="from-gradient-transfers-from to-gradient-transfers-to"
+          />
+          <GradientButton
+            icon="📋"
+            label="Tactics"
+            href="/tactics"
+            gradient="from-gradient-tactics-from to-gradient-tactics-to"
+            onClick={() => setShowTactics(true)}
+          />
+          <GradientButton
+            icon="📊"
+            label="League Table"
+            href="/table"
+            gradient="from-teal-500 to-teal-600"
+          />
+          <GradientButton
+            icon="📈"
+            label="Statistics"
+            href="/stats"
+            gradient="from-purple-500 to-purple-600"
+          />
+        </div>
+
+        {/* Board Status (Collapsible on mobile) */}
+        <div className="mb-6">
+          <CollapsibleSection title="Board Status" defaultOpen={false}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+              <div>
+                <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Season Objective</div>
+                <div className="text-base font-medium text-slate-900 dark:text-dark-text-primary mb-2">
+                  {gameState.boardStatus.currentObjective?.description}
+                </div>
+                <div className={`text-sm font-semibold ${getObjectiveStatusColor(gameState.boardStatus.currentObjective?.status || '')}`}>
+                  Status: {gameState.boardStatus.currentObjective?.status.toUpperCase().replace('-', ' ')}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Board Satisfaction</div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 bg-gray-200 dark:bg-dark-bg-tertiary rounded-full h-4">
+                    <div
+                      className={`h-4 rounded-full transition-all ${
+                        gameState.boardStatus.satisfaction >= 60
+                          ? 'bg-green-500'
+                          : gameState.boardStatus.satisfaction >= 35
+                          ? 'bg-orange-500'
+                          : 'bg-red-500'
+                      }`}
+                      style={{ width: `${gameState.boardStatus.satisfaction}%` }}
+                    />
+                  </div>
+                  <div className="text-lg font-bold text-slate-900 dark:text-dark-text-primary">
+                    {gameState.boardStatus.satisfaction}%
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Job Security</div>
+                <div className={`text-xl font-bold ${getJobSecurityColor(gameState.boardStatus.jobSecurity)}`}>
+                  {gameState.boardStatus.jobSecurity === 'safe' && '✅ SAFE'}
+                  {gameState.boardStatus.jobSecurity === 'under-pressure' && '⚠️ UNDER PRESSURE'}
+                  {gameState.boardStatus.jobSecurity === 'critical' && '🚨 CRITICAL'}
+                </div>
+              </div>
+            </div>
+          </CollapsibleSection>
         </div>
 
         {/* Top Performers Widget */}
@@ -432,104 +358,64 @@ export default function Dashboard() {
           onNewsClick={() => setShowNewsFeed(true)}
         />
 
-        {/* League Table */}
-        <Link href="/table" className="block">
-          <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold text-slate-900">
-                League Table
-              </h2>
-              <span className="text-sm text-teal-600 hover:text-teal-700 font-medium">
-                View Full Table →
-              </span>
+        {/* League Table (Collapsible) */}
+        <div className="mb-6">
+          <CollapsibleSection title="League Table" defaultOpen={true}>
+            <div className="pt-4">
+              <Link href="/table" className="block mb-3 text-right">
+                <span className="text-sm text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium">
+                  View Full Table →
+                </span>
+              </Link>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b-2 border-gray-200 dark:border-dark-border-primary">
+                      <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Pos</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Team</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">P</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">W</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">D</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">L</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">GF</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">GA</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">GD</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {condensedTable.map((entry) => {
+                      const position = sortedTable.findIndex(t => t.teamId === entry.teamId) + 1;
+                      return (
+                        <tr
+                          key={entry.teamId}
+                          className={`border-b border-gray-100 dark:border-dark-border-secondary ${
+                            entry.teamId === gameState.playerTeam.id
+                              ? 'bg-teal-50 dark:bg-dark-teal-50 font-semibold'
+                              : ''
+                          }`}
+                        >
+                          <td className="py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{position}</td>
+                          <td className="py-3 px-4 text-sm text-slate-900 dark:text-dark-text-primary">{entry.teamName}</td>
+                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.played}</td>
+                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.won}</td>
+                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.drawn}</td>
+                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.lost}</td>
+                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.goalsFor}</td>
+                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.goalsAgainst}</td>
+                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">
+                            {entry.goalDifference > 0 ? '+' : ''}{entry.goalDifference}
+                          </td>
+                          <td className="text-center py-3 px-2 text-sm font-bold text-teal-600 dark:text-teal-400">{entry.points}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b-2 border-gray-200">
-                    <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700">
-                      Pos
-                    </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">
-                      Team
-                    </th>
-                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
-                      P
-                    </th>
-                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
-                      W
-                    </th>
-                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
-                      D
-                    </th>
-                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
-                      L
-                    </th>
-                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
-                      GF
-                    </th>
-                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
-                      GA
-                    </th>
-                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
-                      GD
-                    </th>
-                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
-                      Pts
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {condensedTable.map((entry) => {
-                    const position = sortedTable.findIndex(t => t.teamId === entry.teamId) + 1;
-                    return (
-                      <tr
-                        key={entry.teamId}
-                        className={`border-b border-gray-100 ${
-                          entry.teamId === gameState.playerTeam.id
-                            ? 'bg-teal-50 font-semibold'
-                            : ''
-                        }`}
-                      >
-                        <td className="py-3 px-2 text-sm text-slate-700">
-                          {position}
-                        </td>
-                        <td className="py-3 px-4 text-sm text-slate-900">
-                          {entry.teamName}
-                        </td>
-                        <td className="text-center py-3 px-2 text-sm text-slate-700">
-                          {entry.played}
-                        </td>
-                        <td className="text-center py-3 px-2 text-sm text-slate-700">
-                          {entry.won}
-                        </td>
-                        <td className="text-center py-3 px-2 text-sm text-slate-700">
-                          {entry.drawn}
-                        </td>
-                        <td className="text-center py-3 px-2 text-sm text-slate-700">
-                          {entry.lost}
-                        </td>
-                        <td className="text-center py-3 px-2 text-sm text-slate-700">
-                          {entry.goalsFor}
-                        </td>
-                        <td className="text-center py-3 px-2 text-sm text-slate-700">
-                          {entry.goalsAgainst}
-                        </td>
-                        <td className="text-center py-3 px-2 text-sm text-slate-700">
-                          {entry.goalDifference > 0 ? '+' : ''}
-                          {entry.goalDifference}
-                        </td>
-                        <td className="text-center py-3 px-2 text-sm font-bold text-teal-600">
-                          {entry.points}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </Link>
+          </CollapsibleSection>
+        </div>
       </main>
 
       {/* Match Highlights Modal */}
