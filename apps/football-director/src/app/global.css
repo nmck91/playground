@@ -36,4 +36,31 @@
   .pb-safe {
     padding-bottom: calc(theme('spacing.20') + env(safe-area-inset-bottom));
   }
+
+  /* Micro-interaction utilities */
+  .active\:scale-98:active {
+    transform: scale(0.98);
+  }
+
+  .active\:scale-95:active {
+    transform: scale(0.95);
+  }
+
+  .hover\:scale-102:hover {
+    transform: scale(1.02);
+  }
+
+  /* Transition utilities */
+  .transition-normal {
+    transition-property: all;
+    transition-duration: 250ms;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+@layer base {
+  /* Focus-visible styles for accessibility */
+  :focus-visible {
+    @apply outline-none ring-2 ring-teal-500 ring-offset-2 dark:ring-teal-400 dark:ring-offset-dark-bg-primary;
+  }
 }
