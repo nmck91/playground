@@ -30,9 +30,16 @@ import {
   Staff,
   StaffManager,
   InjuryManager,
+  ContractManager,
+  AIContractManager,
   TacticsManager,
   FormationType,
   Mentality,
+  YouthAcademyManager,
+  MoraleManager,
+  MatchPreviewGenerator,
+  MatchPreview,
+  PostMatchGenerator,
 } from '@playground/football-director-engine';
 import { SaveService } from '../services/SaveService';
 
@@ -52,6 +59,7 @@ export function useGameState() {
     seasonAwards?: SeasonAward;
   } | null>(null);
   const [pendingAchievements, setPendingAchievements] = useState<Achievement[]>([]);
+  const [youthProspects, setYouthProspects] = useState<Player[]>([]);
 
   // Load game on mount
   useEffect(() => {
@@ -125,6 +133,8 @@ export function useGameState() {
       const seasonManager = new SeasonManager();
       const statsTracker = new PlayerStatsTracker();
       const injuryManager = new InjuryManager();
+      const contractManager = new ContractManager();
+      const moraleManager = new MoraleManager();
 
       const currentWeek = gameState.season.currentWeek;
       const hasMatches = seasonManager.hasMatchesThisWeek(currentWeek);
@@ -142,6 +152,92 @@ export function useGameState() {
         return recoveryResult.team;
       });
 
+      // Update morale for all teams
+      const playerMoraleResult = moraleManager.updateTeamMorale(
+        updatedPlayerTeam,
+        gameState.leagueTable,
+        currentWeek
+      );
+      updatedPlayerTeam = playerMoraleResult.team;
+
+      updatedAITeams = updatedAITeams.map((team) => {
+        const moraleResult = moraleManager.updateTeamMorale(
+          team,
+          gameState.leagueTable,
+          currentWeek
+        );
+        return moraleResult.team;
+      });
+
+      // Update all contracts with current status
+      updatedPlayerTeam = contractManager.updateTeamContracts(
+        updatedPlayerTeam,
+        gameState.season.year,
+        currentWeek
+      );
+
+      updatedAITeams = updatedAITeams.map(team =>
+        contractManager.updateTeamContracts(
+          team,
+          gameState.season.year,
+          currentWeek
+        )
+      );
+
+      // AI teams process contract renewals every 4 weeks during season
+      const aiContractManager = new AIContractManager();
+      if (currentWeek % 4 === 0 && currentWeek >= 8 && currentWeek <= 45) {
+        updatedAITeams = updatedAITeams.map(team =>
+          aiContractManager.processTeamContracts(
+            team,
+            gameState.season.year,
+            currentWeek
+          )
+        );
+      }
+
+      // 0b. Generate match previews for upcoming player matches (before simulation)
+      let matchPreviews: MatchPreview[] = gameState.matchPreviews || [];
+
+      if (hasMatches) {
+        const previewGen = new MatchPreviewGenerator();
+        const upcomingPlayerFixtures = gameState.fixtures.filter(
+          (f) =>
+            !f.played &&
+            f.week === currentWeek &&
+            (f.homeTeamId === updatedPlayerTeam.id || f.awayTeamId === updatedPlayerTeam.id)
+        );
+
+        // Generate previews for each upcoming player match
+        const newPreviews = upcomingPlayerFixtures.map((fixture) => {
+          const homeTeam =
+            fixture.homeTeamId === updatedPlayerTeam.id
+              ? updatedPlayerTeam
+              : updatedAITeams.find((t) => t.id === fixture.homeTeamId)!;
+          const awayTeam =
+            fixture.awayTeamId === updatedPlayerTeam.id
+              ? updatedPlayerTeam
+              : updatedAITeams.find((t) => t.id === fixture.awayTeamId)!;
+
+          // Get all played fixtures for head-to-head calculation
+          const playedFixtures = gameState.fixtures.filter((f) => f.played);
+
+          return previewGen.generatePreview(
+            fixture,
+            homeTeam,
+            awayTeam,
+            gameState.leagueTable,
+            playedFixtures,
+            currentWeek,
+            gameState.season.year,
+            gameState.season.year * 1000 + currentWeek // Seed for consistency
+          );
+        });
+
+        // Add new previews to the list (keep previous ones for reference)
+        matchPreviews = [...matchPreviews, ...newPreviews];
+      }
+
       // 1. Simulate all matches for this week (only during competitive season)
       let results: MatchResult[] = [];
       let updatedFixtures = gameState.fixtures;
@@ -155,6 +251,46 @@ export function useGameState() {
         );
         results = simulationResult.results;
         updatedFixtures = simulationResult.updatedFixtures;
+
+        // 1a. Generate post-match analysis for player matches
+        const postMatchGen = new PostMatchGenerator();
+        results = results.map((result) => {
+          const isPlayerMatch = result.homeTeam === updatedPlayerTeam.name || result.awayTeam === updatedPlayerTeam.name;
+
+          if (isPlayerMatch) {
+            // Find the teams
+            const homeTeam = result.homeTeam === updatedPlayerTeam.name
+              ? updatedPlayerTeam
+              : updatedAITeams.find((t) => t.name === result.homeTeam)!;
+            const awayTeam = result.awayTeam === updatedPlayerTeam.name
+              ? updatedPlayerTeam
+              : updatedAITeams.find((t) => t.name === result.awayTeam)!;
+
+            // Generate post-match analysis
+            const postMatchAnalysis = postMatchGen.generatePostMatchAnalysis(
+              result,
+              homeTeam,
+              awayTeam,
+              gameState.leagueTable,
+              gameState.season.year * 1000 + currentWeek // Seed for consistency
+            );
+
+            // Add teamName to player interview
+            if (postMatchAnalysis.playerInterview) {
+              postMatchAnalysis.playerInterview.teamName =
+                postMatchAnalysis.playerInterview.playerId === result.manOfMatch?.playerId
+                  ? (result.manOfMatch.team === 'home' ? result.homeTeam : result.awayTeam)
+                  : '';
+            }
+
+            return {
+              ...result,
+              postMatchAnalysis,
+            };
+          }
+
+          return result;
+        });
       }
 
       // 1b. Update player stats and process injuries/suspensions
@@ -272,6 +408,31 @@ export function useGameState() {
       const newListings = transferMarket.generateMarket(updatedTeams, currentWeek, 15);
       finalMarket = [...updatedListings, ...newListings];
 
+      // AI teams sign free agents during active transfer windows (weeks 1-7, 46-52)
+      let finalUpdatedTeams = updatedTeams;
+      let currentFreeAgents = [...(gameState.freeAgents || [])];
+      if ((currentWeek >= 1 && currentWeek <= 7) || (currentWeek >= 46 && currentWeek <= 52)) {
+        if (currentFreeAgents.length > 0) {
+          finalUpdatedTeams = updatedTeams.map(team => {
+            const result = aiContractManager.signFreeAgents(
+              team,
+              currentFreeAgents,
+              gameState.season.year,
+              currentWeek
+            );
+
+            // Remove signed players from free agent pool
+            if (result.signed.length > 0) {
+              currentFreeAgents = currentFreeAgents.filter(fa =>
+                !result.signed.find(p => p.id === fa.player.id)
+              );
+            }
+
+            return result.team;
+          });
+        }
+      }
+
       // 5. Update game state
       // Season is complete when we've finished week 52 (7 pre-season + 38 competitive + 7 off-season)
       const isComplete = currentWeek >= 52;
@@ -283,15 +444,20 @@ export function useGameState() {
       const currentTopPerformers = statsTracker.getTopPerformers(updatedPlayerTeam);
       setSeasonTopPerformers(currentTopPerformers);
 
-      // 6. Update board status
+      // 6. Update board status (only during competitive season: weeks 8-45)
       const boardManager = new BoardManager();
       const weeksRemaining = gameState.season.totalWeeks - currentWeek;
-      let updatedBoardStatus = boardManager.updateBoardStatus(
-        gameState.boardStatus,
-        updatedTable,
-        gameState.playerTeam.id,
-        weeksRemaining
-      );
+      let updatedBoardStatus = gameState.boardStatus;
+
+      // Only evaluate board status during competitive season
+      if (currentWeek >= 8 && currentWeek <= 45) {
+        updatedBoardStatus = boardManager.updateBoardStatus(
+          gameState.boardStatus,
+          updatedTable,
+          gameState.playerTeam.id,
+          weeksRemaining
+        );
+      }
 
       // 6b. Generate news for this week
       const newsGenerator = new NewsGenerator();
@@ -332,10 +498,25 @@ export function useGameState() {
 
       // 7. Apply player development and archive stats if season is complete
       let finalPlayerTeam = { ...updatedPlayerTeam, budget: newBudget };
-      let finalAITeams = updatedTeams;
+      let finalAITeams = finalUpdatedTeams;
       let seasonAward = null;
+      const newFreeAgents = currentFreeAgents;
 
       if (isComplete) {
+        // Process expired contracts → create free agents
+        const playerResult = contractManager.processExpiredContracts(
+          finalPlayerTeam,
+          currentWeek
+        );
+        finalPlayerTeam = playerResult.updatedTeam;
+        newFreeAgents.push(...playerResult.freeAgents);
+
+        finalAITeams = finalAITeams.map(team => {
+          const result = contractManager.processExpiredContracts(team, currentWeek);
+          newFreeAgents.push(...result.freeAgents);
+          return result.updatedTeam;
+        });
+
         const playerDev = new PlayerDevelopment();
 
         // Archive season stats before development
@@ -358,6 +539,31 @@ export function useGameState() {
 
         // Store development reports for display
         setDevelopmentReports(playerReports);
+
+        // Generate youth academy players
+        const youthAcademyManager = new YouthAcademyManager();
+
+        // Player team youth generation - generate prospects for selection
+        if (finalPlayerTeam.players.length < 25) {
+          const prospects = youthAcademyManager.generateYouthProspects(
+            gameState.season.year,
+            gameState.season.year * 999 // Seed for reproducibility
+          );
+
+          // Store prospects for player to select from
+          setYouthProspects(prospects);
+        }
+
+        // AI teams also generate youth players
+        finalAITeams = finalAITeams.map((team) => {
+          if (team.players.length < 25) {
+            return youthAcademyManager.generateYouthPlayers(
+              team,
+              gameState.season.year
+            ).team;
+          }
+          return team;
+        });
 
         // Development news
         const devNews = newsGenerator.generateDevelopmentNews(
@@ -510,6 +716,8 @@ export function useGameState() {
         },
         seasonAwards: updatedSeasonAwards,
         newsFeed: weeklyNews,
+        freeAgents: newFreeAgents,
+        matchPreviews,
       };
 
       // 11. Check achievements
@@ -843,6 +1051,102 @@ export function useGameState() {
     [gameState]
   );
 
+  /**
+   * Offer a contract to a player
+   */
+  const offerContract = useCallback(
+    (player: Player, weeklyWage: number, contractYears: number) => {
+      if (!gameState) return;
+
+      try {
+        const contractManager = new ContractManager();
+        const demands = contractManager.calculatePlayerDemands(player);
+
+        // Reject if too low
+        if (weeklyWage < demands.minWage) {
+          setError(`${player.name} rejected - wage too low (minimum £${demands.minWage.toLocaleString()}/wk)`);
+          return;
+        }
+
+        // Acceptance chance (higher wage = higher chance)
+        const acceptChance = weeklyWage >= demands.minWage * 1.1 ? 1.0 : 0.7;
+        if (Math.random() > acceptChance) {
+          setError(`${player.name} rejected your offer`);
+          return;
+        }
+
+        // Accept contract
+        const updatedPlayer = contractManager.acceptContractOffer(
+          player,
+          weeklyWage,
+          contractYears,
+          gameState.season.year,
+          gameState.season.currentWeek
+        );
+
+        setGameState({
+          ...gameState,
+          playerTeam: {
+            ...gameState.playerTeam,
+            players: gameState.playerTeam.players.map((p) =>
+              p.id === player.id ? updatedPlayer : p
+            ),
+          },
+        });
+
+        setError(null);
+      } catch (err) {
+        setError('Failed to offer contract');
+        console.error(err);
+      }
+    },
+    [gameState]
+  );
+
+  const selectYouthPlayers = useCallback(
+    (selectedPlayers: Player[]) => {
+      if (!gameState) return;
+
+      try {
+        const youthAcademyManager = new YouthAcademyManager();
+
+        // Add selected players to team
+        const updatedTeam = youthAcademyManager.addYouthPlayersToTeam(
+          gameState.playerTeam,
+          selectedPlayers
+        );
+
+        // Generate news if any players were selected
+        let updatedNews = gameState.newsFeed || [];
+        if (selectedPlayers.length > 0) {
+          const newsGenerator = new NewsGenerator();
+          const youthNews = newsGenerator.generateYouthAcademyNews(
+            selectedPlayers,
+            gameState.playerTeam.name,
+            gameState.season.currentWeek,
+            gameState.season.year
+          );
+          updatedNews = [youthNews, ...updatedNews];
+        }
+
+        const newState = {
+          ...gameState,
+          playerTeam: updatedTeam,
+          newsFeed: updatedNews,
+        };
+
+        setGameState(newState);
+        SaveService.saveGame(newState);
+        setYouthProspects([]);
+        setError(null);
+      } catch (err) {
+        setError('Failed to add youth players');
+        console.error(err);
+      }
+    },
+    [gameState]
+  );
+
   return {
     gameState,
     loading,
@@ -852,6 +1156,7 @@ export function useGameState() {
     seasonTopPerformers,
     seasonEvaluation,
     pendingAchievements,
+    youthProspects,
     hasSave: !!gameState,
     actions: {
       newGame,
@@ -866,6 +1171,8 @@ export function useGameState() {
       markAllNewsRead,
       continueToNextSeason,
       setTeamTactics,
+      offerContract,
+      selectYouthPlayers,
     },
   };
 }

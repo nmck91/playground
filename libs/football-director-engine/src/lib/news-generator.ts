@@ -314,6 +314,35 @@ export class NewsGenerator {
   }
 
   /**
+   * Generate news for youth academy graduates
+   */
+  generateYouthAcademyNews(
+    newPlayers: Player[],
+    teamName: string,
+    week: number,
+    season: number
+  ): NewsArticle {
+    const now = new Date();
+    const count = newPlayers.length;
+    const names = newPlayers.map(p => p.name).slice(0, 2).join(' and ');
+    const others = count > 2 ? ` and ${count - 2} other${count > 3 ? 's' : ''}` : '';
+
+    return {
+      id: `news-${Date.now()}-${Math.random()}`,
+      date: now,
+      week,
+      season,
+      type: 'general',
+      headline: `${count} Youth Player${count > 1 ? 's' : ''} Graduate to First Team`,
+      body: `${teamName}'s youth academy has produced another crop of promising talent. ${names}${others} ${count > 1 ? 'have' : 'has'} graduated to the first team squad and will be looking to make ${count > 1 ? 'their' : 'an'} impact in the coming season.`,
+      teams: [teamName],
+      players: newPlayers.map(p => p.name),
+      importance: 'low',
+      read: false,
+    };
+  }
+
+  /**
    * Generate welcome news
    */
   generateWelcomeNews(teamName: string, season: number): NewsArticle {

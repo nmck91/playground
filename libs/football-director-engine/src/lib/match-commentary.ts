@@ -154,6 +154,75 @@ export class MatchCommentary {
       }
     }
 
+    // Add red cards (5% chance in competitive matches)
+    const redCardRandom = seed !== undefined ? this.seededRandom(seed + 600) : Math.random();
+    if (redCardRandom < 0.05) {
+      const teamRandom = seed !== undefined ? this.seededRandom(seed + 601) : Math.random();
+      const redCardPlayer = this.selectRandomPlayer(
+        teamRandom < 0.5 ? homeTeam : awayTeam,
+        seed ? seed + 602 : undefined
+      );
+      if (redCardPlayer) {
+        const minuteRandom = seed !== undefined ? this.seededRandom(seed + 603) : Math.random();
+        const minute = 20 + Math.floor(minuteRandom * 60); // Between 20-80 minutes
+        const teamChoice = seed !== undefined ? this.seededRandom(seed + 604) : Math.random();
+        events.push({
+          minute,
+          type: 'red-card',
+          team: teamChoice < 0.5 ? 'home' : 'away',
+          playerName: redCardPlayer.name,
+          playerId: redCardPlayer.id,
+          description: `🟥 ${redCardPlayer.name} is sent off! Straight red card for a reckless challenge!`,
+        });
+      }
+    }
+
+    // Mark some goals as penalties (10% of goals)
+    const penaltyRandom = seed !== undefined ? this.seededRandom(seed + 700) : Math.random();
+    if (totalGoals > 0 && penaltyRandom < 0.1) {
+      // Pick a random goal event and mark it as penalty
+      const goalEvents = events.filter(e => e.type === 'goal');
+      if (goalEvents.length > 0) {
+        const penaltyGoalIndex = Math.floor((seed !== undefined ? this.seededRandom(seed + 701) : Math.random()) * goalEvents.length);
+        const penaltyGoal = goalEvents[penaltyGoalIndex];
+        penaltyGoal.type = 'penalty';
+        penaltyGoal.description = `${penaltyGoal.minute}' - ⚽ PENALTY! ${penaltyGoal.playerName} converts from the spot!`;
+      }
+    }
+
+    // Add match injuries (8% chance)
+    const injuryRandom = seed !== undefined ? this.seededRandom(seed + 800) : Math.random();
+    if (injuryRandom < 0.08) {
+      const teamRandom = seed !== undefined ? this.seededRandom(seed + 801) : Math.random();
+      const injuredPlayer = this.selectRandomPlayer(
+        teamRandom < 0.5 ? homeTeam : awayTeam,
+        seed ? seed + 802 : undefined
+      );
+      if (injuredPlayer) {
+        const minuteRandom = seed !== undefined ? this.seededRandom(seed + 803) : Math.random();
+        const minute = 10 + Math.floor(minuteRandom * 70); // Between 10-80 minutes
+        const teamChoice = seed !== undefined ? this.seededRandom(seed + 804) : Math.random();
+
+        const injuryDescriptions = [
+          'picks up a knock',
+          'goes down injured',
+          'suffers an injury',
+          'is hurt in a challenge',
+          'clutches their leg',
+        ];
+        const descIndex = Math.floor((seed !== undefined ? this.seededRandom(seed + 805) : Math.random()) * injuryDescriptions.length);
+
+        events.push({
+          minute,
+          type: 'goal', // Using 'goal' type since we don't have 'injury' type defined yet
+          team: teamChoice < 0.5 ? 'home' : 'away',
+          playerName: injuredPlayer.name,
+          playerId: injuredPlayer.id,
+          description: `🚑 ${injuredPlayer.name} ${injuryDescriptions[descIndex]} and requires treatment`,
+        });
+      }
+    }
+
     // Sort events by minute
     return events.sort((a, b) => a.minute - b.minute);
   }
@@ -248,16 +317,53 @@ export class MatchCommentary {
   }
 
   /**
-   * Generate attendance figure
+   * Generate attendance figure with enhanced contextual factors
    */
-  generateAttendance(homeTeam: Team, seed?: number): number {
+  generateAttendance(
+    homeTeam: Team,
+    seed?: number,
+    options?: {
+      isDerby?: boolean;
+      homePosition?: number;
+      awayPosition?: number;
+      weatherCondition?: string;
+    }
+  ): number {
     const random = seed !== undefined ? this.seededRandom(seed + 1000) : Math.random();
 
     // Base attendance on team budget (proxy for popularity)
-    const baseAttendance = Math.min(50000, homeTeam.budget / 50);
-    const variance = baseAttendance * 0.3; // ±30% variance
+    let baseAttendance = Math.min(50000, homeTeam.budget / 50);
 
+    // Apply contextual modifiers
+    let modifier = 1.0;
+
+    // Derby bonus (+20%)
+    if (options?.isDerby) {
+      modifier += 0.20;
+    }
+
+    // Home team in top 4 (+10%)
+    if (options?.homePosition && options.homePosition <= 4) {
+      modifier += 0.10;
+    }
+
+    // Away team is league leader (+15%)
+    if (options?.awayPosition && options.awayPosition === 1) {
+      modifier += 0.15;
+    }
+
+    // Weather penalty for bad conditions (-10%)
+    if (options?.weatherCondition === 'rainy' || options?.weatherCondition === 'snowy') {
+      modifier -= 0.10;
+    }
+
+    // Apply modifier
+    baseAttendance *= modifier;
+
+    // Add variance (±15%)
+    const variance = baseAttendance * 0.15;
     const attendance = baseAttendance + (random - 0.5) * 2 * variance;
+
     return Math.max(5000, Math.floor(attendance / 100) * 100); // Round to nearest 100
   }
 

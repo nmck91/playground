@@ -927,24 +927,115 @@ This document outlines potential features and improvements for the Football Dire
 - Mobile-responsive layout
 - Quick access from dashboard
 
+### ✅ Form Guide on Table
+- Last 5 match results displayed on league table
+- Color-coded badges (Green=Win, Orange=Draw, Red=Loss)
+- Hover tooltips for each result
+- Visual form indicator for each team
+- Legend explaining form colors
+- Mobile-friendly display
+
+### ✅ Match History Details
+- Dedicated match report page (/match/[id])
+- Full match score and result
+- Match events timeline (goals, cards, penalties)
+- Goal scorers for both teams
+- Event details with minute markers
+- Attendance information
+- Clickable links from fixtures page
+- Win/Draw/Loss indicator for player's team
+
+### ✅ League Statistics Pages
+- Dedicated stats page (/stats) with tabbed interface
+- Top Scorers leaderboard (goals, goals per game)
+- Top Assisters leaderboard (assists, assists per game)
+- Team Statistics with three sections:
+  - Best Attack (goals scored rankings)
+  - Best Defense (goals conceded, clean sheets)
+  - Discipline (yellow/red cards)
+- Medal indicators for top 3 positions
+- Player team highlighting throughout
+- Position and team information for all players
+- Mobile-responsive tables
+
+### ✅ Player Contracts & Wages
+- Contract system with expiry tracking
+- Contract status badges (active/expiring-soon/expiring/expired)
+- Weekly contract countdown during simulation
+- Interactive contract negotiation modal with:
+  - Wage slider based on player demands
+  - Contract length selection (1-5 years)
+  - Budget validation
+  - Acceptance/rejection logic
+- Free agent system when contracts expire
+- AI teams automatically renew contracts (every 4 weeks)
+- AI teams sign free agents during transfer windows
+- Migration system for backward compatibility
+- Financial impact tracking
+
+### ✅ Youth Academy
+- Interactive youth player selection system
+- 6 youth prospects generated annually at season end (week 52)
+- Select up to 3 prospects to add to first team
+- Youth players aged 16-18 with skill range 3-7
+- Lower wages for youth players (£500-1500/week)
+- AI teams also receive youth players
+- Automatic faster development for young players (ages 18-21 bracket)
+- Squad size limit of 25 players
+- News generation for youth player selections
+- Color-coded position indicators in selection modal
+- Skill level visual indicators
+
+### ✅ Player Morale System
+- Comprehensive morale calculation (0-100 scale)
+- Four morale levels: High (75-100), Normal (40-74), Low (20-39), Very Low (0-19)
+- Morale factors include:
+  - Team performance (league position)
+  - Recent form (last 5 matches)
+  - Playing time (appearance percentage)
+  - Wages vs skill fairness
+  - Contract status
+  - Injury/suspension status
+  - Age-based expectations
+- Stat modifiers applied to matches:
+  - High Morale (😊): +5% to effective skill
+  - Normal Morale (😐): No effect
+  - Low Morale (☹️): -5% to effective skill
+  - Very Low Morale (😡): -10% to effective skill
+- Weekly morale updates during simulation
+- Visual morale indicators in squad page
+- Integration with match simulator for performance effects
+
+### ✅ Injuries & Suspensions Enhanced
+- Yellow card accumulation system (5 yellows = 1 match ban)
+- Separate tracking for red card suspensions (3 match ban)
+- Injury categories: muscle, bone, concussion
+- Varied recovery times based on injury severity (1-8 weeks)
+- Physio staff recovery bonuses
+- Visual injury badges in squad page
+- Suspension badges with reason display
+- Yellow card warning indicators (4 cards = close to ban)
+- Recovery countdown system
+- Integration with weekly simulation
+
 ---
 
 ## Implementation Priority
 
-### Phase 1 - Quick Wins (1-2 weeks)
-1. Form Guide on Table
-2. Fixtures Page
-3. Match History Details basics
+### ✅ Phase 1 - Quick Wins (COMPLETED)
+1. ✅ Form Guide on Table
+2. ✅ Fixtures Page
+3. ✅ Match History Details basics
 
-### Phase 2 - Strategic Depth (2-4 weeks)
-1. Player Contracts & Wages
-2. League Statistics Pages
-3. Youth Academy
+### ✅ Phase 2 - Strategic Depth (COMPLETED)
+1. ✅ Player Contracts & Wages
+2. ✅ League Statistics Pages
+3. ✅ Youth Academy
 
-### Phase 3 - Immersion (4-6 weeks)
-1. Player Morale System
-2. Match Day Atmosphere
-3. Injuries & Suspensions enhanced
+### ✅ Phase 3 - Immersion (COMPLETED)
+1. ✅ Player Morale System
+2. ✅ Match Day Atmosphere
+3. ✅ Injuries & Suspensions enhanced
 
 ### Phase 4 - Competition (6-8 weeks)
 1. Cup Competitions
@@ -969,4 +1060,4 @@ When implementing features from this roadmap:
 
 ---
 
-*Last Updated: 2025-12-20*
+*Last Updated: 2025-12-21 - Phase 3: 2/3 Complete (Player Morale & Injuries Enhanced complete)*

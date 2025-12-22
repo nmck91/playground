@@ -6,6 +6,7 @@
 'use client';
 
 import { MatchResult } from '@playground/football-director-engine';
+import { useState } from 'react';
 
 interface MatchHighlightsProps {
   results: MatchResult[];
@@ -14,6 +15,8 @@ interface MatchHighlightsProps {
 }
 
 export function MatchHighlights({ results, playerTeamName, onClose }: MatchHighlightsProps) {
+  const [showRatings, setShowRatings] = useState(false);
+
   // Find player's match
   const playerMatch = results.find(
     (r) => r.homeTeam === playerTeamName || r.awayTeam === playerTeamName
@@ -24,8 +27,17 @@ export function MatchHighlights({ results, playerTeamName, onClose }: MatchHighl
     (r) => r.homeTeam !== playerTeamName && r.awayTeam !== playerTeamName
   );
 
+  // Weather emoji mapping
+  const weatherEmoji: Record<string, string> = {
+    sunny: '☀️',
+    cloudy: '☁️',
+    rainy: '🌧️',
+    foggy: '🌫️',
+    snowy: '❄️',
+  };
+
   const renderMatch = (match: MatchResult, isPlayerMatch: boolean) => {
-    const { homeTeam, awayTeam, homeScore, awayScore, homeGoalScorers = [], awayGoalScorers = [], events = [], attendance } = match;
+    const { homeTeam, awayTeam, homeScore, awayScore, homeGoalScorers = [], awayGoalScorers = [], events = [], attendance, weather, stats, manOfMatch, playerRatings, isDerby } = match;
 
     return (
       <div
@@ -34,6 +46,15 @@ export function MatchHighlights({ results, playerTeamName, onClose }: MatchHighl
           isPlayerMatch ? 'bg-teal-50 border-2 border-teal-500' : 'bg-white border border-gray-200'
         }`}
       >
+        {/* Derby Badge */}
+        {isDerby && (
+          <div className="mb-3">
+            <span className="inline-block bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-full">
+              🔥 DERBY MATCH
+            </span>
+          </div>
+        )}
+
         {/* Match Score */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex-1">
@@ -66,6 +87,158 @@ export function MatchHighlights({ results, playerTeamName, onClose }: MatchHighl
             )}
           </div>
         </div>
+
+        {/* Weather & Man of Match Row */}
+        {(weather || manOfMatch) && isPlayerMatch && (
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            {/* Weather */}
+            {weather && (
+              <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+                <div className="text-xs text-slate-600 mb-1">Weather</div>
+                <div className="font-semibold text-sm">
+                  {weatherEmoji[weather.condition]} {weather.description}
+                </div>
+                <div className="text-xs text-slate-600 mt-1">{weather.temperature}°C</div>
+              </div>
+            )}
+
+            {/* Man of Match */}
+            {manOfMatch && (
+              <div className="bg-yellow-50 rounded-lg p-3 border-2 border-yellow-400">
+                <div className="text-xs text-yellow-700 font-semibold mb-1">⭐ MAN OF THE MATCH</div>
+                <div className="font-bold text-sm text-slate-900">{manOfMatch.playerName}</div>
+                <div className="text-xs text-slate-600 mt-1">
+                  Rating: {manOfMatch.rating.toFixed(1)} - {manOfMatch.reason}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Match Statistics */}
+        {stats && isPlayerMatch && (
+          <div className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
+            <h4 className="text-sm font-semibold text-slate-700 mb-3">Match Statistics</h4>
+            <div className="space-y-3">
+              {/* Possession */}
+              <div>
+                <div className="flex justify-between text-xs text-slate-600 mb-1">
+                  <span>Possession</span>
+                  <span>{stats.possession.home}% - {stats.possession.away}%</span>
+                </div>
+                <div className="flex h-4 bg-gray-200 rounded overflow-hidden">
+                  <div className="bg-teal-500" style={{ width: `${stats.possession.home}%` }}></div>
+                  <div className="bg-blue-500" style={{ width: `${stats.possession.away}%` }}></div>
+                </div>
+              </div>
+
+              {/* Shots */}
+              <div>
+                <div className="flex justify-between text-xs text-slate-600 mb-1">
+                  <span>Shots</span>
+                  <span>{stats.shots.home} - {stats.shots.away}</span>
+                </div>
+                <div className="flex h-3 bg-gray-200 rounded overflow-hidden">
+                  <div className="bg-teal-400" style={{ width: `${(stats.shots.home / (stats.shots.home + stats.shots.away)) * 100}%` }}></div>
+                  <div className="bg-blue-400" style={{ width: `${(stats.shots.away / (stats.shots.home + stats.shots.away)) * 100}%` }}></div>
+                </div>
+              </div>
+
+              {/* Shots on Target */}
+              <div>
+                <div className="flex justify-between text-xs text-slate-600 mb-1">
+                  <span>Shots on Target</span>
+                  <span>{stats.shotsOnTarget.home} - {stats.shotsOnTarget.away}</span>
+                </div>
+                <div className="flex h-3 bg-gray-200 rounded overflow-hidden">
+                  <div className="bg-teal-400" style={{ width: `${(stats.shotsOnTarget.home / (stats.shotsOnTarget.home + stats.shotsOnTarget.away)) * 100}%` }}></div>
+                  <div className="bg-blue-400" style={{ width: `${(stats.shotsOnTarget.away / (stats.shotsOnTarget.home + stats.shotsOnTarget.away)) * 100}%` }}></div>
+                </div>
+              </div>
+
+              {/* Corners */}
+              <div>
+                <div className="flex justify-between text-xs text-slate-600 mb-1">
+                  <span>Corners</span>
+                  <span>{stats.corners.home} - {stats.corners.away}</span>
+                </div>
+                <div className="flex h-3 bg-gray-200 rounded overflow-hidden">
+                  <div className="bg-teal-400" style={{ width: `${(stats.corners.home / Math.max(stats.corners.home + stats.corners.away, 1)) * 100}%` }}></div>
+                  <div className="bg-blue-400" style={{ width: `${(stats.corners.away / Math.max(stats.corners.home + stats.corners.away, 1)) * 100}%` }}></div>
+                </div>
+              </div>
+
+              {/* Fouls */}
+              <div>
+                <div className="flex justify-between text-xs text-slate-600 mb-1">
+                  <span>Fouls</span>
+                  <span>{stats.fouls.home} - {stats.fouls.away}</span>
+                </div>
+                <div className="flex h-3 bg-gray-200 rounded overflow-hidden">
+                  <div className="bg-orange-400" style={{ width: `${(stats.fouls.home / Math.max(stats.fouls.home + stats.fouls.away, 1)) * 100}%` }}></div>
+                  <div className="bg-red-400" style={{ width: `${(stats.fouls.away / Math.max(stats.fouls.home + stats.fouls.away, 1)) * 100}%` }}></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Player Ratings */}
+        {playerRatings && playerRatings.length > 0 && isPlayerMatch && (
+          <div className="bg-white rounded-lg p-4 mb-4 border border-gray-200">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm font-semibold text-slate-700">Player Ratings</h4>
+              <button
+                onClick={() => setShowRatings(!showRatings)}
+                className="text-xs text-teal-600 hover:text-teal-700 font-medium"
+              >
+                {showRatings ? '▲ Hide' : '▼ Show'}
+              </button>
+            </div>
+
+            {showRatings && (
+              <div className="grid grid-cols-2 gap-3">
+                {/* Home Team Ratings */}
+                <div>
+                  <div className="text-xs font-semibold text-slate-600 mb-2">{homeTeam}</div>
+                  <div className="space-y-1">
+                    {playerRatings
+                      .filter((r) => r.team === 'home')
+                      .sort((a, b) => b.rating - a.rating)
+                      .slice(0, 5)
+                      .map((rating, i) => (
+                        <div key={i} className="flex items-center justify-between text-xs">
+                          <span className="text-slate-700 truncate">{rating.playerName}</span>
+                          <span className={`font-bold ml-2 ${rating.rating >= 8 ? 'text-green-600' : rating.rating >= 6.5 ? 'text-slate-700' : 'text-red-600'}`}>
+                            {rating.rating.toFixed(1)}
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+
+                {/* Away Team Ratings */}
+                <div>
+                  <div className="text-xs font-semibold text-slate-600 mb-2">{awayTeam}</div>
+                  <div className="space-y-1">
+                    {playerRatings
+                      .filter((r) => r.team === 'away')
+                      .sort((a, b) => b.rating - a.rating)
+                      .slice(0, 5)
+                      .map((rating, i) => (
+                        <div key={i} className="flex items-center justify-between text-xs">
+                          <span className="text-slate-700 truncate">{rating.playerName}</span>
+                          <span className={`font-bold ml-2 ${rating.rating >= 8 ? 'text-green-600' : rating.rating >= 6.5 ? 'text-slate-700' : 'text-red-600'}`}>
+                            {rating.rating.toFixed(1)}
+                          </span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Match Events */}
         {events.length > 0 && (

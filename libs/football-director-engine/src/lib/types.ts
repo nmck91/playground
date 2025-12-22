@@ -35,6 +35,30 @@ export interface Injury {
   sustainedInWeek: number;
 }
 
+export interface PlayerContract {
+  weeklyWage: number;        // Matches Player.wages for compatibility
+  startYear: number;         // Season when contract started
+  startWeek: number;         // Week when signed
+  expiryYear: number;        // Season when contract expires
+  expiryWeek: number;        // Week of expiry (typically 52)
+  yearsRemaining: number;    // Calculated field
+  weeksRemaining: number;    // Calculated field
+  status: ContractStatus;    // Calculated based on weeks remaining
+}
+
+export type ContractStatus =
+  | 'active'          // >26 weeks remaining
+  | 'expiring-soon'   // 13-26 weeks
+  | 'expiring'        // 1-12 weeks
+  | 'expired';        // 0 weeks
+
+export interface FreeAgent {
+  player: Player;
+  becameFreeWeek: number;
+  previousTeamId: string;
+  previousTeamName: string;
+}
+
 export interface Player {
   id: string;
   name: string;
@@ -46,6 +70,8 @@ export interface Player {
   history: PlayerHistoryRecord[];
   injury?: Injury; // Current injury status
   suspendedUntil?: number; // Week number when suspension ends
+  contract?: PlayerContract; // Contract details (optional for migration)
+  morale?: number; // Player happiness (0-100, optional for migration)
 }
 
 export type StaffRole = 'manager' | 'coach' | 'scout';
@@ -99,6 +125,42 @@ export interface MatchEvent {
   description: string;
 }
 
+// Match Day Atmosphere: Weather conditions
+export interface MatchWeather {
+  condition: 'sunny' | 'cloudy' | 'rainy' | 'foggy' | 'snowy';
+  temperature: number; // Celsius
+  description: string; // e.g., "Perfect conditions", "Heavy rain"
+}
+
+// Match Day Atmosphere: Match statistics
+export interface MatchStats {
+  possession: { home: number; away: number }; // Percentage
+  shots: { home: number; away: number };
+  shotsOnTarget: { home: number; away: number };
+  corners: { home: number; away: number };
+  fouls: { home: number; away: number };
+}
+
+// Match Day Atmosphere: Player performance rating
+export interface PlayerRating {
+  playerId: string;
+  playerName: string;
+  position: string;
+  rating: number; // 1-10 scale
+  team: 'home' | 'away';
+  goals?: number;
+  assists?: number;
+}
+
+// Match Day Atmosphere: Man of the match award
+export interface ManOfMatch {
+  playerId: string;
+  playerName: string;
+  team: 'home' | 'away';
+  rating: number;
+  reason: string; // e.g., "2 goals and an assist"
+}
+
 export interface MatchResult {
   homeScore: number;
   awayScore: number;
@@ -109,6 +171,83 @@ export interface MatchResult {
   awayGoalScorers?: string[]; // Player names who scored for away team
   events?: MatchEvent[]; // Key match events
   attendance?: number;
+  // Match Day Atmosphere enhancements (optional for backward compatibility)
+  weather?: MatchWeather;
+  stats?: MatchStats;
+  playerRatings?: PlayerRating[];
+  manOfMatch?: ManOfMatch;
+  isDerby?: boolean;
+  postMatchAnalysis?: PostMatchAnalysis;
+}
+
+// Match Day Atmosphere: Pre-Match Preview Types
+
+// Head-to-head history between two teams
+export interface HeadToHead {
+  homeWins: number;
+  awayWins: number;
+  draws: number;
+  lastFiveMeetings: Array<{
+    homeTeam: string;
+    awayTeam: string;
+    homeScore: number;
+    awayScore: number;
+    week: number;
+    season: number;
+  }>;
+}
+
+// Team news before a match
+export interface TeamNews {
+  injuries: Array<{ playerName: string; returnWeek: number }>;
+  suspensions: Array<{ playerName: string; returnWeek: number }>;
+  keyPlayers: Array<{ playerName: string; form: string; goals: number }>;
+  recentForm: ('W' | 'D' | 'L')[];
+}
+
+// Pre-match preview data
+export interface MatchPreview {
+  fixtureId: string;
+  homeTeam: string;
+  awayTeam: string;
+  week: number;
+  homePosition: number;
+  awayPosition: number;
+  headToHead: HeadToHead;
+  homeTeamNews: TeamNews;
+  awayTeamNews: TeamNews;
+  expectedAttendance: number;
+  weather: MatchWeather;
+  isDerby: boolean;
+  matchImportance: 'low' | 'medium' | 'high';
+  managerQuotes?: {
+    home: string;
+    away: string;
+  };
+}
+
+// Post-match content types
+export interface ManagerQuote {
+  managerName: string;
+  teamName: string;
+  quote: string;
+  sentiment: 'happy' | 'neutral' | 'frustrated';
+}
+
+export interface PlayerInterview {
+  playerId: string;
+  playerName: string;
+  teamName: string;
+  quote: string;
+  rating: number;
+}
+
+export interface PostMatchAnalysis {
+  homeManagerQuote: ManagerQuote;
+  awayManagerQuote: ManagerQuote;
+  playerInterview?: PlayerInterview;
+  turningPoint?: string;
+  keyStats: string[];
 }
 
 export interface LeagueTable {
@@ -215,12 +354,14 @@ export interface GameState {
   matchHistory: MatchResult[];
   transferMarket: TransferListing[]; // Available players for transfer
   staffMarket: Staff[]; // Available staff for hire
+  freeAgents: FreeAgent[]; // Players whose contracts have expired
   boardStatus: BoardStatus; // Board objectives and job security
   seasonRecords: SeasonRecords[]; // Historical season records
   clubRecords: ClubRecords; // All-time club records
   achievements: Achievement[]; // Unlockable achievements
   seasonAwards: SeasonAward[]; // Season-by-season awards
   newsFeed: NewsArticle[]; // News articles (ordered by date DESC)
+  matchPreviews?: MatchPreview[]; // Pre-match previews for upcoming fixtures (optional for migration)
 }
 
 export interface SaveMetadata {

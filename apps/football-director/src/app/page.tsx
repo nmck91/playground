@@ -15,10 +15,11 @@ import { NewsFeed } from '../components/game/NewsFeed';
 import { NewsTickerWidget } from '../components/game/NewsTickerWidget';
 import { TacticsManager } from '../components/game/TacticsManager';
 import { SaveSlotManager } from '../components/saves/SaveSlotManager';
+import { YouthAcademyModal } from '../components/game/YouthAcademyModal';
 import Link from 'next/link';
 
 export default function Dashboard() {
-  const { gameState, loading, error, lastSimulationResults, developmentReports, seasonTopPerformers, seasonEvaluation, pendingAchievements, actions } = useGameState();
+  const { gameState, loading, error, lastSimulationResults, developmentReports, seasonTopPerformers, seasonEvaluation, pendingAchievements, youthProspects, actions } = useGameState();
   const [showHighlights, setShowHighlights] = useState(false);
   const [showDevelopment, setShowDevelopment] = useState(false);
   const [showEvaluation, setShowEvaluation] = useState(false);
@@ -613,6 +614,14 @@ export default function Dashboard() {
       <AchievementToast
         achievements={pendingAchievements}
         onDismiss={actions.dismissAchievement}
+      />
+
+      {/* Youth Academy Modal */}
+      <YouthAcademyModal
+        prospects={youthProspects}
+        isOpen={youthProspects.length > 0}
+        onClose={() => actions.selectYouthPlayers([])}
+        onConfirm={actions.selectYouthPlayers}
       />
     </div>
   );

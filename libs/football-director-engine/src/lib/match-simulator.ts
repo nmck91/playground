@@ -4,18 +4,21 @@
  * Simulates football matches based on team strength
  */
 
-import { Team, Match, MatchResult } from './types';
+import { Team, Match, MatchResult, MatchStats, PlayerRating, ManOfMatch, Player } from './types';
 import { MatchCommentary } from './match-commentary';
 import { StaffManager } from './staff-manager';
 import { TacticsManager } from './tactics-manager';
 import { InjuryManager } from './injury-manager';
+import { MoraleManager } from './morale-manager';
+import { WeatherGenerator } from './weather-generator';
 
 export class MatchSimulator {
   private tacticsManager = new TacticsManager();
   private injuryManager = new InjuryManager();
+  private moraleManager = new MoraleManager();
 
   /**
-   * Calculate team strength based on player skills, manager bonus, and available players
+   * Calculate team strength based on player skills, manager bonus, morale, and available players
    */
   calculateTeamStrength(team: Team, currentWeek: number): number {
     if (!team.players || team.players.length === 0) {
@@ -29,7 +32,19 @@ export class MatchSimulator {
       return 0;
     }
 
-    const totalSkill = availablePlayers.reduce((sum, player) => sum + player.skill, 0);
+    // Calculate total skill with morale modifiers
+    const totalSkill = availablePlayers.reduce((sum, player) => {
+      let effectiveSkill = player.skill;
+
+      // Apply morale modifier if morale exists
+      if (player.morale !== undefined) {
+        const moraleInfo = this.moraleManager.getMoraleInfo(player.morale);
+        effectiveSkill = this.moraleManager.applyMoraleToSkill(player.skill, moraleInfo);
+      }
+
+      return sum + effectiveSkill;
+    }, 0);
+
     const baseStrength = totalSkill / availablePlayers.length;
 
     // Apply manager bonus (affects team performance)
@@ -84,6 +99,10 @@ export class MatchSimulator {
     const commentary = new MatchCommentary();
     const homeScorerPlayers = commentary.selectGoalScorers(match.homeTeam, homeGoals, seed);
     const awayScorerPlayers = commentary.selectGoalScorers(match.awayTeam, awayGoals, seed ? seed + 10 : undefined);
+
+    // Detect derby before generating events
+    const isDerby = this.isDerbyMatch(match.homeTeam.name, match.awayTeam.name);
+
     const events = commentary.generateMatchEvents(
       match.homeTeam,
       match.awayTeam,
@@ -93,11 +112,52 @@ export class MatchSimulator {
       awayScorerPlayers,
       seed
     );
-    const attendance = commentary.generateAttendance(match.homeTeam, seed);
+
+    // Generate weather (we'll need this for attendance)
+    const weatherGen = new WeatherGenerator();
+    const weather = weatherGen.generateWeather(currentWeek, seed);
+
+    // Enhanced attendance with contextual factors
+    // Note: We don't have league table here, so we'll pass undefined for positions
+    const attendance = commentary.generateAttendance(
+      match.homeTeam,
+      seed,
+      {
+        isDerby,
+        weatherCondition: weather.condition,
+        // homePosition and awayPosition would require league table, skip for now
+      }
+    );
 
     // Convert Player[] to string[] for goal scorers
     const homeGoalScorers = homeScorerPlayers.map((player) => player.name);
     const awayGoalScorers = awayScorerPlayers.map((player) => player.name);
+
+    // Generate match statistics
+    const stats = this.generateMatchStats(
+      adjustedHomeStrength,
+      adjustedAwayStrength,
+      homeGoals,
+      awayGoals,
+      seed ? seed + 5000 : undefined
+    );
+
+    // Generate player ratings
+    const playerRatings = this.generatePlayerRatings(
+      match,
+      homeGoals,
+      awayGoals,
+      homeScorerPlayers,
+      awayScorerPlayers,
+      seed ? seed + 6000 : undefined
+    );
+
+    // Select man of the match
+    const manOfMatch = this.selectManOfMatch(
+      playerRatings,
+      homeScorerPlayers,
+      awayScorerPlayers
+    );
 
     return {
       homeScore: homeGoals,
@@ -109,6 +169,12 @@ export class MatchSimulator {
       awayGoalScorers,
       events,
       attendance,
+      // Match Day Atmosphere enhancements
+      weather,
+      stats,
+      playerRatings,
+      manOfMatch,
+      isDerby,
     };
   }
 
@@ -144,6 +210,213 @@ export class MatchSimulator {
   private seededRandom(seed: number): number {
     const x = Math.sin(seed) * 10000;
     return x - Math.floor(x);
+  }
+
+  /**
+   * Generate match statistics based on team strengths and scoreline
+   */
+  private generateMatchStats(
+    homeStrength: number,
+    awayStrength: number,
+    homeScore: number,
+    awayScore: number,
+    seed?: number
+  ): MatchStats {
+    const random = seed !== undefined ? this.seededRandom(seed) : Math.random();
+
+    // Calculate possession based on strength ratio (50-50 if equal)
+    const strengthTotal = homeStrength + awayStrength;
+    const homePossessionBase = (homeStrength / strengthTotal) * 100;
+    const homePossession = Math.round(homePossessionBase + (random - 0.5) * 10); // ±5% variance
+    const awayPossession = 100 - homePossession;
+
+    // Shots based on possession and goals (teams that score had more attempts)
+    const homeShots = Math.max(homeScore * 2, Math.round((homePossession / 100) * (8 + random * 8)));
+    const awayShots = Math.max(awayScore * 2, Math.round((awayPossession / 100) * (8 + random * 8)));
+
+    // Shots on target = goals + some additional attempts
+    const homeShotsOnTarget = homeScore + Math.floor(random * (homeShots - homeScore));
+    const awayShotsOnTarget = awayScore + Math.floor(random * (awayShots - awayScore));
+
+    // Corners roughly correlate with possession and attacking intent
+    const homeCorners = Math.round((homePossession / 100) * (4 + random * 6));
+    const awayCorners = Math.round((awayPossession / 100) * (4 + random * 6));
+
+    // Fouls tend to be higher for teams with less possession (defending more)
+    const homeFouls = Math.round((awayPossession / 100) * (8 + random * 8));
+    const awayFouls = Math.round((homePossession / 100) * (8 + random * 8));
+
+    return {
+      possession: { home: homePossession, away: awayPossession },
+      shots: { home: homeShots, away: awayShots },
+      shotsOnTarget: { home: homeShotsOnTarget, away: awayShotsOnTarget },
+      corners: { home: homeCorners, away: awayCorners },
+      fouls: { home: homeFouls, away: awayFouls },
+    };
+  }
+
+  /**
+   * Generate player ratings for all players in the match
+   */
+  private generatePlayerRatings(
+    match: Match,
+    homeScore: number,
+    awayScore: number,
+    homeScorerPlayers: Player[],
+    awayScorerPlayers: Player[],
+    seed?: number
+  ): PlayerRating[] {
+    const ratings: PlayerRating[] = [];
+    const random = seed !== undefined ? this.seededRandom(seed + 1000) : Math.random();
+
+    // Get available players from both teams
+    const injuryManager = new InjuryManager();
+    const homeAvailable = injuryManager.getAvailablePlayers(match.homeTeam, 1);
+    const awayAvailable = injuryManager.getAvailablePlayers(match.awayTeam, 1);
+
+    // Select 11 players from each team (best skilled available)
+    const homePlayers = homeAvailable
+      .sort((a, b) => b.skill - a.skill)
+      .slice(0, 11);
+    const awayPlayers = awayAvailable
+      .sort((a, b) => b.skill - a.skill)
+      .slice(0, 11);
+
+    // Rate home team players
+    homePlayers.forEach((player, index) => {
+      ratings.push(
+        this.ratePlayer(player, 'home', homeScorerPlayers, homeScore, awayScore, seed ? seed + index : undefined)
+      );
+    });
+
+    // Rate away team players
+    awayPlayers.forEach((player, index) => {
+      ratings.push(
+        this.ratePlayer(player, 'away', awayScorerPlayers, awayScore, homeScore, seed ? seed + 100 + index : undefined)
+      );
+    });
+
+    return ratings;
+  }
+
+  /**
+   * Rate an individual player's performance
+   */
+  private ratePlayer(
+    player: Player,
+    team: 'home' | 'away',
+    teamScorers: Player[],
+    teamScore: number,
+    opponentScore: number,
+    seed?: number
+  ): PlayerRating {
+    const random = seed !== undefined ? this.seededRandom(seed) : Math.random();
+
+    // Base rating from skill (1-20 scale → 4-8 rating scale)
+    let rating = 4 + (player.skill / 20) * 4;
+
+    // Check if player scored
+    const goals = teamScorers.filter(s => s.id === player.id).length;
+    const assists = 0; // TODO: Track assists properly in future
+
+    // Bonuses
+    if (goals > 0) {
+      rating += 1.5 * goals; // +1.5 to +3 for goals
+    }
+
+    // Team result bonus/penalty
+    if (teamScore > opponentScore) {
+      rating += 0.5; // Winning team bonus
+    } else if (teamScore < opponentScore) {
+      rating -= 0.5; // Losing team penalty
+    }
+
+    // Clean sheet bonus for defenders and GK
+    if ((player.position === 'DEF' || player.position === 'GK') && opponentScore === 0) {
+      rating += 0.5;
+    }
+
+    // Add random variance (±1)
+    rating += (random - 0.5) * 2;
+
+    // Clamp to 1-10 range
+    rating = Math.max(1, Math.min(10, rating));
+
+    // Round to 1 decimal place
+    rating = Math.round(rating * 10) / 10;
+
+    return {
+      playerId: player.id,
+      playerName: player.name,
+      position: player.position,
+      rating,
+      team,
+      goals: goals > 0 ? goals : undefined,
+      assists: assists > 0 ? assists : undefined,
+    };
+  }
+
+  /**
+   * Select man of the match from player ratings
+   */
+  private selectManOfMatch(
+    ratings: PlayerRating[],
+    homeScorers: Player[],
+    awayScorers: Player[]
+  ): ManOfMatch {
+    // Find highest rated player
+    const topRated = ratings.reduce((prev, current) =>
+      current.rating > prev.rating ? current : prev
+    );
+
+    // Generate reason based on performance
+    let reason = '';
+    const goals = topRated.goals || 0;
+    const assists = topRated.assists || 0;
+
+    if (goals > 1) {
+      reason = `${goals} goals`;
+    } else if (goals === 1 && assists > 0) {
+      reason = `${goals} goal and ${assists} assist${assists > 1 ? 's' : ''}`;
+    } else if (goals === 1) {
+      reason = 'Match-winning goal';
+    } else if (assists > 1) {
+      reason = `${assists} assists`;
+    } else if (topRated.position === 'GK' && topRated.rating >= 8.5) {
+      reason = 'Outstanding performance';
+    } else if (topRated.rating >= 9.0) {
+      reason = 'Dominant display';
+    } else {
+      reason = 'Excellent performance';
+    }
+
+    return {
+      playerId: topRated.playerId,
+      playerName: topRated.playerName,
+      team: topRated.team,
+      rating: topRated.rating,
+      reason,
+    };
+  }
+
+  /**
+   * Detect if this is a derby/rivalry match
+   */
+  private isDerbyMatch(homeTeamName: string, awayTeamName: string): boolean {
+    // Define known rivalries (can be expanded)
+    const rivalries = [
+      ['Manchester United', 'Manchester City'],
+      ['Arsenal', 'Tottenham'],
+      ['Liverpool', 'Everton'],
+      ['Chelsea', 'Arsenal'],
+      ['Celtic', 'Rangers'],
+    ];
+
+    return rivalries.some(
+      ([team1, team2]) =>
+        (homeTeamName === team1 && awayTeamName === team2) ||
+        (homeTeamName === team2 && awayTeamName === team1)
+    );
   }
 
   /**

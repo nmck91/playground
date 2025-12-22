@@ -30,6 +30,51 @@ export default function TablePage() {
     );
   }
 
+  // Get team's last 5 results for form guide
+  const getTeamForm = (teamId: string): ('W' | 'D' | 'L')[] => {
+    const teamFixtures = gameState.fixtures
+      .filter(f => f.played && (f.homeTeamId === teamId || f.awayTeamId === teamId))
+      .sort((a, b) => b.week - a.week)
+      .slice(0, 5);
+
+    return teamFixtures.map(fixture => {
+      if (!fixture.result) return 'L';
+
+      const isHome = fixture.homeTeamId === teamId;
+      const teamScore = isHome ? fixture.result.homeScore : fixture.result.awayScore;
+      const oppScore = isHome ? fixture.result.awayScore : fixture.result.homeScore;
+
+      if (teamScore > oppScore) return 'W';
+      if (teamScore < oppScore) return 'L';
+      return 'D';
+    });
+  };
+
+  // Form badge component
+  const FormBadge = ({ form }: { form: ('W' | 'D' | 'L')[] }) => {
+    if (form.length === 0) return null;
+
+    return (
+      <div className="flex gap-1 justify-center">
+        {form.map((result, index) => (
+          <div
+            key={index}
+            className={`w-5 h-5 rounded-sm flex items-center justify-center text-xs font-bold text-white ${
+              result === 'W'
+                ? 'bg-green-500'
+                : result === 'D'
+                ? 'bg-orange-400'
+                : 'bg-red-500'
+            }`}
+            title={result === 'W' ? 'Win' : result === 'D' ? 'Draw' : 'Loss'}
+          >
+            {result}
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   const sortedTable = gameState.leagueTable.sort((a, b) => {
     if (b.points !== a.points) return b.points - a.points;
     if (b.goalDifference !== a.goalDifference)
@@ -71,6 +116,9 @@ export default function TablePage() {
                   </th>
                   <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">
                     Team
+                  </th>
+                  <th className="text-center py-3 px-4 text-sm font-semibold text-slate-700">
+                    Form
                   </th>
                   <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
                     P
@@ -127,6 +175,9 @@ export default function TablePage() {
                         {entry.teamName}
                         {isPlayerTeam && <span className="ml-2 text-teal-600">★</span>}
                       </td>
+                      <td className="py-3 px-4">
+                        <FormBadge form={getTeamForm(entry.teamId)} />
+                      </td>
                       <td className="text-center py-3 px-2 text-sm text-slate-700">
                         {entry.played}
                       </td>
@@ -173,6 +224,14 @@ export default function TablePage() {
               <div className="flex items-center gap-3">
                 <div className="w-4 h-4 bg-teal-50 border border-teal-200 rounded"></div>
                 <span className="font-semibold">Your Team</span>
+              </div>
+              <div className="flex items-center gap-3 pt-2 border-t border-gray-100 mt-2">
+                <div className="flex gap-1">
+                  <div className="w-4 h-4 bg-green-500 rounded-sm"></div>
+                  <div className="w-4 h-4 bg-orange-400 rounded-sm"></div>
+                  <div className="w-4 h-4 bg-red-500 rounded-sm"></div>
+                </div>
+                <span>Form: Last 5 matches (Green = Win, Orange = Draw, Red = Loss)</span>
               </div>
             </div>
           </div>

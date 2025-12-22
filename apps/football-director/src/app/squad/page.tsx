@@ -10,6 +10,8 @@ import { useGameState } from '../../hooks/useGameState';
 import Link from 'next/link';
 import { Player, TransferMarket } from '@playground/football-director-engine';
 import { PlayerStatsModal } from '../../components/game/PlayerStatsModal';
+import { ContractBadge } from '../../components/ui/ContractBadge';
+import { ContractNegotiationModal } from '../../components/game/ContractNegotiationModal';
 
 type SortBy = 'position' | 'skill' | 'age' | 'wages' | 'name';
 type FilterPosition = 'ALL' | 'GK' | 'DEF' | 'MID' | 'FWD';
@@ -20,6 +22,7 @@ export default function SquadPage() {
   const [filterPosition, setFilterPosition] = useState<FilterPosition>('ALL');
   const [showSellModal, setShowSellModal] = useState(false);
   const [showPlayerStats, setShowPlayerStats] = useState(false);
+  const [showContractModal, setShowContractModal] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const transferMarket = new TransferMarket();
 
@@ -250,7 +253,7 @@ export default function SquadPage() {
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="text-lg font-semibold text-slate-900">{player.name}</h3>
                         {/* Injury Indicator */}
                         {player.injury && (
@@ -268,6 +271,15 @@ export default function SquadPage() {
                             title={`Suspended until week ${player.suspendedUntil}`}
                           >
                             🟥 {player.suspendedUntil - gameState.season.currentWeek}w
+                          </span>
+                        )}
+                        {/* Yellow Card Warning (4 yellows = 1 away from ban) */}
+                        {!player.injury && !player.suspendedUntil && player.stats.yellowCards >= 4 && (
+                          <span
+                            className="px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-300"
+                            title={`${player.stats.yellowCards} yellow cards - 1 away from suspension`}
+                          >
+                            🟨 {player.stats.yellowCards}
                           </span>
                         )}
                       </div>
@@ -293,12 +305,45 @@ export default function SquadPage() {
                       <span className="ml-2 font-medium text-slate-900">{player.age}</span>
                     </div>
                     <div>
+                      <span className="text-slate-500">Morale:</span>
+                      <span className="ml-2 font-medium">
+                        {player.morale !== undefined ? (
+                          <>
+                            {player.morale >= 75 ? '😊' : player.morale >= 40 ? '😐' : player.morale >= 20 ? '☹️' : '😡'}
+                            <span className={`ml-1 ${
+                              player.morale >= 75 ? 'text-green-600' :
+                              player.morale >= 40 ? 'text-slate-600' :
+                              player.morale >= 20 ? 'text-orange-600' :
+                              'text-red-600'
+                            }`}>
+                              {player.morale >= 75 ? 'High' : player.morale >= 40 ? 'Normal' : player.morale >= 20 ? 'Low' : 'Very Low'}
+                            </span>
+                          </>
+                        ) : (
+                          <span className="text-slate-400">-</span>
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 text-sm mb-3">
+                    <div>
                       <span className="text-slate-500">Wages:</span>
                       <span className="ml-2 font-medium text-slate-900">
                         £{player.wages.toLocaleString()}/wk
                       </span>
                     </div>
                   </div>
+
+                  {/* Contract Status */}
+                  {player.contract && (
+                    <div className="mt-2 flex items-center justify-between text-sm">
+                      <span className="text-slate-500">Contract:</span>
+                      <ContractBadge
+                        status={player.contract.status}
+                        weeksRemaining={player.contract.weeksRemaining}
+                      />
+                    </div>
+                  )}
 
                   {/* Season Stats Preview */}
                   {player.stats && player.stats.appearances > 0 && (
@@ -334,24 +379,41 @@ export default function SquadPage() {
                         £{estimatedValue.toLocaleString()}
                       </div>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleViewStats(player)}
+                          className="flex-1 bg-purple-500 hover:bg-purple-600 text-white text-xs md:text-sm px-3 md:px-4 py-2.5 md:py-2 rounded-lg transition-normal font-medium"
+                        >
+                          📊 Stats
+                        </button>
+                        <button
+                          onClick={() => handleSellClick(player)}
+                          disabled={!canSell}
+                          className={`flex-1 text-xs md:text-sm px-3 md:px-4 py-2.5 md:py-2 rounded-lg transition-normal font-medium ${
+                            canSell
+                              ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                          }`}
+                          title={!canSell ? 'Cannot sell (minimum 11 players required)' : ''}
+                        >
+                          {canSell ? '💰 Sell' : '🔒 Locked'}
+                        </button>
+                      </div>
                       <button
-                        onClick={() => handleViewStats(player)}
-                        className="flex-1 bg-purple-500 hover:bg-purple-600 text-white text-xs md:text-sm px-3 md:px-4 py-2.5 md:py-2 rounded-lg transition-normal font-medium"
-                      >
-                        📊 Stats
-                      </button>
-                      <button
-                        onClick={() => handleSellClick(player)}
-                        disabled={!canSell}
-                        className={`flex-1 text-xs md:text-sm px-3 md:px-4 py-2.5 md:py-2 rounded-lg transition-normal font-medium ${
-                          canSell
-                            ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                        onClick={() => {
+                          setSelectedPlayer(player);
+                          setShowContractModal(true);
+                        }}
+                        disabled={player.contract?.status === 'active'}
+                        className={`w-full text-xs md:text-sm px-3 md:px-4 py-2.5 md:py-2 rounded-lg transition-normal font-medium ${
+                          player.contract?.status !== 'active'
+                            ? 'bg-green-500 hover:bg-green-600 text-white'
                             : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                         }`}
-                        title={!canSell ? 'Cannot sell (minimum 11 players required)' : ''}
+                        title={player.contract?.status === 'active' ? 'Contract already active' : 'Negotiate contract'}
                       >
-                        {canSell ? '💰 Sell' : '🔒 Locked'}
+                        📝 Contract
                       </button>
                     </div>
                   </div>
@@ -400,6 +462,22 @@ export default function SquadPage() {
           setShowPlayerStats(false);
           setSelectedPlayer(null);
         }}
+      />
+
+      {/* Contract Negotiation Modal */}
+      <ContractNegotiationModal
+        player={selectedPlayer}
+        isOpen={showContractModal}
+        onClose={() => {
+          setShowContractModal(false);
+          setSelectedPlayer(null);
+        }}
+        onOffer={(weeklyWage, years) => {
+          if (selectedPlayer) {
+            actions.offerContract(selectedPlayer, weeklyWage, years);
+          }
+        }}
+        currentBudget={gameState.finances.budget}
       />
     </div>
   );

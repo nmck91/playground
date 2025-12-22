@@ -18,6 +18,8 @@ import {
   NewsGenerator,
   StaffManager,
   Team,
+  Player,
+  PlayerContract,
 } from '@playground/football-director-engine';
 
 const OLD_SAVE_KEY = 'football-director-save'; // Legacy single-save key
@@ -111,6 +113,7 @@ export class SaveService {
       matchHistory: [],
       transferMarket: initialMarket,
       staffMarket: initialStaffMarket,
+      freeAgents: [],
       boardStatus,
       seasonRecords: [],
       clubRecords,
@@ -120,6 +123,51 @@ export class SaveService {
     };
 
     return gameState;
+  }
+
+  /**
+   * Migrate player wages to contracts
+   */
+  private static migratePlayerContracts(gameState: GameState): GameState {
+    // Skip if already migrated
+    if (gameState.playerTeam.players[0]?.contract) {
+      return gameState;
+    }
+
+    const createContract = (player: Player, currentYear: number): PlayerContract => {
+      const years = Math.floor(Math.random() * 3) + 2; // 2-4 years randomly
+      return {
+        weeklyWage: player.wages,
+        startYear: currentYear - 1,
+        startWeek: 1,
+        expiryYear: currentYear + years,
+        expiryWeek: 52,
+        yearsRemaining: years,
+        weeksRemaining: years * 52,
+        status: 'active',
+      };
+    };
+
+    const currentYear = gameState.season.year;
+
+    return {
+      ...gameState,
+      playerTeam: {
+        ...gameState.playerTeam,
+        players: gameState.playerTeam.players.map(p => ({
+          ...p,
+          contract: createContract(p, currentYear),
+        })),
+      },
+      aiTeams: gameState.aiTeams.map(team => ({
+        ...team,
+        players: team.players.map(p => ({
+          ...p,
+          contract: createContract(p, currentYear),
+        })),
+      })),
+      freeAgents: gameState.freeAgents || [],
+    };
   }
 
   /**
@@ -150,6 +198,9 @@ export class SaveService {
             date: new Date(t.date),
           })
         );
+
+        // Apply contract migration
+        slot.gameState = this.migratePlayerContracts(slot.gameState);
       });
 
       return parsed;

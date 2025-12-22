@@ -1,13 +1,16 @@
 'use client';
 
 import { useGameState } from '../../hooks/useGameState';
-import { Fixture } from '@playground/football-director-engine';
+import { Fixture, MatchPreview } from '@playground/football-director-engine';
 import Link from 'next/link';
 import { useState } from 'react';
+import { MatchPreviewModal } from '../../components/game/MatchPreviewModal';
 
 export default function FixturesPage() {
   const { gameState, loading, error } = useGameState();
   const [filterType, setFilterType] = useState<'all' | 'competitive' | 'friendly'>('all');
+  const [selectedPreview, setSelectedPreview] = useState<MatchPreview | null>(null);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   if (loading) {
     return (
@@ -104,6 +107,21 @@ export default function FixturesPage() {
   const isPlayerFixture = (fixture: Fixture) => {
     return fixture.homeTeamId === gameState.playerTeam.id ||
            fixture.awayTeamId === gameState.playerTeam.id;
+  };
+
+  // Get match preview for a fixture
+  const getMatchPreview = (fixture: Fixture): MatchPreview | null => {
+    if (!gameState.matchPreviews) return null;
+    return gameState.matchPreviews.find(p => p.fixtureId === fixture.id) || null;
+  };
+
+  // Open preview modal
+  const openPreview = (fixture: Fixture) => {
+    const preview = getMatchPreview(fixture);
+    if (preview) {
+      setSelectedPreview(preview);
+      setIsPreviewOpen(true);
+    }
   };
 
   // Get result display
@@ -217,6 +235,7 @@ export default function FixturesPage() {
                 const isPlayerMatch = isPlayerFixture(fixture);
                 const homeTeam = getTeamName(fixture.homeTeamId);
                 const awayTeam = getTeamName(fixture.awayTeamId);
+                const hasPreview = isPlayerMatch && getMatchPreview(fixture) !== null;
 
                 return (
                   <div
@@ -227,7 +246,7 @@ export default function FixturesPage() {
                         : 'border-gray-200 bg-gray-50'
                     }`}
                   >
-                    <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center justify-between flex-wrap gap-3">
                       <div className="flex items-center gap-3">
                         <div className="text-sm font-semibold text-slate-600 min-w-[80px]">
                           Week {fixture.week}
@@ -250,6 +269,14 @@ export default function FixturesPage() {
                             {awayTeam}
                           </div>
                         </div>
+                        {hasPreview && (
+                          <button
+                            onClick={() => openPreview(fixture)}
+                            className="ml-3 bg-teal-500 hover:bg-teal-600 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-normal text-sm whitespace-nowrap"
+                          >
+                            📋 Preview
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -272,12 +299,13 @@ export default function FixturesPage() {
                 const awayTeam = getTeamName(fixture.awayTeamId);
 
                 return (
-                  <div
+                  <Link
                     key={fixture.id}
-                    className={`p-4 rounded-lg border-2 transition-normal ${
+                    href={`/match/${fixture.id}`}
+                    className={`block p-4 rounded-lg border-2 transition-normal hover:shadow-lg cursor-pointer ${
                       isPlayerMatch
-                        ? 'border-teal-300 bg-teal-50'
-                        : 'border-gray-200 bg-gray-50'
+                        ? 'border-teal-300 bg-teal-50 hover:border-teal-400'
+                        : 'border-gray-200 bg-gray-50 hover:border-gray-300'
                     }`}
                   >
                     <div className="flex items-center justify-between flex-wrap gap-2">
@@ -307,7 +335,7 @@ export default function FixturesPage() {
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </Link>
                 );
               })}
             </div>
@@ -329,6 +357,13 @@ export default function FixturesPage() {
           </div>
         )}
       </main>
+
+      {/* Match Preview Modal */}
+      <MatchPreviewModal
+        preview={selectedPreview}
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+      />
     </div>
   );
 }
