@@ -8,24 +8,24 @@ export default function TablePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
-        <div className="text-slate-900 text-xl">Loading...</div>
+      <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary flex items-center justify-center">
+        <div className="text-slate-900 dark:text-dark-text-primary text-xl">Loading...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
-        <div className="text-red-600 text-xl">Error: {error}</div>
+      <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary flex items-center justify-center">
+        <div className="text-red-600 dark:text-red-400 text-xl">Error: {error}</div>
       </div>
     );
   }
 
   if (!gameState) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
-        <div className="text-slate-900 text-xl">No game state found</div>
+      <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary flex items-center justify-center">
+        <div className="text-slate-900 dark:text-dark-text-primary text-xl">No game state found</div>
       </div>
     );
   }
@@ -83,20 +83,20 @@ export default function TablePage() {
   });
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary pb-20">
       {/* Header */}
-      <header className="bg-teal-500 text-cream-100 shadow-lg">
+      <header className="bg-teal-500 dark:bg-dark-teal-600 text-cream-100 dark:text-dark-text-primary shadow-lg">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl md:text-4xl font-bold">League Table</h1>
-              <p className="text-teal-100 mt-1 md:mt-2 text-sm md:text-base">
+              <p className="text-teal-100 dark:text-dark-text-secondary mt-1 md:mt-2 text-sm md:text-base">
                 Season {gameState.season.year} - Week {gameState.season.currentWeek}
               </p>
             </div>
             <Link
               href="/"
-              className="bg-white text-teal-600 hover:bg-teal-50 font-medium px-3 md:px-6 py-2 md:py-3 rounded-lg shadow-sm transition-normal text-sm md:text-base"
+              className="bg-white dark:bg-dark-bg-secondary text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-dark-bg-tertiary font-medium px-3 md:px-6 py-2 md:py-3 rounded-lg shadow-sm transition-normal text-sm md:text-base"
             >
               <span className="hidden md:inline">← Back to Dashboard</span>
               <span className="md:hidden">← Back</span>
@@ -106,42 +106,42 @@ export default function TablePage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-dark-border-primary">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b-2 border-gray-200">
-                  <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700">
+                <tr className="border-b-2 border-gray-200 dark:border-dark-border-primary">
+                  <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                     Pos
                   </th>
-                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">
+                  <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                     Team
                   </th>
-                  <th className="text-center py-3 px-4 text-sm font-semibold text-slate-700">
+                  <th className="text-center py-3 px-4 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                     Form
                   </th>
-                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                     P
                   </th>
-                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                     W
                   </th>
-                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                     D
                   </th>
-                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                     L
                   </th>
-                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                     GF
                   </th>
-                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                     GA
                   </th>
-                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                     GD
                   </th>
-                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                  <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                     Pts
                   </th>
                 </tr>
@@ -155,52 +155,52 @@ export default function TablePage() {
                   return (
                     <tr
                       key={entry.teamId}
-                      className={`border-b border-gray-100 ${
+                      className={`border-b border-gray-100 dark:border-dark-border-secondary ${
                         isPlayerTeam
-                          ? 'bg-teal-50 font-semibold'
+                          ? 'bg-teal-50 dark:bg-teal-900/20 font-semibold'
                           : isTopFour
-                          ? 'bg-green-50/30'
+                          ? 'bg-green-50/30 dark:bg-green-900/10'
                           : isRelegation
-                          ? 'bg-red-50/30'
+                          ? 'bg-red-50/30 dark:bg-red-900/10'
                           : ''
                       }`}
                     >
-                      <td className="py-3 px-2 text-sm text-slate-700">
+                      <td className="py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">
                         <div className="flex items-center gap-2">
                           {index + 1}
                           {index === 0 && <span className="text-yellow-500">🏆</span>}
                         </div>
                       </td>
-                      <td className="py-3 px-4 text-sm text-slate-900">
+                      <td className="py-3 px-4 text-sm text-slate-900 dark:text-dark-text-primary">
                         {entry.teamName}
-                        {isPlayerTeam && <span className="ml-2 text-teal-600">★</span>}
+                        {isPlayerTeam && <span className="ml-2 text-teal-600 dark:text-teal-400">★</span>}
                       </td>
                       <td className="py-3 px-4">
                         <FormBadge form={getTeamForm(entry.teamId)} />
                       </td>
-                      <td className="text-center py-3 px-2 text-sm text-slate-700">
+                      <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">
                         {entry.played}
                       </td>
-                      <td className="text-center py-3 px-2 text-sm text-slate-700">
+                      <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">
                         {entry.won}
                       </td>
-                      <td className="text-center py-3 px-2 text-sm text-slate-700">
+                      <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">
                         {entry.drawn}
                       </td>
-                      <td className="text-center py-3 px-2 text-sm text-slate-700">
+                      <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">
                         {entry.lost}
                       </td>
-                      <td className="text-center py-3 px-2 text-sm text-slate-700">
+                      <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">
                         {entry.goalsFor}
                       </td>
-                      <td className="text-center py-3 px-2 text-sm text-slate-700">
+                      <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">
                         {entry.goalsAgainst}
                       </td>
-                      <td className="text-center py-3 px-2 text-sm text-slate-700">
+                      <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">
                         {entry.goalDifference > 0 ? '+' : ''}
                         {entry.goalDifference}
                       </td>
-                      <td className="text-center py-3 px-2 text-sm font-bold text-teal-600">
+                      <td className="text-center py-3 px-2 text-sm font-bold text-teal-600 dark:text-teal-400">
                         {entry.points}
                       </td>
                     </tr>
@@ -211,21 +211,21 @@ export default function TablePage() {
           </div>
 
           {/* Legend */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <div className="text-sm text-slate-600 space-y-2">
+          <div className="mt-6 pt-6 border-t border-gray-200 dark:border-dark-border-primary">
+            <div className="text-sm text-slate-600 dark:text-dark-text-secondary space-y-2">
               <div className="flex items-center gap-3">
-                <div className="w-4 h-4 bg-green-50 border border-green-200 rounded"></div>
+                <div className="w-4 h-4 bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-700 rounded"></div>
                 <span>Top 4 - European Competition</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-4 h-4 bg-red-50 border border-red-200 rounded"></div>
+                <div className="w-4 h-4 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-700 rounded"></div>
                 <span>Bottom 3 - Relegation Zone</span>
               </div>
               <div className="flex items-center gap-3">
-                <div className="w-4 h-4 bg-teal-50 border border-teal-200 rounded"></div>
+                <div className="w-4 h-4 bg-teal-50 dark:bg-teal-900/20 border border-teal-200 dark:border-teal-600 rounded"></div>
                 <span className="font-semibold">Your Team</span>
               </div>
-              <div className="flex items-center gap-3 pt-2 border-t border-gray-100 mt-2">
+              <div className="flex items-center gap-3 pt-2 border-t border-gray-100 dark:border-dark-border-secondary mt-2">
                 <div className="flex gap-1">
                   <div className="w-4 h-4 bg-green-500 rounded-sm"></div>
                   <div className="w-4 h-4 bg-orange-400 rounded-sm"></div>
