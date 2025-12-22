@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-primary: theme('colors.cream.50');
+    --bg-secondary: theme('colors.white');
+    --text-primary: theme('colors.slate.900');
+    --text-secondary: theme('colors.slate.700');
+  }
+
+  .dark {
+    --bg-primary: theme('colors.dark.bg.primary');
+    --bg-secondary: theme('colors.dark.bg.secondary');
+    --text-primary: theme('colors.dark.text.primary');
+    --text-secondary: theme('colors.dark.text.secondary');
+  }
+
+  /* Smooth theme transitions */
+  * {
+    @apply transition-colors duration-normal;
+  }
+
+  /* Glass-morphism utility */
+  .glass {
+    @apply backdrop-blur-md bg-white/80 dark:bg-dark-bg-secondary/80 border border-gray-200/50 dark:border-dark-border-primary/50;
+  }
+}
+
+@layer utilities {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .pb-safe {
+    padding-bottom: calc(theme('spacing.20') + env(safe-area-inset-bottom));
+  }
+}

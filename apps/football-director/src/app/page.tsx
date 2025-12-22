@@ -16,6 +16,7 @@ import { NewsTickerWidget } from '../components/game/NewsTickerWidget';
 import { TacticsManager } from '../components/game/TacticsManager';
 import { SaveSlotManager } from '../components/saves/SaveSlotManager';
 import { YouthAcademyModal } from '../components/game/YouthAcademyModal';
+import { ThemeToggle } from '../components/ui/ThemeToggle';
 import Link from 'next/link';
 
 export default function Dashboard() {
@@ -163,28 +164,33 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary">
       {/* Header */}
-      <header className="bg-teal-500 text-cream-100 shadow-lg">
+      <header className="bg-teal-500 dark:bg-dark-teal-600 text-cream-100 dark:text-dark-text-primary shadow-lg">
         <div className="max-w-7xl mx-auto px-6 py-8">
-          <h1 className="text-4xl font-bold">⚽ Football Director</h1>
-          <p className="text-teal-100 mt-2">{gameState.playerTeam.name}</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-4xl font-bold">⚽ Football Director</h1>
+              <p className="text-teal-100 mt-2">{gameState.playerTeam.name}</p>
+            </div>
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Season Info */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-6 mb-8 border border-gray-200 dark:border-dark-border-primary">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
             <div>
-              <div className="text-sm text-slate-500 mb-1">Season</div>
-              <div className="text-2xl font-bold text-slate-900">
+              <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Season</div>
+              <div className="text-2xl font-bold text-slate-900 dark:text-dark-text-primary">
                 {gameState.season.year}
               </div>
             </div>
             <div>
-              <div className="text-sm text-slate-500 mb-1">Week</div>
-              <div className="text-2xl font-bold text-slate-900">
+              <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Week</div>
+              <div className="text-2xl font-bold text-slate-900 dark:text-dark-text-primary">
                 {gameState.season.currentWeek} / {gameState.season.totalWeeks}
               </div>
               <div className="text-xs mt-1">
