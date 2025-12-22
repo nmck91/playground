@@ -14,24 +14,24 @@ export default function FixturesPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
-        <div className="text-slate-900 text-xl">Loading...</div>
+      <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary flex items-center justify-center">
+        <div className="text-slate-900 dark:text-dark-text-primary text-xl">Loading...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
-        <div className="text-red-600 text-xl">Error: {error}</div>
+      <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary flex items-center justify-center">
+        <div className="text-red-600 dark:text-red-400 text-xl">Error: {error}</div>
       </div>
     );
   }
 
   if (!gameState) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
-        <div className="text-slate-900 text-xl">No game state found</div>
+      <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary flex items-center justify-center">
+        <div className="text-slate-900 dark:text-dark-text-primary text-xl">No game state found</div>
       </div>
     );
   }
@@ -140,24 +140,24 @@ export default function FixturesPage() {
     const playerScore = isHome ? fixture.result.homeScore : fixture.result.awayScore;
     const opponentScore = isHome ? fixture.result.awayScore : fixture.result.homeScore;
 
-    let resultClass = 'text-slate-700';
+    let resultClass = 'text-slate-700 dark:text-slate-300';
     let resultLabel = '';
 
     if (playerScore > opponentScore) {
-      resultClass = 'text-green-600 font-bold';
+      resultClass = 'text-green-600 dark:text-green-400 font-bold';
       resultLabel = 'W';
     } else if (playerScore < opponentScore) {
-      resultClass = 'text-red-600 font-bold';
+      resultClass = 'text-red-600 dark:text-red-400 font-bold';
       resultLabel = 'L';
     } else {
-      resultClass = 'text-orange-600 font-bold';
+      resultClass = 'text-orange-600 dark:text-orange-400 font-bold';
       resultLabel = 'D';
     }
 
     return (
       <div className="flex items-center gap-2">
         <span className={resultClass}>{resultLabel}</span>
-        <span className="text-slate-900 font-semibold">
+        <span className="text-slate-900 dark:text-dark-text-primary font-semibold">
           {playerScore} - {opponentScore}
         </span>
       </div>
@@ -165,20 +165,20 @@ export default function FixturesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary pb-20">
       {/* Header */}
-      <header className="bg-teal-500 text-cream-100 shadow-lg">
+      <header className="bg-teal-500 dark:bg-dark-teal-600 text-cream-100 dark:text-dark-text-primary shadow-lg">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl md:text-4xl font-bold">Fixtures</h1>
-              <p className="text-teal-100 mt-1 md:mt-2 text-sm md:text-base">
+              <p className="text-teal-100 dark:text-dark-text-secondary mt-1 md:mt-2 text-sm md:text-base">
                 Season {gameState.season.year} - Week {gameState.season.currentWeek}
               </p>
             </div>
             <Link
               href="/"
-              className="bg-white text-teal-600 hover:bg-teal-50 font-medium px-3 md:px-6 py-2 md:py-3 rounded-lg shadow-sm transition-normal text-sm md:text-base"
+              className="bg-white dark:bg-dark-bg-secondary text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-dark-bg-tertiary font-medium px-3 md:px-6 py-2 md:py-3 rounded-lg shadow-sm transition-normal text-sm md:text-base"
             >
               <span className="hidden md:inline">← Back to Dashboard</span>
               <span className="md:hidden">← Back</span>
@@ -189,14 +189,14 @@ export default function FixturesPage() {
 
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-4 mb-6 border border-gray-200 dark:border-dark-border-primary">
           <div className="flex gap-2">
             <button
               onClick={() => setFilterType('all')}
               className={`px-4 py-2 rounded-lg font-medium transition-normal ${
                 filterType === 'all'
-                  ? 'bg-teal-500 text-white'
-                  : 'bg-gray-100 text-slate-700 hover:bg-gray-200'
+                  ? 'bg-teal-500 dark:bg-teal-600 text-white'
+                  : 'bg-gray-100 dark:bg-dark-bg-tertiary text-slate-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-bg-primary'
               }`}
             >
               All Matches
@@ -205,8 +205,8 @@ export default function FixturesPage() {
               onClick={() => setFilterType('competitive')}
               className={`px-4 py-2 rounded-lg font-medium transition-normal ${
                 filterType === 'competitive'
-                  ? 'bg-teal-500 text-white'
-                  : 'bg-gray-100 text-slate-700 hover:bg-gray-200'
+                  ? 'bg-teal-500 dark:bg-teal-600 text-white'
+                  : 'bg-gray-100 dark:bg-dark-bg-tertiary text-slate-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-bg-primary'
               }`}
             >
               League
@@ -215,8 +215,8 @@ export default function FixturesPage() {
               onClick={() => setFilterType('friendly')}
               className={`px-4 py-2 rounded-lg font-medium transition-normal ${
                 filterType === 'friendly'
-                  ? 'bg-teal-500 text-white'
-                  : 'bg-gray-100 text-slate-700 hover:bg-gray-200'
+                  ? 'bg-teal-500 dark:bg-teal-600 text-white'
+                  : 'bg-gray-100 dark:bg-dark-bg-tertiary text-slate-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-bg-primary'
               }`}
             >
               Friendlies
@@ -226,8 +226,8 @@ export default function FixturesPage() {
 
         {/* Upcoming Fixtures */}
         {upcomingFixtures.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-2xl font-semibold text-slate-900 mb-4">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-6 mb-6 border border-gray-200 dark:border-dark-border-primary">
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-dark-text-primary mb-4">
               Upcoming Fixtures
             </h2>
             <div className="space-y-3">
@@ -242,37 +242,37 @@ export default function FixturesPage() {
                     key={fixture.id}
                     className={`p-4 rounded-lg border-2 transition-normal ${
                       isPlayerMatch
-                        ? 'border-teal-300 bg-teal-50'
-                        : 'border-gray-200 bg-gray-50'
+                        ? 'border-teal-300 dark:border-teal-600 bg-teal-50 dark:bg-teal-900/20'
+                        : 'border-gray-200 dark:border-dark-border-primary bg-gray-50 dark:bg-dark-bg-tertiary'
                     }`}
                   >
                     <div className="flex items-center justify-between flex-wrap gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="text-sm font-semibold text-slate-600 min-w-[80px]">
+                        <div className="text-sm font-semibold text-slate-600 dark:text-dark-text-secondary min-w-[80px]">
                           Week {fixture.week}
                         </div>
-                        <div className="text-xs px-2 py-1 rounded bg-purple-100 text-purple-700 font-medium">
+                        <div className="text-xs px-2 py-1 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 font-medium">
                           {fixture.matchType === 'friendly' ? '⚽ Friendly' : '🏆 League'}
                         </div>
                       </div>
                       <div className="flex items-center gap-4 flex-1 justify-end flex-wrap md:flex-nowrap">
                         <div className="flex items-center gap-2">
-                          <div className={`text-right ${isPlayerMatch && homeTeam === gameState.playerTeam.name ? 'font-bold text-teal-600' : ''}`}>
+                          <div className={`text-right ${isPlayerMatch && homeTeam === gameState.playerTeam.name ? 'font-bold text-teal-600 dark:text-teal-400' : 'text-slate-900 dark:text-dark-text-primary'}`}>
                             {homeTeam}
                           </div>
                           <FormBadge form={getTeamForm(fixture.homeTeamId)} />
                         </div>
-                        <div className="text-slate-400 font-medium">vs</div>
+                        <div className="text-slate-400 dark:text-dark-text-tertiary font-medium">vs</div>
                         <div className="flex items-center gap-2">
                           <FormBadge form={getTeamForm(fixture.awayTeamId)} />
-                          <div className={`text-left ${isPlayerMatch && awayTeam === gameState.playerTeam.name ? 'font-bold text-teal-600' : ''}`}>
+                          <div className={`text-left ${isPlayerMatch && awayTeam === gameState.playerTeam.name ? 'font-bold text-teal-600 dark:text-teal-400' : 'text-slate-900 dark:text-dark-text-primary'}`}>
                             {awayTeam}
                           </div>
                         </div>
                         {hasPreview && (
                           <button
                             onClick={() => openPreview(fixture)}
-                            className="ml-3 bg-teal-500 hover:bg-teal-600 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-normal text-sm whitespace-nowrap"
+                            className="ml-3 bg-teal-500 hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-700 text-white font-medium px-4 py-2 rounded-lg shadow-sm transition-normal text-sm whitespace-nowrap"
                           >
                             📋 Preview
                           </button>
@@ -288,8 +288,8 @@ export default function FixturesPage() {
 
         {/* Past Results */}
         {pastFixtures.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-semibold text-slate-900 mb-4">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-dark-border-primary">
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-dark-text-primary mb-4">
               Results
             </h2>
             <div className="space-y-3">
@@ -304,22 +304,22 @@ export default function FixturesPage() {
                     href={`/match/${fixture.id}`}
                     className={`block p-4 rounded-lg border-2 transition-normal hover:shadow-lg cursor-pointer ${
                       isPlayerMatch
-                        ? 'border-teal-300 bg-teal-50 hover:border-teal-400'
-                        : 'border-gray-200 bg-gray-50 hover:border-gray-300'
+                        ? 'border-teal-300 dark:border-teal-600 bg-teal-50 dark:bg-teal-900/20 hover:border-teal-400 dark:hover:border-teal-500'
+                        : 'border-gray-200 dark:border-dark-border-primary bg-gray-50 dark:bg-dark-bg-tertiary hover:border-gray-300 dark:hover:border-dark-border-secondary'
                     }`}
                   >
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <div className="flex items-center gap-3">
-                        <div className="text-sm font-semibold text-slate-600 min-w-[80px]">
+                        <div className="text-sm font-semibold text-slate-600 dark:text-dark-text-secondary min-w-[80px]">
                           Week {fixture.week}
                         </div>
-                        <div className="text-xs px-2 py-1 rounded bg-purple-100 text-purple-700 font-medium">
+                        <div className="text-xs px-2 py-1 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 font-medium">
                           {fixture.matchType === 'friendly' ? '⚽ Friendly' : '🏆 League'}
                         </div>
                       </div>
                       <div className="flex items-center gap-4 flex-1 justify-end flex-wrap md:flex-nowrap">
                         <div className="flex items-center gap-2">
-                          <div className={`text-right ${isPlayerMatch && homeTeam === gameState.playerTeam.name ? 'font-bold text-slate-900' : 'text-slate-700'}`}>
+                          <div className={`text-right ${isPlayerMatch && homeTeam === gameState.playerTeam.name ? 'font-bold text-slate-900 dark:text-dark-text-primary' : 'text-slate-700 dark:text-dark-text-secondary'}`}>
                             {homeTeam}
                           </div>
                           <FormBadge form={getTeamForm(fixture.homeTeamId)} />
@@ -329,7 +329,7 @@ export default function FixturesPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <FormBadge form={getTeamForm(fixture.awayTeamId)} />
-                          <div className={`text-left ${isPlayerMatch && awayTeam === gameState.playerTeam.name ? 'font-bold text-slate-900' : 'text-slate-700'}`}>
+                          <div className={`text-left ${isPlayerMatch && awayTeam === gameState.playerTeam.name ? 'font-bold text-slate-900 dark:text-dark-text-primary' : 'text-slate-700 dark:text-dark-text-secondary'}`}>
                             {awayTeam}
                           </div>
                         </div>
@@ -344,12 +344,12 @@ export default function FixturesPage() {
 
         {/* No fixtures message */}
         {upcomingFixtures.length === 0 && pastFixtures.length === 0 && (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-12 text-center border border-gray-200 dark:border-dark-border-primary">
             <div className="text-4xl mb-4">📅</div>
-            <h3 className="text-xl font-semibold text-slate-900 mb-2">
+            <h3 className="text-xl font-semibold text-slate-900 dark:text-dark-text-primary mb-2">
               No {filterType !== 'all' ? filterType : ''} fixtures found
             </h3>
-            <p className="text-slate-600">
+            <p className="text-slate-600 dark:text-dark-text-secondary">
               {filterType !== 'all'
                 ? 'Try selecting a different filter to see more fixtures.'
                 : 'Fixtures will appear as the season progresses.'}
