@@ -28,24 +28,24 @@ export default function SquadPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
-        <div className="text-slate-900 text-xl">Loading...</div>
+      <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary flex items-center justify-center">
+        <div className="text-slate-900 dark:text-dark-text-primary text-xl">Loading...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
-        <div className="text-red-600 text-xl">Error: {error}</div>
+      <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary flex items-center justify-center">
+        <div className="text-red-600 dark:text-red-400 text-xl">Error: {error}</div>
       </div>
     );
   }
 
   if (!gameState) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
-        <div className="text-slate-900 text-xl">No game state found</div>
+      <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary flex items-center justify-center">
+        <div className="text-slate-900 dark:text-dark-text-primary text-xl">No game state found</div>
       </div>
     );
   }
@@ -143,18 +143,18 @@ export default function SquadPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary pb-20">
       {/* Header */}
-      <header className="bg-teal-500 text-cream-100 shadow-lg">
+      <header className="bg-teal-500 dark:bg-dark-teal-600 text-cream-100 dark:text-dark-text-primary shadow-lg">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl md:text-4xl font-bold">Squad Management</h1>
-              <p className="text-teal-100 mt-1 text-sm md:text-base">{gameState.playerTeam.name}</p>
+              <p className="text-teal-100 dark:text-dark-text-secondary mt-1 text-sm md:text-base">{gameState.playerTeam.name}</p>
             </div>
             <Link
               href="/"
-              className="bg-white text-teal-600 hover:bg-teal-50 font-medium px-3 md:px-6 py-2 md:py-3 rounded-lg shadow-sm transition-normal text-sm md:text-base"
+              className="bg-white dark:bg-dark-bg-secondary text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-dark-bg-tertiary font-medium px-3 md:px-6 py-2 md:py-3 rounded-lg shadow-sm transition-normal text-sm md:text-base"
             >
               <span className="hidden md:inline">← Back to Dashboard</span>
               <span className="md:hidden">← Back</span>
@@ -165,30 +165,30 @@ export default function SquadPage() {
 
       <main className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">
         {/* Squad Overview */}
-        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6 md:mb-8">
-          <h2 className="text-xl md:text-2xl font-semibold text-slate-900 mb-4">Squad Overview</h2>
+        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-4 md:p-6 mb-6 md:mb-8 border border-gray-200 dark:border-dark-border-primary">
+          <h2 className="text-xl md:text-2xl font-semibold text-slate-900 dark:text-dark-text-primary mb-4">Squad Overview</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             <div>
-              <div className="text-xs md:text-sm text-slate-500 mb-1">Total Players</div>
-              <div className="text-xl md:text-2xl font-bold text-slate-900">
+              <div className="text-xs md:text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Total Players</div>
+              <div className="text-xl md:text-2xl font-bold text-slate-900 dark:text-dark-text-primary">
                 {gameState.playerTeam.players.length} / 25
               </div>
             </div>
             <div>
-              <div className="text-xs md:text-sm text-slate-500 mb-1">Average Skill</div>
+              <div className="text-xs md:text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Average Skill</div>
               <div className={`text-xl md:text-2xl font-bold ${getSkillColor(parseFloat(avgSkill))}`}>
                 {avgSkill} / 20
               </div>
             </div>
             <div>
-              <div className="text-xs md:text-sm text-slate-500 mb-1">Weekly Wages</div>
-              <div className="text-xl md:text-2xl font-bold text-slate-900">
+              <div className="text-xs md:text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Weekly Wages</div>
+              <div className="text-xl md:text-2xl font-bold text-slate-900 dark:text-dark-text-primary">
                 £{totalWages.toLocaleString()}
               </div>
             </div>
             <div>
-              <div className="text-xs md:text-sm text-slate-500 mb-1">Position Split</div>
-              <div className="text-xs md:text-sm text-slate-700 mt-1">
+              <div className="text-xs md:text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Position Split</div>
+              <div className="text-xs md:text-sm text-slate-700 dark:text-dark-text-secondary mt-1">
                 GK: {positionCounts.GK} | DEF: {positionCounts.DEF} | MID: {positionCounts.MID} | FWD: {positionCounts.FWD}
               </div>
             </div>
@@ -196,7 +196,7 @@ export default function SquadPage() {
         </div>
 
         {/* Filters and Sorting */}
-        <div className="bg-white rounded-lg shadow-md p-4 md:p-6 mb-6 md:mb-8">
+        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-4 md:p-6 mb-6 md:mb-8 border border-gray-200 dark:border-dark-border-primary">
           <div className="space-y-4">
             {/* Sort Dropdown */}
             <div>
