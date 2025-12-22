@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <rect width="512" height="512" fill="#21808D" rx="96"/>
+
+  <!-- Football icon -->
+  <circle cx="256" cy="256" r="140" fill="#FFFFFF"/>
+
+  <!-- Pentagon pattern (classic football) -->
+  <path d="M 256 136 L 291 196 L 256 236 L 221 196 Z" fill="#21808D"/>
+  <path d="M 291 196 L 346 206 L 336 256 L 286 246 Z" fill="#21808D"/>
+  <path d="M 336 256 L 326 306 L 276 296 L 286 246 Z" fill="#21808D"/>
+  <path d="M 276 296 L 256 346 L 236 296 L 276 296 Z" fill="#21808D"/>
+  <path d="M 236 296 L 186 306 L 176 256 L 226 246 Z" fill="#21808D"/>
+  <path d="M 176 256 L 166 206 L 221 196 L 226 246 Z" fill="#21808D"/>
+
+  <!-- Center pentagon -->
+  <polygon points="256,200 280,230 268,265 244,265 232,230" fill="#21808D"/>
+
+  <!-- Highlight -->
+  <ellipse cx="230" cy="210" rx="25" ry="35" fill="rgba(255,255,255,0.3)" transform="rotate(-30 230 210)"/>
+</svg>
