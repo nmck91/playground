@@ -347,40 +347,35 @@ export default function Dashboard() {
           onNewsClick={() => setShowNewsFeed(true)}
         />
 
-        {/* League Table with Position Header */}
+        {/* League Position & Table (Collapsible) */}
         <div className="mb-6">
-          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl border border-gray-200 dark:border-dark-border-primary overflow-hidden">
-            {/* League Position Header */}
-            <div className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-dark-bg-tertiary dark:to-dark-bg-tertiary border-b border-gray-200 dark:border-dark-border-primary p-6">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <div className="text-sm font-medium text-slate-500 dark:text-dark-text-secondary mb-1">
-                    League Position
+          <CollapsibleSection
+            title={
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-baseline gap-3">
+                  <div className="text-sm font-medium text-slate-500 dark:text-dark-text-secondary">
+                    League Position:
                   </div>
-                  <div className="flex items-baseline gap-3">
-                    <div className="text-5xl font-bold text-slate-900 dark:text-dark-text-primary">
-                      {playerPosition}
-                      {playerPosition === 1 && <span className="ml-2">🏆</span>}
-                    </div>
-                    <div className="text-lg text-slate-600 dark:text-dark-text-secondary">
-                      / {sortedTable.length}
-                    </div>
+                  <div className="text-3xl font-bold text-slate-900 dark:text-dark-text-primary">
+                    {playerPosition}
+                    {playerPosition === 1 && <span className="ml-2 text-2xl">🏆</span>}
                   </div>
-                  <div className="text-sm text-slate-600 dark:text-dark-text-secondary mt-2">
-                    Season {gameState.season.year}/{gameState.season.year + 1}
+                  <div className="text-base text-slate-600 dark:text-dark-text-secondary">
+                    / {sortedTable.length}
                   </div>
                 </div>
                 <Link
                   href="/table"
-                  className="px-4 py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white text-sm font-medium rounded-lg transition-all active:scale-95"
+                  onClick={(e) => e.stopPropagation()}
+                  className="px-3 py-1.5 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white text-xs font-medium rounded-lg transition-all active:scale-95"
                 >
                   Full Table →
                 </Link>
               </div>
-            </div>
-
-            {/* League Table */}
-            <div className="p-6">
+            }
+            defaultOpen={true}
+          >
+            <div className="pt-4">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -428,7 +423,7 @@ export default function Dashboard() {
                 </table>
               </div>
             </div>
-          </div>
+          </CollapsibleSection>
         </div>
       </main>
 

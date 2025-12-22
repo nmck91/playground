@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ReactNode } from 'react';
 
 interface Props {
-  title: string;
+  title: string | ReactNode;
   defaultOpen?: boolean;
   children: React.ReactNode;
 }
@@ -17,10 +17,14 @@ export function CollapsibleSection({ title, defaultOpen = false, children }: Pro
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors"
       >
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-dark-text-primary">
-          {title}
-        </h3>
-        <span className={`text-gray-400 transition-transform ${isOpen ? 'rotate-180' : ''}`}>
+        {typeof title === 'string' ? (
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-dark-text-primary">
+            {title}
+          </h3>
+        ) : (
+          <div className="flex-1">{title}</div>
+        )}
+        <span className={`text-gray-400 dark:text-dark-text-tertiary transition-transform ml-3 ${isOpen ? 'rotate-180' : ''}`}>
           ▼
         </span>
       </button>
