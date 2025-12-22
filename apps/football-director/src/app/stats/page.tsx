@@ -13,24 +13,24 @@ export default function StatsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
-        <div className="text-slate-900 text-xl">Loading...</div>
+      <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary flex items-center justify-center">
+        <div className="text-slate-900 dark:text-dark-text-primary text-xl">Loading...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
-        <div className="text-red-600 text-xl">Error: {error}</div>
+      <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary flex items-center justify-center">
+        <div className="text-red-600 dark:text-red-400 text-xl">Error: {error}</div>
       </div>
     );
   }
 
   if (!gameState) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
-        <div className="text-slate-900 text-xl">No game state found</div>
+      <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary flex items-center justify-center">
+        <div className="text-slate-900 dark:text-dark-text-primary text-xl">No game state found</div>
       </div>
     );
   }
@@ -94,20 +94,20 @@ export default function StatsPage() {
   const isPlayerTeam = (teamName: string) => teamName === gameState.playerTeam.name;
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary pb-20">
       {/* Header */}
-      <header className="bg-teal-500 text-cream-100 shadow-lg">
+      <header className="bg-teal-500 dark:bg-dark-teal-600 text-cream-100 dark:text-dark-text-primary shadow-lg">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl md:text-4xl font-bold">League Statistics</h1>
-              <p className="text-teal-100 mt-1 md:mt-2 text-sm md:text-base">
+              <p className="text-teal-100 dark:text-dark-text-secondary mt-1 md:mt-2 text-sm md:text-base">
                 Season {gameState.season.year} - Week {gameState.season.currentWeek}
               </p>
             </div>
             <Link
               href="/"
-              className="bg-white text-teal-600 hover:bg-teal-50 font-medium px-3 md:px-6 py-2 md:py-3 rounded-lg shadow-sm transition-normal text-sm md:text-base"
+              className="bg-white dark:bg-dark-bg-secondary text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-dark-bg-tertiary font-medium px-3 md:px-6 py-2 md:py-3 rounded-lg shadow-sm transition-normal text-sm md:text-base"
             >
               <span className="hidden md:inline">← Back to Dashboard</span>
               <span className="md:hidden">← Back</span>
@@ -118,14 +118,14 @@ export default function StatsPage() {
 
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Tabs */}
-        <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-4 mb-6 border border-gray-200 dark:border-dark-border-primary">
           <div className="flex gap-2 flex-wrap">
             <button
               onClick={() => setActiveTab('scorers')}
               className={`px-4 py-2 rounded-lg font-medium transition-normal ${
                 activeTab === 'scorers'
-                  ? 'bg-teal-500 text-white'
-                  : 'bg-gray-100 text-slate-700 hover:bg-gray-200'
+                  ? 'bg-teal-500 dark:bg-teal-600 text-white'
+                  : 'bg-gray-100 dark:bg-dark-bg-tertiary text-slate-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-bg-primary'
               }`}
             >
               ⚽ Top Scorers
@@ -134,8 +134,8 @@ export default function StatsPage() {
               onClick={() => setActiveTab('assisters')}
               className={`px-4 py-2 rounded-lg font-medium transition-normal ${
                 activeTab === 'assisters'
-                  ? 'bg-teal-500 text-white'
-                  : 'bg-gray-100 text-slate-700 hover:bg-gray-200'
+                  ? 'bg-teal-500 dark:bg-teal-600 text-white'
+                  : 'bg-gray-100 dark:bg-dark-bg-tertiary text-slate-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-bg-primary'
               }`}
             >
               🎯 Top Assisters
@@ -144,8 +144,8 @@ export default function StatsPage() {
               onClick={() => setActiveTab('teams')}
               className={`px-4 py-2 rounded-lg font-medium transition-normal ${
                 activeTab === 'teams'
-                  ? 'bg-teal-500 text-white'
-                  : 'bg-gray-100 text-slate-700 hover:bg-gray-200'
+                  ? 'bg-teal-500 dark:bg-teal-600 text-white'
+                  : 'bg-gray-100 dark:bg-dark-bg-tertiary text-slate-700 dark:text-dark-text-secondary hover:bg-gray-200 dark:hover:bg-dark-bg-primary'
               }`}
             >
               📊 Team Stats
@@ -155,30 +155,30 @@ export default function StatsPage() {
 
         {/* Top Scorers Tab */}
         {activeTab === 'scorers' && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-semibold text-slate-900 mb-4">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-dark-border-primary">
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-dark-text-primary mb-4">
               Top Scorers
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b-2 border-gray-200">
-                    <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700">
+                  <tr className="border-b-2 border-gray-200 dark:border-dark-border-primary">
+                    <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                       Rank
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                       Player
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                       Team
                     </th>
-                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                       Apps
                     </th>
-                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                       Goals
                     </th>
-                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                       Goals/Game
                     </th>
                   </tr>
@@ -191,35 +191,35 @@ export default function StatsPage() {
                     return (
                       <tr
                         key={player.id}
-                        className={`border-b border-gray-100 ${
-                          isPlayerTeamPlayer ? 'bg-teal-50 font-semibold' : ''
+                        className={`border-b border-gray-100 dark:border-dark-border-secondary ${
+                          isPlayerTeamPlayer ? 'bg-teal-50 dark:bg-teal-900/20 font-semibold' : ''
                         }`}
                       >
-                        <td className="py-3 px-2 text-sm text-slate-700">
+                        <td className="py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">
                           <div className="flex items-center gap-2">
                             {index + 1}
                             {index === 0 && <span className="text-yellow-500">🥇</span>}
                             {index === 1 && <span className="text-gray-400">🥈</span>}
-                            {index === 2 && <span className="text-orange-600">🥉</span>}
+                            {index === 2 && <span className="text-orange-600 dark:text-orange-400">🥉</span>}
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-sm text-slate-900">
+                        <td className="py-3 px-4 text-sm text-slate-900 dark:text-dark-text-primary">
                           {player.name}
-                          <span className="text-xs text-slate-500 ml-2">
+                          <span className="text-xs text-slate-500 dark:text-dark-text-tertiary ml-2">
                             ({player.position})
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-sm text-slate-700">
+                        <td className="py-3 px-4 text-sm text-slate-700 dark:text-dark-text-secondary">
                           {player.teamName}
-                          {isPlayerTeamPlayer && <span className="ml-2 text-teal-600">★</span>}
+                          {isPlayerTeamPlayer && <span className="ml-2 text-teal-600 dark:text-teal-400">★</span>}
                         </td>
-                        <td className="text-center py-3 px-2 text-sm text-slate-700">
+                        <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">
                           {player.stats.appearances}
                         </td>
-                        <td className="text-center py-3 px-2 text-sm font-bold text-teal-600">
+                        <td className="text-center py-3 px-2 text-sm font-bold text-teal-600 dark:text-teal-400">
                           {player.stats.goals}
                         </td>
-                        <td className="text-center py-3 px-2 text-sm text-slate-600">
+                        <td className="text-center py-3 px-2 text-sm text-slate-600 dark:text-dark-text-tertiary">
                           {goalsPerGame}
                         </td>
                       </tr>
@@ -229,7 +229,7 @@ export default function StatsPage() {
               </table>
             </div>
             {topScorers.length === 0 && (
-              <div className="text-center py-12 text-slate-500">
+              <div className="text-center py-12 text-slate-500 dark:text-dark-text-secondary">
                 No goals scored yet this season.
               </div>
             )}
@@ -238,30 +238,30 @@ export default function StatsPage() {
 
         {/* Top Assisters Tab */}
         {activeTab === 'assisters' && (
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-2xl font-semibold text-slate-900 mb-4">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-dark-border-primary">
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-dark-text-primary mb-4">
               Top Assisters
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b-2 border-gray-200">
-                    <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700">
+                  <tr className="border-b-2 border-gray-200 dark:border-dark-border-primary">
+                    <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                       Rank
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                       Player
                     </th>
-                    <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">
+                    <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                       Team
                     </th>
-                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                       Apps
                     </th>
-                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                       Assists
                     </th>
-                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">
+                    <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">
                       Assists/Game
                     </th>
                   </tr>
@@ -274,35 +274,35 @@ export default function StatsPage() {
                     return (
                       <tr
                         key={player.id}
-                        className={`border-b border-gray-100 ${
-                          isPlayerTeamPlayer ? 'bg-teal-50 font-semibold' : ''
+                        className={`border-b border-gray-100 dark:border-dark-border-secondary ${
+                          isPlayerTeamPlayer ? 'bg-teal-50 dark:bg-teal-900/20 font-semibold' : ''
                         }`}
                       >
-                        <td className="py-3 px-2 text-sm text-slate-700">
+                        <td className="py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">
                           <div className="flex items-center gap-2">
                             {index + 1}
                             {index === 0 && <span className="text-yellow-500">🥇</span>}
                             {index === 1 && <span className="text-gray-400">🥈</span>}
-                            {index === 2 && <span className="text-orange-600">🥉</span>}
+                            {index === 2 && <span className="text-orange-600 dark:text-orange-400">🥉</span>}
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-sm text-slate-900">
+                        <td className="py-3 px-4 text-sm text-slate-900 dark:text-dark-text-primary">
                           {player.name}
-                          <span className="text-xs text-slate-500 ml-2">
+                          <span className="text-xs text-slate-500 dark:text-dark-text-tertiary ml-2">
                             ({player.position})
                           </span>
                         </td>
-                        <td className="py-3 px-4 text-sm text-slate-700">
+                        <td className="py-3 px-4 text-sm text-slate-700 dark:text-dark-text-secondary">
                           {player.teamName}
-                          {isPlayerTeamPlayer && <span className="ml-2 text-teal-600">★</span>}
+                          {isPlayerTeamPlayer && <span className="ml-2 text-teal-600 dark:text-teal-400">★</span>}
                         </td>
-                        <td className="text-center py-3 px-2 text-sm text-slate-700">
+                        <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">
                           {player.stats.appearances}
                         </td>
-                        <td className="text-center py-3 px-2 text-sm font-bold text-purple-600">
+                        <td className="text-center py-3 px-2 text-sm font-bold text-purple-600 dark:text-purple-400">
                           {player.stats.assists}
                         </td>
-                        <td className="text-center py-3 px-2 text-sm text-slate-600">
+                        <td className="text-center py-3 px-2 text-sm text-slate-600 dark:text-dark-text-tertiary">
                           {assistsPerGame}
                         </td>
                       </tr>
@@ -312,7 +312,7 @@ export default function StatsPage() {
               </table>
             </div>
             {topAssisters.length === 0 && (
-              <div className="text-center py-12 text-slate-500">
+              <div className="text-center py-12 text-slate-500 dark:text-dark-text-secondary">
                 No assists recorded yet this season.
               </div>
             )}
@@ -323,17 +323,17 @@ export default function StatsPage() {
         {activeTab === 'teams' && (
           <div className="space-y-6">
             {/* Best Attack */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-semibold text-slate-900 mb-4">
+            <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-dark-border-primary">
+              <h2 className="text-2xl font-semibold text-slate-900 dark:text-dark-text-primary mb-4">
                 🔥 Best Attack (Goals Scored)
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b-2 border-gray-200">
-                      <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700">Rank</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Team</th>
-                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">Goals Scored</th>
+                    <tr className="border-b-2 border-gray-200 dark:border-dark-border-primary">
+                      <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Rank</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Team</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Goals Scored</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -343,16 +343,16 @@ export default function StatsPage() {
                       .map((team, index) => (
                         <tr
                           key={team.id}
-                          className={`border-b border-gray-100 ${
-                            isPlayerTeam(team.name) ? 'bg-teal-50 font-semibold' : ''
+                          className={`border-b border-gray-100 dark:border-dark-border-secondary ${
+                            isPlayerTeam(team.name) ? 'bg-teal-50 dark:bg-teal-900/20 font-semibold' : ''
                           }`}
                         >
-                          <td className="py-3 px-2 text-sm text-slate-700">{index + 1}</td>
-                          <td className="py-3 px-4 text-sm text-slate-900">
+                          <td className="py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{index + 1}</td>
+                          <td className="py-3 px-4 text-sm text-slate-900 dark:text-dark-text-primary">
                             {team.name}
-                            {isPlayerTeam(team.name) && <span className="ml-2 text-teal-600">★</span>}
+                            {isPlayerTeam(team.name) && <span className="ml-2 text-teal-600 dark:text-teal-400">★</span>}
                           </td>
-                          <td className="text-center py-3 px-2 text-sm font-bold text-green-600">
+                          <td className="text-center py-3 px-2 text-sm font-bold text-green-600 dark:text-green-400">
                             {team.goalsScored}
                           </td>
                         </tr>
@@ -363,18 +363,18 @@ export default function StatsPage() {
             </div>
 
             {/* Best Defense */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-semibold text-slate-900 mb-4">
+            <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-dark-border-primary">
+              <h2 className="text-2xl font-semibold text-slate-900 dark:text-dark-text-primary mb-4">
                 🛡️ Best Defense (Fewest Goals Conceded)
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b-2 border-gray-200">
-                      <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700">Rank</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Team</th>
-                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">Goals Conceded</th>
-                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">Clean Sheets</th>
+                    <tr className="border-b-2 border-gray-200 dark:border-dark-border-primary">
+                      <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Rank</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Team</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Goals Conceded</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Clean Sheets</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -384,19 +384,19 @@ export default function StatsPage() {
                       .map((team, index) => (
                         <tr
                           key={team.id}
-                          className={`border-b border-gray-100 ${
-                            isPlayerTeam(team.name) ? 'bg-teal-50 font-semibold' : ''
+                          className={`border-b border-gray-100 dark:border-dark-border-secondary ${
+                            isPlayerTeam(team.name) ? 'bg-teal-50 dark:bg-teal-900/20 font-semibold' : ''
                           }`}
                         >
-                          <td className="py-3 px-2 text-sm text-slate-700">{index + 1}</td>
-                          <td className="py-3 px-4 text-sm text-slate-900">
+                          <td className="py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{index + 1}</td>
+                          <td className="py-3 px-4 text-sm text-slate-900 dark:text-dark-text-primary">
                             {team.name}
-                            {isPlayerTeam(team.name) && <span className="ml-2 text-teal-600">★</span>}
+                            {isPlayerTeam(team.name) && <span className="ml-2 text-teal-600 dark:text-teal-400">★</span>}
                           </td>
-                          <td className="text-center py-3 px-2 text-sm font-bold text-blue-600">
+                          <td className="text-center py-3 px-2 text-sm font-bold text-blue-600 dark:text-blue-400">
                             {team.goalsConceded}
                           </td>
-                          <td className="text-center py-3 px-2 text-sm text-slate-600">
+                          <td className="text-center py-3 px-2 text-sm text-slate-600 dark:text-dark-text-tertiary">
                             {team.cleanSheets}
                           </td>
                         </tr>
@@ -407,19 +407,19 @@ export default function StatsPage() {
             </div>
 
             {/* Discipline */}
-            <div className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-semibold text-slate-900 mb-4">
+            <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-dark-border-primary">
+              <h2 className="text-2xl font-semibold text-slate-900 dark:text-dark-text-primary mb-4">
                 🟨 Discipline (Cards)
               </h2>
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b-2 border-gray-200">
-                      <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700">Rank</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700">Team</th>
-                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">Yellow Cards</th>
-                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">Red Cards</th>
-                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700">Total</th>
+                    <tr className="border-b-2 border-gray-200 dark:border-dark-border-primary">
+                      <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Rank</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Team</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Yellow Cards</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Red Cards</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Total</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -429,22 +429,22 @@ export default function StatsPage() {
                       .map((team, index) => (
                         <tr
                           key={team.id}
-                          className={`border-b border-gray-100 ${
-                            isPlayerTeam(team.name) ? 'bg-teal-50 font-semibold' : ''
+                          className={`border-b border-gray-100 dark:border-dark-border-secondary ${
+                            isPlayerTeam(team.name) ? 'bg-teal-50 dark:bg-teal-900/20 font-semibold' : ''
                           }`}
                         >
-                          <td className="py-3 px-2 text-sm text-slate-700">{index + 1}</td>
-                          <td className="py-3 px-4 text-sm text-slate-900">
+                          <td className="py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{index + 1}</td>
+                          <td className="py-3 px-4 text-sm text-slate-900 dark:text-dark-text-primary">
                             {team.name}
-                            {isPlayerTeam(team.name) && <span className="ml-2 text-teal-600">★</span>}
+                            {isPlayerTeam(team.name) && <span className="ml-2 text-teal-600 dark:text-teal-400">★</span>}
                           </td>
-                          <td className="text-center py-3 px-2 text-sm font-bold text-yellow-600">
+                          <td className="text-center py-3 px-2 text-sm font-bold text-yellow-600 dark:text-yellow-400">
                             {team.yellowCards}
                           </td>
-                          <td className="text-center py-3 px-2 text-sm font-bold text-red-600">
+                          <td className="text-center py-3 px-2 text-sm font-bold text-red-600 dark:text-red-400">
                             {team.redCards}
                           </td>
-                          <td className="text-center py-3 px-2 text-sm text-slate-700">
+                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">
                             {team.yellowCards + team.redCards}
                           </td>
                         </tr>
