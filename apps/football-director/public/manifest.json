@@ -1,0 +1,26 @@
+{
+  "name": "Football Director",
+  "short_name": "FD",
+  "description": "Build, manage, and lead your football team to glory. Make tactical decisions, sign players, and compete for trophies in this immersive football management simulator.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#21808D",
+  "background_color": "#FCFCF9",
+  "categories": ["sports", "games"],
+  "icons": [
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
