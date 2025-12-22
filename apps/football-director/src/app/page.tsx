@@ -168,12 +168,12 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary pb-20">
       {/* Header */}
-      <header className="bg-teal-500 dark:bg-dark-teal-600 text-cream-100 dark:text-dark-text-primary shadow-lg">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <header className="bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-border-primary">
+        <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold">⚽ Football Director</h1>
-              <p className="text-teal-100 mt-2">{gameState.playerTeam.name}</p>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-dark-text-primary">⚽ Football Director</h1>
+              <p className="text-slate-600 dark:text-dark-text-secondary mt-1 text-sm">{gameState.playerTeam.name}</p>
             </div>
             <ThemeToggle />
           </div>
@@ -181,17 +181,6 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 pb-safe">
-        {/* Hero: League Position (Priority #1 on mobile) */}
-        <div className="bg-gradient-to-br from-teal-500 to-teal-600 dark:from-dark-teal-600 dark:to-dark-teal-600 rounded-xl p-6 text-white shadow-lg mb-4">
-          <div className="text-sm font-medium text-teal-100 dark:text-dark-text-secondary mb-1">League Position</div>
-          <div className="text-5xl font-bold mb-2">
-            {playerPosition}
-            {playerPosition === 1 && ' 🏆'}
-          </div>
-          <div className="text-teal-100 dark:text-dark-text-secondary">
-            {gameState.playerTeam.name} • Season {gameState.season.year}
-          </div>
-        </div>
 
         {/* Secondary Stats (2 columns on mobile, 4 on desktop) */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -358,15 +347,40 @@ export default function Dashboard() {
           onNewsClick={() => setShowNewsFeed(true)}
         />
 
-        {/* League Table (Collapsible) */}
+        {/* League Table with Position Header */}
         <div className="mb-6">
-          <CollapsibleSection title="League Table" defaultOpen={true}>
-            <div className="pt-4">
-              <Link href="/table" className="block mb-3 text-right">
-                <span className="text-sm text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 font-medium">
-                  View Full Table →
-                </span>
-              </Link>
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl border border-gray-200 dark:border-dark-border-primary overflow-hidden">
+            {/* League Position Header */}
+            <div className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-dark-bg-tertiary dark:to-dark-bg-tertiary border-b border-gray-200 dark:border-dark-border-primary p-6">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <div className="text-sm font-medium text-slate-500 dark:text-dark-text-secondary mb-1">
+                    League Position
+                  </div>
+                  <div className="flex items-baseline gap-3">
+                    <div className="text-5xl font-bold text-slate-900 dark:text-dark-text-primary">
+                      {playerPosition}
+                      {playerPosition === 1 && <span className="ml-2">🏆</span>}
+                    </div>
+                    <div className="text-lg text-slate-600 dark:text-dark-text-secondary">
+                      / {sortedTable.length}
+                    </div>
+                  </div>
+                  <div className="text-sm text-slate-600 dark:text-dark-text-secondary mt-2">
+                    Season {gameState.season.year}/{gameState.season.year + 1}
+                  </div>
+                </div>
+                <Link
+                  href="/table"
+                  className="px-4 py-2 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white text-sm font-medium rounded-lg transition-all active:scale-95"
+                >
+                  Full Table →
+                </Link>
+              </div>
+            </div>
+
+            {/* League Table */}
+            <div className="p-6">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
@@ -414,7 +428,7 @@ export default function Dashboard() {
                 </table>
               </div>
             </div>
-          </CollapsibleSection>
+          </div>
         </div>
       </main>
 
