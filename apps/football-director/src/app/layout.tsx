@@ -1,5 +1,6 @@
 import './global.css';
 import { ThemeProvider } from '../providers/ThemeProvider';
+import { BottomNav } from '../components/navigation/BottomNav';
 
 export const metadata = {
   title: 'Football Director',
@@ -33,6 +34,7 @@ export default function RootLayout({
       <body className="bg-cream-50 dark:bg-dark-bg-primary text-slate-900 dark:text-dark-text-primary transition-colors">
         <ThemeProvider>
           {children}
+          <BottomNav />
         </ThemeProvider>
       </body>
     </html>

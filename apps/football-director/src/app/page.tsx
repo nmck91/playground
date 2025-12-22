@@ -164,7 +164,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary">
+    <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary pb-20">
       {/* Header */}
       <header className="bg-teal-500 dark:bg-dark-teal-600 text-cream-100 dark:text-dark-text-primary shadow-lg">
         <div className="max-w-7xl mx-auto px-6 py-8">
@@ -178,7 +178,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-6 py-8">
+      <main className="max-w-7xl mx-auto px-6 py-8 pb-safe">
         {/* Season Info */}
         <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-6 mb-8 border border-gray-200 dark:border-dark-border-primary">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 md:gap-6">
