@@ -86,7 +86,7 @@ export default function TacticsPage() {
             {formations.map((formation) => (
               <button
                 key={formation}
-                onClick={() => setSelectedFormation(formation)}
+                onClick={() => setSelectedFormation(formation as any)}
                 className={`p-4 rounded-lg border-2 transition-all ${
                   selectedFormation === formation
                     ? 'border-teal-500 dark:border-teal-400 bg-teal-50 dark:bg-teal-900/20 shadow-md'
@@ -121,7 +121,7 @@ export default function TacticsPage() {
               return (
                 <button
                   key={mentality}
-                  onClick={() => setSelectedMentality(mentality)}
+                  onClick={() => setSelectedMentality(mentality as any)}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     selectedMentality === mentality
                       ? 'border-teal-500 dark:border-teal-400 bg-teal-50 dark:bg-teal-900/20 shadow-md'

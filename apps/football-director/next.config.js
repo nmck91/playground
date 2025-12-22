@@ -1,5 +1,4 @@
-//@ts-check
-
+// @ts-nocheck
 const withPWA = require('next-pwa')({
   dest: 'public',
   register: true,

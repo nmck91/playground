@@ -13,7 +13,7 @@ interface MenuItem {
 
 export default function MorePage() {
   const { gameState } = useGameState();
-  const unreadNews = gameState?.news?.filter(n => !n.read).length || 0;
+  const unreadNews = gameState?.newsFeed?.filter(n => !n.read).length || 0;
 
   const menuItems: MenuItem[] = [
     { label: 'League Table', icon: '📊', href: '/table' },
