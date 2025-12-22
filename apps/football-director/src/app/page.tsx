@@ -243,7 +243,7 @@ export default function Dashboard() {
         <button
           onClick={actions.simulateNextWeek}
           disabled={isSeasonComplete}
-          className="w-full h-20 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 dark:from-green-600 dark:to-emerald-700 text-white text-xl font-bold rounded-xl shadow-lg active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-6"
+          className="w-full h-14 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 dark:from-green-600 dark:to-emerald-700 text-white text-xl font-bold rounded-xl shadow-lg active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-6"
         >
           {isSeasonComplete
             ? '✅ Season Complete'
