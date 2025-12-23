@@ -2,18 +2,23 @@
 
 import { useGameState } from '../../hooks/useGameState';
 import Link from 'next/link';
-import { TacticsManager as TacticsEngine } from '@playground/football-director-engine';
-import { useState } from 'react';
+import { ClubPhilosophy, StaffManager } from '@playground/football-director-engine';
+import { useState, useEffect } from 'react';
 
-export default function TacticsPage() {
+export default function PhilosophyPage() {
   const { gameState, loading, error, actions } = useGameState();
-  const [selectedFormation, setSelectedFormation] = useState(gameState?.playerTeam.tactics?.formation || '4-4-2');
-  const [selectedMentality, setSelectedMentality] = useState(gameState?.playerTeam.tactics?.mentality || 'balanced');
+  const [selectedPhilosophy, setSelectedPhilosophy] = useState<ClubPhilosophy>(
+    gameState?.playerTeam.philosophy || 'balanced'
+  );
   const [saved, setSaved] = useState(false);
 
-  const tacticsEngine = new TacticsEngine();
-  const formations = ['4-4-2', '4-3-3', '3-5-2', '4-5-1', '3-4-3', '5-3-2'];
-  const mentalities = ['defensive', 'balanced', 'attacking'];
+  const staffManager = new StaffManager();
+
+  useEffect(() => {
+    if (gameState?.playerTeam.philosophy) {
+      setSelectedPhilosophy(gameState.playerTeam.philosophy);
+    }
+  }, [gameState]);
 
   if (loading) {
     return (
@@ -39,136 +44,232 @@ export default function TacticsPage() {
     );
   }
 
+  const manager = gameState.playerTeam.staff.find(s => s.role === 'manager');
+  const compatibility = manager?.style
+    ? staffManager.calculateStyleCompatibility(manager.style, selectedPhilosophy)
+    : 50;
+
   const handleSave = () => {
-    actions.setTeamTactics(selectedFormation as any, selectedMentality as any);
+    actions.setClubPhilosophy(selectedPhilosophy);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const formationDescription = tacticsEngine.getFormationDescription(selectedFormation as any);
-  const mentalityDescription = tacticsEngine.getMentalityDescription(selectedMentality as any);
+  const philosophies: Array<{
+    value: ClubPhilosophy;
+    label: string;
+    icon: string;
+    description: string;
+    tactics: string;
+  }> = [
+    {
+      value: 'attacking',
+      label: 'Attacking',
+      icon: '⚡',
+      description: 'High-risk, high-reward football. Score more than the opposition.',
+      tactics: 'Offensive formations (4-3-3, 3-4-3), high press, lots of chances',
+    },
+    {
+      value: 'possession',
+      label: 'Possession',
+      icon: '🎯',
+      description: 'Control the ball, control the game. Patient buildup play.',
+      tactics: 'Ball-control formations (4-5-1, 3-5-2), short passing, high possession',
+    },
+    {
+      value: 'defensive',
+      label: 'Defensive',
+      icon: '🛡️',
+      description: 'Solid at the back, hard to break down. Counter when possible.',
+      tactics: 'Defensive formations (5-3-2, 4-4-2 defensive), deep block, counter-attacks',
+    },
+    {
+      value: 'balanced',
+      label: 'Balanced',
+      icon: '⚖️',
+      description: 'Well-rounded approach. Adapt to the situation and opposition.',
+      tactics: 'Flexible formations (4-4-2, 4-3-3), adapt to match situation',
+    },
+    {
+      value: 'direct',
+      label: 'Direct',
+      icon: '➡️',
+      description: 'Get the ball forward quickly. Physical, high-tempo play.',
+      tactics: 'Direct formations, long balls, target man, fast transitions',
+    },
+    {
+      value: 'counter-attack',
+      label: 'Counter-Attack',
+      icon: '🏃',
+      description: 'Sit deep, absorb pressure, hit on the break with pace.',
+      tactics: 'Deep defensive line, fast wingers/forwards, quick transitions',
+    },
+  ];
+
+  const getCompatibilityColor = (score: number) => {
+    if (score >= 90) return 'text-green-600 dark:text-green-400';
+    if (score >= 70) return 'text-teal-600 dark:text-teal-400';
+    if (score >= 50) return 'text-yellow-600 dark:text-yellow-400';
+    return 'text-red-600 dark:text-red-400';
+  };
+
+  const getCompatibilityText = (score: number) => {
+    if (score >= 90) return 'Perfect Match!';
+    if (score >= 70) return 'Good Fit';
+    if (score >= 50) return 'Acceptable';
+    return 'Poor Match';
+  };
 
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary pb-20">
       {/* Header */}
-      <header className="bg-teal-500 dark:bg-dark-teal-600 text-cream-100 dark:text-dark-text-primary shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">
+      <header className="bg-gradient-to-br from-purple-500 to-purple-600 dark:from-purple-600 dark:to-purple-700 text-white shadow-lg">
+        <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl md:text-4xl font-bold">⚙️ Tactics Manager</h1>
-              <p className="text-teal-100 dark:text-dark-text-secondary mt-1 md:mt-2 text-sm md:text-base">
-                Set your team's formation and mentality
+              <h1 className="text-4xl font-bold">📋 Club Philosophy</h1>
+              <p className="text-purple-100 dark:text-purple-200 mt-2">
+                Define how your team plays
               </p>
             </div>
             <Link
               href="/"
-              className="bg-white dark:bg-dark-bg-secondary text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-dark-bg-tertiary font-medium px-3 md:px-6 py-2 md:py-3 rounded-lg shadow-sm transition-normal text-sm md:text-base"
+              className="bg-white dark:bg-dark-bg-secondary text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-dark-bg-tertiary px-6 py-3 rounded-lg font-semibold transition-all"
             >
-              <span className="hidden md:inline">← Back to Dashboard</span>
-              <span className="md:hidden">← Back</span>
+              ← Back to Dashboard
             </Link>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8 space-y-6">
-        {/* Save Success Message */}
-        {saved && (
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 text-green-900 dark:text-green-400 px-6 py-4 rounded-lg animate-fade-in">
-            ✓ Tactics saved successfully!
+      <main className="max-w-7xl mx-auto px-6 py-8">
+        {error && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 text-red-700 dark:text-red-400 px-6 py-4 rounded-lg mb-6">
+            {error}
           </div>
         )}
 
-        {/* Formation Selection */}
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-4 md:p-6 border border-gray-200 dark:border-dark-border-primary">
-          <h3 className="text-xl font-semibold text-slate-900 dark:text-dark-text-primary mb-4">Formation</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-            {formations.map((formation) => (
-              <button
-                key={formation}
-                onClick={() => setSelectedFormation(formation as any)}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  selectedFormation === formation
-                    ? 'border-teal-500 dark:border-teal-400 bg-teal-50 dark:bg-teal-900/20 shadow-md'
-                    : 'border-gray-200 dark:border-dark-border-primary hover:border-teal-300 dark:hover:border-teal-600 bg-white dark:bg-dark-bg-tertiary'
-                }`}
-              >
-                <div className="text-2xl font-bold text-slate-900 dark:text-dark-text-primary">{formation}</div>
-                <div className="text-xs text-slate-600 dark:text-dark-text-secondary mt-1">
-                  {tacticsEngine.getFormationDescription(formation as any)}
-                </div>
-              </button>
-            ))}
+        {saved && (
+          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 text-green-700 dark:text-green-400 px-6 py-4 rounded-lg mb-6">
+            Club philosophy updated successfully!
           </div>
-          <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-700">
-            <p className="text-sm text-blue-900 dark:text-blue-400">
-              <strong>Selected:</strong> {formationDescription}
-            </p>
-          </div>
-        </div>
+        )}
 
-        {/* Mentality Selection */}
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-4 md:p-6 border border-gray-200 dark:border-dark-border-primary">
-          <h3 className="text-xl font-semibold text-slate-900 dark:text-dark-text-primary mb-4">Mentality</h3>
-          <div className="grid grid-cols-3 gap-3">
-            {mentalities.map((mentality) => {
-              const icons = {
-                defensive: '🛡️',
-                balanced: '⚖️',
-                attacking: '⚔️',
-              };
-
-              return (
-                <button
-                  key={mentality}
-                  onClick={() => setSelectedMentality(mentality as any)}
-                  className={`p-4 rounded-lg border-2 transition-all ${
-                    selectedMentality === mentality
-                      ? 'border-teal-500 dark:border-teal-400 bg-teal-50 dark:bg-teal-900/20 shadow-md'
-                      : 'border-gray-200 dark:border-dark-border-primary hover:border-gray-300 dark:hover:border-dark-border-secondary bg-white dark:bg-dark-bg-tertiary'
-                  }`}
-                >
-                  <div className="text-3xl mb-1">{icons[mentality as keyof typeof icons]}</div>
-                  <div className="text-sm font-semibold text-slate-900 dark:text-dark-text-primary capitalize">
-                    {mentality}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-          <div className="mt-3 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg border border-purple-200 dark:border-purple-700">
-            <p className="text-sm text-purple-900 dark:text-purple-400">
-              <strong>Selected:</strong> {mentalityDescription}
-            </p>
-          </div>
-        </div>
-
-        {/* Tactical Preview */}
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-4 md:p-6 border border-gray-200 dark:border-dark-border-primary">
-          <div className="bg-gradient-to-br from-green-100 to-green-50 dark:from-green-900/20 dark:to-green-900/10 p-4 rounded-lg border border-green-300 dark:border-green-700">
-            <h4 className="font-semibold text-green-900 dark:text-green-400 mb-3">⚽ Your Tactics</h4>
-            <div className="text-sm text-green-800 dark:text-green-400 space-y-2">
-              <div>
-                <strong>Formation:</strong> {selectedFormation}
-              </div>
-              <div>
-                <strong>Mentality:</strong> {selectedMentality}
-              </div>
-              <div className="mt-3 pt-3 border-t border-green-300 dark:border-green-700 text-xs">
-                These tactics will affect your team's performance in matches. Different formations
-                counter each other, and mentality affects your attacking and defensive balance.
-              </div>
+        {/* Info Box */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6 mb-8">
+          <div className="flex items-start gap-3">
+            <span className="text-3xl">ℹ️</span>
+            <div>
+              <h3 className="text-lg font-bold text-blue-900 dark:text-blue-300 mb-2">
+                How Club Philosophy Works
+              </h3>
+              <ul className="text-sm text-blue-800 dark:text-blue-400 space-y-1">
+                <li>• You set the <strong>club philosophy</strong> as the director</li>
+                <li>• Your <strong>manager</strong> implements tactics based on their style</li>
+                <li>• Hire managers whose style matches your philosophy for best results</li>
+                <li>• Manager happiness is affected by philosophy compatibility</li>
+              </ul>
             </div>
           </div>
         </div>
 
+        {/* Current Manager Info */}
+        {manager && (
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-6 mb-8 border border-gray-200 dark:border-dark-border-primary">
+            <h2 className="text-2xl font-semibold text-slate-900 dark:text-dark-text-primary mb-4">
+              Current Manager
+            </h2>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-dark-text-primary">
+                  👔 {manager.name}
+                </h3>
+                <p className="text-sm text-slate-600 dark:text-dark-text-secondary mt-1">
+                  Style: <span className="font-semibold capitalize">{manager.style || 'Unknown'}</span>
+                </p>
+                <p className="text-sm text-slate-600 dark:text-dark-text-secondary">
+                  Happiness: <span className="font-semibold">{manager.happiness || 80}/100</span>
+                </p>
+              </div>
+              <div className="text-right">
+                <div className={`text-3xl font-bold ${getCompatibilityColor(compatibility)}`}>
+                  {compatibility}%
+                </div>
+                <div className={`text-sm font-semibold ${getCompatibilityColor(compatibility)}`}>
+                  {getCompatibilityText(compatibility)}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!manager && (
+          <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 text-orange-700 dark:text-orange-400 px-6 py-4 rounded-lg mb-8">
+            ⚠️ No manager hired. Visit the Staff page to hire a manager.
+          </div>
+        )}
+
+        {/* Philosophy Selection */}
+        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-6 mb-8 border border-gray-200 dark:border-dark-border-primary">
+          <h2 className="text-2xl font-semibold text-slate-900 dark:text-dark-text-primary mb-6">
+            Select Club Philosophy
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {philosophies.map((phil) => {
+              const isSelected = selectedPhilosophy === phil.value;
+              const philCompatibility = manager?.style
+                ? staffManager.calculateStyleCompatibility(manager.style, phil.value)
+                : 50;
+
+              return (
+                <button
+                  key={phil.value}
+                  onClick={() => setSelectedPhilosophy(phil.value)}
+                  className={`text-left p-5 rounded-lg border-2 transition-all ${
+                    isSelected
+                      ? 'border-purple-500 dark:border-purple-600 bg-purple-50 dark:bg-purple-900/20 shadow-md'
+                      : 'border-gray-200 dark:border-dark-border-primary hover:border-purple-300 dark:hover:border-purple-700 bg-white dark:bg-dark-bg-tertiary'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-3xl">{phil.icon}</span>
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-dark-text-primary">
+                        {phil.label}
+                      </h3>
+                    </div>
+                    {isSelected && (
+                      <span className="text-purple-600 dark:text-purple-400 text-xl">✓</span>
+                    )}
+                  </div>
+                  <p className="text-sm text-slate-700 dark:text-dark-text-secondary mb-3">
+                    {phil.description}
+                  </p>
+                  <div className="text-xs text-slate-600 dark:text-dark-text-tertiary mb-3 pb-3 border-b border-gray-200 dark:border-dark-border-secondary">
+                    {phil.tactics}
+                  </div>
+                  {manager?.style && (
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-500 dark:text-dark-text-tertiary">Manager Match:</span>
+                      <span className={`font-bold ${getCompatibilityColor(philCompatibility)}`}>
+                        {philCompatibility}%
+                      </span>
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Save Button */}
-        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-4 md:p-6 border border-gray-200 dark:border-dark-border-primary">
+        <div className="flex justify-center">
           <button
             onClick={handleSave}
-            className="w-full px-6 py-4 bg-teal-500 dark:bg-teal-600 hover:bg-teal-600 dark:hover:bg-teal-700 text-white font-semibold rounded-lg transition-normal shadow-md text-lg"
+            className="bg-purple-500 dark:bg-purple-600 hover:bg-purple-600 dark:hover:bg-purple-700 text-white font-bold py-4 px-12 rounded-lg text-lg shadow-lg transition-all active:scale-98"
           >
-            Save Tactics
+            💾 Save Philosophy
           </button>
         </div>
       </main>
