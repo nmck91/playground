@@ -172,7 +172,7 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-dark-text-primary">⚽ Football Director</h1>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-dark-text-primary">Football Director</h1>
               <p className="text-slate-600 dark:text-dark-text-secondary mt-1 text-sm">{gameState.playerTeam.name}</p>
             </div>
             <ThemeToggle />
@@ -183,9 +183,12 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-4 py-6 pb-safe">
         
 
-        {/* Secondary Stats (2 columns on mobile, 4 on desktop) */}
-        <div className="grid grid-cols-3 gap-3 mb-6">
-          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-8 border border-gray-200 dark:border-dark-border-primary">
+        {/* Key Stats (2 cards) */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <Link
+            href="/fixtures"
+            className="bg-white dark:bg-dark-bg-secondary rounded-xl p-8 border border-gray-200 dark:border-dark-border-primary hover:shadow-md hover:border-teal-300 dark:hover:border-teal-600 transition-all active:scale-98"
+          >
             <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Week</div>
             <div className="text-2xl font-bold text-slate-900 dark:text-dark-text-primary">
               {gameState.season.currentWeek}/{gameState.season.totalWeeks}
@@ -199,36 +202,117 @@ export default function Dashboard() {
                 <span className="text-blue-600 dark:text-blue-400 font-semibold">🏖️ Off-Season</span>
               )}
             </div>
-          </div>
+          </Link>
 
-          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-8 border border-gray-200 dark:border-dark-border-primary">
+          <Link
+            href="/transfers"
+            className="bg-white dark:bg-dark-bg-secondary rounded-xl p-8 border border-gray-200 dark:border-dark-border-primary hover:shadow-md hover:border-teal-300 dark:hover:border-teal-600 transition-all active:scale-98"
+          >
             <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Budget</div>
-            <div className="text-2xl font-bold text-slate-900 dark:text-dark-text-primary">
+            <div className="text-2xl font-bold text-slate-900 dark:text-dark-text-primary mb-2">
               £{(gameState.finances.budget / 1000000).toFixed(1)}M
             </div>
-          </div>
-
-          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-8 border border-gray-200 dark:border-dark-border-primary">
-            <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Transfers</div>
-            <div className="text-lg font-bold">
+            <div className="text-xs">
+              <span className="text-slate-500 dark:text-dark-text-secondary">Transfers: </span>
               {gameState.season.transferWindow === 'open' ? (
-                <span className="text-green-600 dark:text-green-400">✅ Open</span>
+                <span className="text-green-600 dark:text-green-400 font-semibold">✅ Open</span>
               ) : (
-                <span className="text-red-600 dark:text-red-400">🔒 Closed</span>
+                <span className="text-red-600 dark:text-red-400 font-semibold">🔒 Closed</span>
               )}
             </div>
-          </div>
-
-          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-8 border border-gray-200 dark:border-dark-border-primary">
-            <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Job Security</div>
-            <div className="text-base font-bold">
-              {gameState.boardStatus.jobSecurity === 'safe' && <span className="text-green-600 dark:text-green-400">✅ Safe</span>}
-              {gameState.boardStatus.jobSecurity === 'under-pressure' && <span className="text-orange-600 dark:text-orange-400">⚠️ Pressure</span>}
-              {gameState.boardStatus.jobSecurity === 'critical' && <span className="text-red-600 dark:text-red-400">🚨 Critical</span>}
-            </div>
-          </div>
+          </Link>
         </div>
 
+        {/* Board Status (Collapsible) */}
+        <div className="mb-6">
+          <CollapsibleSection
+            title={
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-baseline gap-3">
+                  <div className="text-lg font-semibold text-slate-900 dark:text-dark-text-primary">
+                    Board Status
+                  </div>
+                  <div className={`text-base font-bold ${getJobSecurityColor(gameState.boardStatus.jobSecurity)}`}>
+                    {gameState.boardStatus.jobSecurity === 'safe' && '✅ Safe'}
+                    {gameState.boardStatus.jobSecurity === 'under-pressure' && '⚠️ Under Pressure'}
+                    {gameState.boardStatus.jobSecurity === 'critical' && '🚨 Critical'}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="text-sm text-slate-500 dark:text-dark-text-secondary">Satisfaction:</div>
+                  <div className={`text-base font-bold ${
+                    gameState.boardStatus.satisfaction >= 60
+                      ? 'text-green-600 dark:text-green-400'
+                      : gameState.boardStatus.satisfaction >= 35
+                      ? 'text-orange-600 dark:text-orange-400'
+                      : 'text-red-600 dark:text-red-400'
+                  }`}>
+                    {gameState.boardStatus.satisfaction}%
+                  </div>
+                </div>
+              </div>
+            }
+            defaultOpen={false}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
+              <div>
+                <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Season Objective</div>
+                <div className="text-base font-medium text-slate-900 dark:text-dark-text-primary mb-2">
+                  {gameState.boardStatus.currentObjective?.description}
+                </div>
+                <div className={`text-sm font-semibold ${getObjectiveStatusColor(gameState.boardStatus.currentObjective?.status || '')}`}>
+                  Status: {gameState.boardStatus.currentObjective?.status.toUpperCase().replace('-', ' ')}
+                </div>
+              </div>
+              <div>
+                <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Board Satisfaction</div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 bg-gray-200 dark:bg-dark-bg-tertiary rounded-full h-4">
+                    <div
+                      className={`h-4 rounded-full transition-all ${
+                        gameState.boardStatus.satisfaction >= 60
+                          ? 'bg-green-500'
+                          : gameState.boardStatus.satisfaction >= 35
+                          ? 'bg-orange-500'
+                          : 'bg-red-500'
+                      }`}
+                      style={{ width: `${gameState.boardStatus.satisfaction}%` }}
+                    />
+                  </div>
+                  <div className="text-lg font-bold text-slate-900 dark:text-dark-text-primary">
+                    {gameState.boardStatus.satisfaction}%
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Job Security</div>
+                <div className={`text-xl font-bold ${getJobSecurityColor(gameState.boardStatus.jobSecurity)}`}>
+                  {gameState.boardStatus.jobSecurity === 'safe' && '✅ SAFE'}
+                  {gameState.boardStatus.jobSecurity === 'under-pressure' && '⚠️ UNDER PRESSURE'}
+                  {gameState.boardStatus.jobSecurity === 'critical' && '🚨 CRITICAL'}
+                </div>
+              </div>
+            </div>
+          </CollapsibleSection>
+        </div>
+
+        
+        {/* Simulate Button (Full-Width, Bold) */}
+        <button
+          onClick={actions.simulateNextWeek}
+          disabled={isSeasonComplete}
+          className="w-full h-14 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 dark:from-green-600 dark:to-emerald-700 text-white text-xl font-bold rounded-xl shadow-lg active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-6"
+        >
+          {isSeasonComplete
+            ? '✅ Season Complete'
+            : gameState.season.phase === 'pre-season' && [4, 5, 6].includes(gameState.season.currentWeek)
+            ? '⚽ Play Friendly'
+            : gameState.season.phase === 'pre-season'
+            ? '▶️ Continue Pre-Season'
+            : gameState.season.phase === 'off-season'
+            ? '▶️ Continue Off-Season'
+            : '⚽ Simulate Next Week'}
+        </button>
 
         {/* League Position & Table (Collapsible) */}
         <div className="mb-6">
@@ -308,43 +392,14 @@ export default function Dashboard() {
             </div>
           </CollapsibleSection>
         </div>
-        
-        {/* Simulate Button (Full-Width, Bold) */}
-        <button
-          onClick={actions.simulateNextWeek}
-          disabled={isSeasonComplete}
-          className="w-full h-14 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 dark:from-green-600 dark:to-emerald-700 text-white text-xl font-bold rounded-xl shadow-lg active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-6"
-        >
-          {isSeasonComplete
-            ? '✅ Season Complete'
-            : gameState.season.phase === 'pre-season' && [4, 5, 6].includes(gameState.season.currentWeek)
-            ? '⚽ Play Friendly'
-            : gameState.season.phase === 'pre-season'
-            ? '▶️ Continue Pre-Season'
-            : gameState.season.phase === 'off-season'
-            ? '▶️ Continue Off-Season'
-            : '⚽ Simulate Next Week'}
-        </button>
 
-        {/* Quick Actions (2 columns on mobile, 3 on desktop) */}
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+        {/* Quick Actions (2 columns on mobile, 2 on desktop) */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
           <GradientButton
             icon="👥"
             label="Squad"
             href="/squad"
             gradient="from-gradient-squad-from to-gradient-squad-to"
-          />
-          <GradientButton
-            icon="⚽"
-            label="Matches"
-            href="/fixtures"
-            gradient="from-gradient-matches-from to-gradient-matches-to"
-          />
-          <GradientButton
-            icon="💰"
-            label="Transfers"
-            href="/transfers"
-            gradient="from-gradient-transfers-from to-gradient-transfers-to"
           />
           <GradientButton
             icon="📋"
@@ -365,79 +420,6 @@ export default function Dashboard() {
             href="/more"
             gradient="from-gradient-more-from to-gradient-more-to"
           />
-        </div>
-
-        {/* Board Status (Collapsible) */}
-        <div className="mb-6">
-          <CollapsibleSection
-            title={
-              <div className="flex items-center justify-between w-full">
-                <div className="flex items-baseline gap-3">
-                  <div className="text-lg font-semibold text-slate-900 dark:text-dark-text-primary">
-                    Board Status
-                  </div>
-                  <div className={`text-base font-bold ${getJobSecurityColor(gameState.boardStatus.jobSecurity)}`}>
-                    {gameState.boardStatus.jobSecurity === 'safe' && '✅ Safe'}
-                    {gameState.boardStatus.jobSecurity === 'under-pressure' && '⚠️ Under Pressure'}
-                    {gameState.boardStatus.jobSecurity === 'critical' && '🚨 Critical'}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="text-sm text-slate-500 dark:text-dark-text-secondary">Satisfaction:</div>
-                  <div className={`text-base font-bold ${
-                    gameState.boardStatus.satisfaction >= 60
-                      ? 'text-green-600 dark:text-green-400'
-                      : gameState.boardStatus.satisfaction >= 35
-                      ? 'text-orange-600 dark:text-orange-400'
-                      : 'text-red-600 dark:text-red-400'
-                  }`}>
-                    {gameState.boardStatus.satisfaction}%
-                  </div>
-                </div>
-              </div>
-            }
-            defaultOpen={false}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-              <div>
-                <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Season Objective</div>
-                <div className="text-base font-medium text-slate-900 dark:text-dark-text-primary mb-2">
-                  {gameState.boardStatus.currentObjective?.description}
-                </div>
-                <div className={`text-sm font-semibold ${getObjectiveStatusColor(gameState.boardStatus.currentObjective?.status || '')}`}>
-                  Status: {gameState.boardStatus.currentObjective?.status.toUpperCase().replace('-', ' ')}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Board Satisfaction</div>
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 bg-gray-200 dark:bg-dark-bg-tertiary rounded-full h-4">
-                    <div
-                      className={`h-4 rounded-full transition-all ${
-                        gameState.boardStatus.satisfaction >= 60
-                          ? 'bg-green-500'
-                          : gameState.boardStatus.satisfaction >= 35
-                          ? 'bg-orange-500'
-                          : 'bg-red-500'
-                      }`}
-                      style={{ width: `${gameState.boardStatus.satisfaction}%` }}
-                    />
-                  </div>
-                  <div className="text-lg font-bold text-slate-900 dark:text-dark-text-primary">
-                    {gameState.boardStatus.satisfaction}%
-                  </div>
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Job Security</div>
-                <div className={`text-xl font-bold ${getJobSecurityColor(gameState.boardStatus.jobSecurity)}`}>
-                  {gameState.boardStatus.jobSecurity === 'safe' && '✅ SAFE'}
-                  {gameState.boardStatus.jobSecurity === 'under-pressure' && '⚠️ UNDER PRESSURE'}
-                  {gameState.boardStatus.jobSecurity === 'critical' && '🚨 CRITICAL'}
-                </div>
-              </div>
-            </div>
-          </CollapsibleSection>
         </div>
 
         {/* Top Performers Widget */}
