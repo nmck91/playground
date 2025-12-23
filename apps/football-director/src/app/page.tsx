@@ -184,8 +184,8 @@ export default function Dashboard() {
         
 
         {/* Secondary Stats (2 columns on mobile, 4 on desktop) */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-4 border border-gray-200 dark:border-dark-border-primary">
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-8 border border-gray-200 dark:border-dark-border-primary">
             <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Week</div>
             <div className="text-2xl font-bold text-slate-900 dark:text-dark-text-primary">
               {gameState.season.currentWeek}/{gameState.season.totalWeeks}
@@ -201,14 +201,14 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-4 border border-gray-200 dark:border-dark-border-primary">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-8 border border-gray-200 dark:border-dark-border-primary">
             <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Budget</div>
             <div className="text-2xl font-bold text-slate-900 dark:text-dark-text-primary">
               £{(gameState.finances.budget / 1000000).toFixed(1)}M
             </div>
           </div>
 
-          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-4 border border-gray-200 dark:border-dark-border-primary">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-8 border border-gray-200 dark:border-dark-border-primary">
             <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Transfers</div>
             <div className="text-lg font-bold">
               {gameState.season.transferWindow === 'open' ? (
@@ -219,7 +219,7 @@ export default function Dashboard() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-4 border border-gray-200 dark:border-dark-border-primary">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-8 border border-gray-200 dark:border-dark-border-primary">
             <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Job Security</div>
             <div className="text-base font-bold">
               {gameState.boardStatus.jobSecurity === 'safe' && <span className="text-green-600 dark:text-green-400">✅ Safe</span>}
@@ -367,9 +367,37 @@ export default function Dashboard() {
           />
         </div>
 
-        {/* Board Status (Collapsible on mobile) */}
+        {/* Board Status (Collapsible) */}
         <div className="mb-6">
-          <CollapsibleSection title="Board Status" defaultOpen={false}>
+          <CollapsibleSection
+            title={
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-baseline gap-3">
+                  <div className="text-lg font-semibold text-slate-900 dark:text-dark-text-primary">
+                    Board Status
+                  </div>
+                  <div className={`text-base font-bold ${getJobSecurityColor(gameState.boardStatus.jobSecurity)}`}>
+                    {gameState.boardStatus.jobSecurity === 'safe' && '✅ Safe'}
+                    {gameState.boardStatus.jobSecurity === 'under-pressure' && '⚠️ Under Pressure'}
+                    {gameState.boardStatus.jobSecurity === 'critical' && '🚨 Critical'}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="text-sm text-slate-500 dark:text-dark-text-secondary">Satisfaction:</div>
+                  <div className={`text-base font-bold ${
+                    gameState.boardStatus.satisfaction >= 60
+                      ? 'text-green-600 dark:text-green-400'
+                      : gameState.boardStatus.satisfaction >= 35
+                      ? 'text-orange-600 dark:text-orange-400'
+                      : 'text-red-600 dark:text-red-400'
+                  }`}>
+                    {gameState.boardStatus.satisfaction}%
+                  </div>
+                </div>
+              </div>
+            }
+            defaultOpen={false}
+          >
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
               <div>
                 <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Season Objective</div>
