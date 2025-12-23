@@ -219,6 +219,22 @@ export class SaveService {
   }
 
   /**
+   * Optimize game state for storage by limiting historical data
+   */
+  private static optimizeForStorage(gameState: GameState): GameState {
+    const MAX_MATCH_HISTORY = 76; // Keep last 2 seasons worth of matches
+    const MAX_NEWS_FEED = 100; // Keep last 100 news items
+
+    return {
+      ...gameState,
+      // Limit match history to prevent bloat
+      matchHistory: gameState.matchHistory.slice(-MAX_MATCH_HISTORY),
+      // Limit news feed to prevent bloat
+      newsFeed: gameState.newsFeed.slice(-MAX_NEWS_FEED),
+    };
+  }
+
+  /**
    * Save game to specific slot
    */
   static saveToSlot(slotId: number, gameState: GameState, saveName?: string): void {
@@ -245,16 +261,45 @@ export class SaveService {
         createdAt: saves[slotId]?.metadata.createdAt || now,
       };
 
+      // Optimize game state before saving to reduce storage size
+      const optimizedState = this.optimizeForStorage({
+        ...gameState,
+        lastSaved: now,
+      });
+
       const slot: SaveSlot = {
         metadata,
-        gameState: {
-          ...gameState,
-          lastSaved: now,
-        },
+        gameState: optimizedState,
       };
 
       saves[slotId] = slot;
-      localStorage.setItem(SAVES_KEY, JSON.stringify(saves));
+
+      // Try to save, catch quota errors
+      try {
+        localStorage.setItem(SAVES_KEY, JSON.stringify(saves));
+      } catch (storageError) {
+        if (storageError instanceof DOMException && storageError.name === 'QuotaExceededError') {
+          // If quota exceeded, try with more aggressive optimization
+          console.warn('Storage quota exceeded, applying aggressive optimization...');
+
+          // More aggressive: Keep only last season of matches
+          const aggressiveState = {
+            ...optimizedState,
+            matchHistory: optimizedState.matchHistory.slice(-38),
+            newsFeed: optimizedState.newsFeed.slice(-50),
+          };
+
+          const aggressiveSlot: SaveSlot = {
+            metadata,
+            gameState: aggressiveState,
+          };
+
+          saves[slotId] = aggressiveSlot;
+          localStorage.setItem(SAVES_KEY, JSON.stringify(saves));
+        } else {
+          throw storageError;
+        }
+      }
     } catch (error) {
       console.error('Failed to save to slot:', error);
       throw new Error(`Failed to save to slot ${slotId}`);
