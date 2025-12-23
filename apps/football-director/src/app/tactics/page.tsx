@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ClubPhilosophy, StaffManager } from '@playground/football-director-engine';
 import { useState, useEffect } from 'react';
 
-export default function PhilosophyPage() {
+export default function BoardroomPage() {
   const { gameState, loading, error, actions } = useGameState();
   const [selectedPhilosophy, setSelectedPhilosophy] = useState<ClubPhilosophy>(
     gameState?.playerTeam.philosophy || 'balanced'
@@ -127,9 +127,9 @@ export default function PhilosophyPage() {
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-4xl font-bold">📋 Club Philosophy</h1>
+              <h1 className="text-4xl font-bold">🏛️ Boardroom</h1>
               <p className="text-purple-100 dark:text-purple-200 mt-2">
-                Define how your team plays
+                Set objectives and define your club philosophy
               </p>
             </div>
             <Link
@@ -154,6 +154,68 @@ export default function PhilosophyPage() {
             Club philosophy updated successfully!
           </div>
         )}
+
+        {/* Board Objectives */}
+        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-6 mb-8 border border-gray-200 dark:border-dark-border-primary">
+          <h2 className="text-2xl font-semibold text-slate-900 dark:text-dark-text-primary mb-6">
+            Board Objectives & Status
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div>
+              <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Season Objective</div>
+              <div className="text-base font-medium text-slate-900 dark:text-dark-text-primary mb-2">
+                {gameState.boardStatus.currentObjective?.description}
+              </div>
+              <div className={`text-sm font-semibold ${
+                gameState.boardStatus.currentObjective?.status === 'on-track' ? 'text-green-600 dark:text-green-400' :
+                gameState.boardStatus.currentObjective?.status === 'at-risk' ? 'text-orange-600 dark:text-orange-400' :
+                gameState.boardStatus.currentObjective?.status === 'failed' ? 'text-red-600 dark:text-red-400' :
+                gameState.boardStatus.currentObjective?.status === 'achieved' ? 'text-blue-600 dark:text-blue-400' :
+                'text-slate-600 dark:text-slate-400'
+              }`}>
+                Status: {gameState.boardStatus.currentObjective?.status.toUpperCase().replace('-', ' ')}
+              </div>
+            </div>
+            <div>
+              <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Board Satisfaction</div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="flex-1 bg-gray-200 dark:bg-dark-bg-tertiary rounded-full h-4">
+                  <div
+                    className={`h-4 rounded-full transition-all ${
+                      gameState.boardStatus.satisfaction >= 60
+                        ? 'bg-green-500'
+                        : gameState.boardStatus.satisfaction >= 35
+                        ? 'bg-orange-500'
+                        : 'bg-red-500'
+                    }`}
+                    style={{ width: `${gameState.boardStatus.satisfaction}%` }}
+                  />
+                </div>
+                <div className={`text-lg font-bold ${
+                  gameState.boardStatus.satisfaction >= 60
+                    ? 'text-green-600 dark:text-green-400'
+                    : gameState.boardStatus.satisfaction >= 35
+                    ? 'text-orange-600 dark:text-orange-400'
+                    : 'text-red-600 dark:text-red-400'
+                }`}>
+                  {gameState.boardStatus.satisfaction}%
+                </div>
+              </div>
+            </div>
+            <div>
+              <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Job Security</div>
+              <div className={`text-xl font-bold ${
+                gameState.boardStatus.jobSecurity === 'safe' ? 'text-green-600 dark:text-green-400' :
+                gameState.boardStatus.jobSecurity === 'under-pressure' ? 'text-orange-600 dark:text-orange-400' :
+                'text-red-600 dark:text-red-400'
+              }`}>
+                {gameState.boardStatus.jobSecurity === 'safe' && '✅ SAFE'}
+                {gameState.boardStatus.jobSecurity === 'under-pressure' && '⚠️ UNDER PRESSURE'}
+                {gameState.boardStatus.jobSecurity === 'critical' && '🚨 CRITICAL'}
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Info Box */}
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-6 mb-8">

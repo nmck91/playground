@@ -184,8 +184,8 @@ export default function Dashboard() {
       <main className="max-w-7xl mx-auto px-4 py-6 pb-safe">
         
 
-        {/* Key Stats (2 cards) */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
+        {/* Key Stats (3 cards) */}
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
           <Link
             href="/fixtures"
             className="bg-white dark:bg-dark-bg-secondary rounded-xl p-8 border border-gray-200 dark:border-dark-border-primary hover:shadow-md hover:border-teal-300 dark:hover:border-teal-600 transition-all active:scale-98"
@@ -222,79 +222,29 @@ export default function Dashboard() {
               )}
             </div>
           </Link>
-        </div>
 
-        {/* Board Status (Collapsible) */}
-        <div className="mb-6">
-          <CollapsibleSection
-            title={
-              <div className="flex items-center justify-between w-full">
-                <div className="flex items-baseline gap-3">
-                  <div className="text-lg font-semibold text-slate-900 dark:text-dark-text-primary">
-                    Board Status
-                  </div>
-                  <div className={`text-base font-bold ${getJobSecurityColor(gameState.boardStatus.jobSecurity)}`}>
-                    {gameState.boardStatus.jobSecurity === 'safe' && '✅ Safe'}
-                    {gameState.boardStatus.jobSecurity === 'under-pressure' && '⚠️ Under Pressure'}
-                    {gameState.boardStatus.jobSecurity === 'critical' && '🚨 Critical'}
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="text-sm text-slate-500 dark:text-dark-text-secondary">Satisfaction:</div>
-                  <div className={`text-base font-bold ${
-                    gameState.boardStatus.satisfaction >= 60
-                      ? 'text-green-600 dark:text-green-400'
-                      : gameState.boardStatus.satisfaction >= 35
-                      ? 'text-orange-600 dark:text-orange-400'
-                      : 'text-red-600 dark:text-red-400'
-                  }`}>
-                    {gameState.boardStatus.satisfaction}%
-                  </div>
-                </div>
-              </div>
-            }
-            defaultOpen={false}
+          <Link
+            href="/tactics"
+            className="bg-white dark:bg-dark-bg-secondary rounded-xl p-8 border border-gray-200 dark:border-dark-border-primary hover:shadow-md hover:border-teal-300 dark:hover:border-teal-600 transition-all active:scale-98 col-span-2 md:col-span-1"
           >
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-              <div>
-                <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Season Objective</div>
-                <div className="text-base font-medium text-slate-900 dark:text-dark-text-primary mb-2">
-                  {gameState.boardStatus.currentObjective?.description}
-                </div>
-                <div className={`text-sm font-semibold ${getObjectiveStatusColor(gameState.boardStatus.currentObjective?.status || '')}`}>
-                  Status: {gameState.boardStatus.currentObjective?.status.toUpperCase().replace('-', ' ')}
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Board Satisfaction</div>
-                <div className="flex items-center gap-3">
-                  <div className="flex-1 bg-gray-200 dark:bg-dark-bg-tertiary rounded-full h-4">
-                    <div
-                      className={`h-4 rounded-full transition-all ${
-                        gameState.boardStatus.satisfaction >= 60
-                          ? 'bg-green-500'
-                          : gameState.boardStatus.satisfaction >= 35
-                          ? 'bg-orange-500'
-                          : 'bg-red-500'
-                      }`}
-                      style={{ width: `${gameState.boardStatus.satisfaction}%` }}
-                    />
-                  </div>
-                  <div className="text-lg font-bold text-slate-900 dark:text-dark-text-primary">
-                    {gameState.boardStatus.satisfaction}%
-                  </div>
-                </div>
-              </div>
-              <div>
-                <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Job Security</div>
-                <div className={`text-xl font-bold ${getJobSecurityColor(gameState.boardStatus.jobSecurity)}`}>
-                  {gameState.boardStatus.jobSecurity === 'safe' && '✅ SAFE'}
-                  {gameState.boardStatus.jobSecurity === 'under-pressure' && '⚠️ UNDER PRESSURE'}
-                  {gameState.boardStatus.jobSecurity === 'critical' && '🚨 CRITICAL'}
-                </div>
-              </div>
+            <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Board Status</div>
+            <div className={`text-2xl font-bold mb-2 ${
+              gameState.boardStatus.satisfaction >= 60
+                ? 'text-green-600 dark:text-green-400'
+                : gameState.boardStatus.satisfaction >= 35
+                ? 'text-orange-600 dark:text-orange-400'
+                : 'text-red-600 dark:text-red-400'
+            }`}>
+              {gameState.boardStatus.satisfaction}%
             </div>
-          </CollapsibleSection>
+            <div className="text-xs">
+              <span className={getJobSecurityColor(gameState.boardStatus.jobSecurity) + ' font-semibold'}>
+                {gameState.boardStatus.jobSecurity === 'safe' && '✅ Safe'}
+                {gameState.boardStatus.jobSecurity === 'under-pressure' && '⚠️ Under Pressure'}
+                {gameState.boardStatus.jobSecurity === 'critical' && '🚨 Critical'}
+              </span>
+            </div>
+          </Link>
         </div>
 
         {/* Manager Happiness */}
@@ -459,8 +409,8 @@ export default function Dashboard() {
             gradient="from-gradient-squad-from to-gradient-squad-to"
           />
           <GradientButton
-            icon="📋"
-            label="Philosophy"
+            icon="🏛️"
+            label="Boardroom"
             href="/tactics"
             gradient="from-gradient-tactics-from to-gradient-tactics-to"
           />
