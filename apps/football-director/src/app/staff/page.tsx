@@ -133,7 +133,9 @@ export default function StaffPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {gameState.playerTeam.staff.map((staff) => {
-              const canFire = gameState.playerTeam.staff.length > 1;
+              // Can fire if: (1) have multiple staff, OR (2) have replacement available in market
+              const hasReplacement = gameState.staffMarket.some(s => s.role === staff.role);
+              const canFire = gameState.playerTeam.staff.length > 1 || hasReplacement;
 
               return (
                 <div
@@ -176,7 +178,7 @@ export default function StaffPage() {
                     disabled={!canFire}
                     className="w-full bg-red-500 dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-normal disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {canFire ? 'Fire (2 weeks severance)' : 'Cannot Fire (Min 1 staff)'}
+                    {canFire ? 'Fire (2 weeks severance)' : 'No replacement available'}
                   </button>
                 </div>
               );
