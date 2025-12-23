@@ -354,12 +354,6 @@ export default function Dashboard() {
             onClick={() => setShowTactics(true)}
           />
           <GradientButton
-            icon="📊"
-            label="League Table"
-            href="/table"
-            gradient="from-teal-500 to-teal-600"
-          />
-          <GradientButton
             icon="📈"
             label="Statistics"
             href="/stats"
