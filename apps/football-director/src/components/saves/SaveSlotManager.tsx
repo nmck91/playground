@@ -118,26 +118,26 @@ export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProp
   const hasEmptySlot = Object.keys(slots).length < 5;
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary">
       {/* Header */}
-      <header className="bg-teal-500 text-cream-100 shadow-lg">
+      <header className="bg-teal-500 dark:bg-dark-teal-600 text-cream-100 dark:text-dark-text-primary shadow-lg">
         <div className="max-w-7xl mx-auto px-6 py-8">
           <h1 className="text-4xl font-bold">⚽ Football Director</h1>
-          <p className="text-teal-100 mt-2">Save Management</p>
+          <p className="text-teal-100 dark:text-teal-200 mt-2">Save Management</p>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Actions */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-6 mb-8 border border-gray-200 dark:border-dark-border-primary">
           <div className="flex flex-wrap gap-4">
             <button
               onClick={() => setShowNewGameDialog(true)}
               disabled={!hasEmptySlot}
               className={`px-6 py-3 rounded-lg font-medium shadow-sm transition-colors ${
                 hasEmptySlot
-                  ? 'bg-teal-500 hover:bg-teal-600 text-white'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  ? 'bg-teal-500 dark:bg-teal-600 hover:bg-teal-600 dark:hover:bg-teal-700 text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
               }`}
               title={!hasEmptySlot ? 'All save slots are full. Delete a save first.' : ''}
             >
@@ -148,8 +148,8 @@ export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProp
               disabled={!hasEmptySlot}
               className={`px-6 py-3 rounded-lg font-medium shadow-sm transition-colors ${
                 hasEmptySlot
-                  ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  ? 'bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700 text-white'
+                  : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
               }`}
               title={!hasEmptySlot ? 'All save slots are full. Delete a save first.' : ''}
             >
@@ -157,7 +157,7 @@ export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProp
             </button>
           </div>
           {!hasEmptySlot && (
-            <div className="mt-4 text-sm text-orange-600 bg-orange-50 border border-orange-200 rounded p-3">
+            <div className="mt-4 text-sm text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded p-3">
               All save slots are full (5/5). Delete a save to create a new one or import a save.
             </div>
           )}
@@ -182,10 +182,10 @@ export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProp
 
       {/* New Game Dialog */}
       {showNewGameDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
-            <h3 className="text-2xl font-bold text-slate-900 mb-4">Create New Game</h3>
-            <p className="text-slate-700 mb-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-2xl max-w-md w-full p-6 border border-gray-200 dark:border-dark-border-primary">
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-dark-text-primary mb-4">Create New Game</h3>
+            <p className="text-slate-700 dark:text-dark-text-secondary mb-4">
               Give your save a name (optional):
             </p>
             <input
@@ -200,7 +200,7 @@ export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProp
                 }
               }}
               placeholder="My Save"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 mb-6"
+              className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 mb-6 bg-white dark:bg-dark-bg-tertiary text-slate-900 dark:text-dark-text-primary placeholder-gray-400 dark:placeholder-gray-500"
               autoFocus
             />
             <div className="flex gap-4">
@@ -209,13 +209,13 @@ export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProp
                   setShowNewGameDialog(false);
                   setNewGameName('');
                 }}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-slate-900 font-medium py-3 px-6 rounded-lg transition-colors"
+                className="flex-1 bg-gray-200 dark:bg-dark-bg-tertiary hover:bg-gray-300 dark:hover:bg-dark-bg-primary text-slate-900 dark:text-dark-text-primary font-medium py-3 px-6 rounded-lg transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleNewGame}
-                className="flex-1 bg-teal-500 hover:bg-teal-600 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+                className="flex-1 bg-teal-500 dark:bg-teal-600 hover:bg-teal-600 dark:hover:bg-teal-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
               >
                 Create
               </button>
@@ -226,38 +226,38 @@ export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProp
 
       {/* Import Dialog */}
       {showImportDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-2xl max-w-2xl w-full p-6">
-            <h3 className="text-2xl font-bold text-slate-900 mb-4">Import Save</h3>
+        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-2xl max-w-2xl w-full p-6 border border-gray-200 dark:border-dark-border-primary">
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-dark-text-primary mb-4">Import Save</h3>
 
             {/* File Upload */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-dark-text-secondary mb-2">
                 Upload save file:
               </label>
               <input
                 type="file"
                 accept=".json"
                 onChange={handleImportFile}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 bg-white dark:bg-dark-bg-tertiary text-slate-900 dark:text-dark-text-primary"
               />
             </div>
 
             {/* Or paste JSON */}
             <div className="mb-4">
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label className="block text-sm font-medium text-slate-700 dark:text-dark-text-secondary mb-2">
                 Or paste save data (JSON):
               </label>
               <textarea
                 value={importText}
                 onChange={(e) => setImportText(e.target.value)}
                 placeholder="Paste save JSON here..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 font-mono text-sm h-32"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-dark-border-primary rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 font-mono text-sm h-32 bg-white dark:bg-dark-bg-tertiary text-slate-900 dark:text-dark-text-primary placeholder-gray-400 dark:placeholder-gray-500"
               />
             </div>
 
             {importError && (
-              <div className="mb-4 text-sm text-red-600 bg-red-50 border border-red-200 rounded p-3">
+              <div className="mb-4 text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded p-3">
                 {importError}
               </div>
             )}
@@ -269,7 +269,7 @@ export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProp
                   setImportText('');
                   setImportError(null);
                 }}
-                className="flex-1 bg-gray-200 hover:bg-gray-300 text-slate-900 font-medium py-3 px-6 rounded-lg transition-colors"
+                className="flex-1 bg-gray-200 dark:bg-dark-bg-tertiary hover:bg-gray-300 dark:hover:bg-dark-bg-primary text-slate-900 dark:text-dark-text-primary font-medium py-3 px-6 rounded-lg transition-colors"
               >
                 Cancel
               </button>
@@ -278,8 +278,8 @@ export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProp
                 disabled={!importText.trim()}
                 className={`flex-1 font-medium py-3 px-6 rounded-lg transition-colors ${
                   importText.trim()
-                    ? 'bg-blue-500 hover:bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    ? 'bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700 text-white'
+                    : 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
                 }`}
               >
                 Import
