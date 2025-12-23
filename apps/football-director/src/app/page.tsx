@@ -188,11 +188,11 @@ export default function Dashboard() {
                     : '/football-director-logo-text-white.svg'
                   }
                   alt="Football Director"
-                  className="h-14"
+                  className="h-12"
                 />
               )}
               {!mounted && (
-                <div className="h-14 w-64 bg-gray-200 dark:bg-dark-bg-tertiary animate-pulse rounded" />
+                <div className="h-12 w-56 bg-gray-200 dark:bg-dark-bg-tertiary animate-pulse rounded" />
               )}
               <p className="text-slate-600 dark:text-dark-text-secondary text-sm">{gameState.playerTeam.name}</p>
             </div>
