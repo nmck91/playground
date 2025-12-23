@@ -13,7 +13,6 @@ import { TrophyCabinet } from '../components/game/TrophyCabinet';
 import { AchievementToast } from '../components/game/AchievementToast';
 import { NewsFeed } from '../components/game/NewsFeed';
 import { NewsTickerWidget } from '../components/game/NewsTickerWidget';
-import { TacticsManager } from '../components/game/TacticsManager';
 import { SaveSlotManager } from '../components/saves/SaveSlotManager';
 import { YouthAcademyModal } from '../components/game/YouthAcademyModal';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
@@ -31,7 +30,6 @@ export default function Dashboard() {
   const [showRecords, setShowRecords] = useState(false);
   const [showTrophyCabinet, setShowTrophyCabinet] = useState(false);
   const [showNewsFeed, setShowNewsFeed] = useState(false);
-  const [showTactics, setShowTactics] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
 
   // Show highlights after simulation
@@ -462,10 +460,9 @@ export default function Dashboard() {
           />
           <GradientButton
             icon="📋"
-            label="Tactics"
+            label="Philosophy"
             href="/tactics"
             gradient="from-gradient-tactics-from to-gradient-tactics-to"
-            onClick={() => setShowTactics(true)}
           />
           <GradientButton
             icon="📈"
@@ -568,17 +565,6 @@ export default function Dashboard() {
           isOpen={showNewsFeed}
           onClose={() => setShowNewsFeed(false)}
           onMarkAllRead={actions.markAllNewsRead}
-        />
-      )}
-
-      {/* Tactics Manager Modal */}
-      {gameState && gameState.playerTeam.tactics && (
-        <TacticsManager
-          currentFormation={gameState.playerTeam.tactics.formation}
-          currentMentality={gameState.playerTeam.tactics.mentality}
-          onSave={actions.setTeamTactics}
-          onClose={() => setShowTactics(false)}
-          isOpen={showTactics}
         />
       )}
 
