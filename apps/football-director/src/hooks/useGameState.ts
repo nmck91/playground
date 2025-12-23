@@ -35,6 +35,7 @@ import {
   TacticsManager,
   FormationType,
   Mentality,
+  ClubPhilosophy,
   YouthAcademyManager,
   MoraleManager,
   MatchPreviewGenerator,
@@ -1052,6 +1053,38 @@ export function useGameState() {
   );
 
   /**
+   * Update club philosophy
+   */
+  const setClubPhilosophy = useCallback(
+    (philosophy: ClubPhilosophy) => {
+      if (!gameState) return;
+
+      try {
+        const updatedTeam = {
+          ...gameState.playerTeam,
+          philosophy,
+        };
+
+        setGameState({
+          ...gameState,
+          playerTeam: updatedTeam,
+        });
+
+        saveGameState({
+          ...gameState,
+          playerTeam: updatedTeam,
+        });
+
+        setError(null);
+      } catch (err) {
+        setError('Failed to update club philosophy');
+        console.error(err);
+      }
+    },
+    [gameState]
+  );
+
+  /**
    * Offer a contract to a player
    */
   const offerContract = useCallback(
@@ -1171,6 +1204,7 @@ export function useGameState() {
       markAllNewsRead,
       continueToNextSeason,
       setTeamTactics,
+      setClubPhilosophy,
       offerContract,
       selectYouthPlayers,
     },
