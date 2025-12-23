@@ -1065,15 +1065,13 @@ export function useGameState() {
           philosophy,
         };
 
-        setGameState({
+        const updatedState = {
           ...gameState,
           playerTeam: updatedTeam,
-        });
+        };
 
-        saveGameState({
-          ...gameState,
-          playerTeam: updatedTeam,
-        });
+        setGameState(updatedState);
+        SaveService.saveGame(updatedState);
 
         setError(null);
       } catch (err) {
