@@ -47,8 +47,8 @@ export function TopPerformersWidget({ topPerformers, onPlayerClick }: TopPerform
   ];
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">
+    <div className="bg-white dark:bg-dark-bg-secondary rounded-lg border border-gray-200 dark:border-dark-border-primary p-6">
+      <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
         🏆 Top Performers
       </h3>
 
@@ -58,38 +58,38 @@ export function TopPerformersWidget({ topPerformers, onPlayerClick }: TopPerform
             {item.player ? (
               <button
                 onClick={() => item.player && onPlayerClick?.(item.player)}
-                className="w-full text-left p-3 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100"
+                className="w-full text-left p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors border border-gray-100 dark:border-dark-border-secondary"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <span className="text-2xl">{item.icon}</span>
                     <div>
-                      <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+                      <p className="text-xs text-gray-500 dark:text-dark-text-secondary font-medium uppercase tracking-wide">
                         {item.title}
                       </p>
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary">
                         {item.player.name}
                       </p>
-                      <p className="text-xs text-gray-600">
+                      <p className="text-xs text-gray-600 dark:text-dark-text-secondary">
                         {item.player.position} · Skill {item.player.skill}
                       </p>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-teal-600">{item.stat}</p>
-                    <p className="text-xs text-gray-500">{item.statLabel}</p>
+                    <p className="text-2xl font-bold text-teal-600 dark:text-teal-400">{item.stat}</p>
+                    <p className="text-xs text-gray-500 dark:text-dark-text-secondary">{item.statLabel}</p>
                   </div>
                 </div>
               </button>
             ) : (
-              <div className="p-3 rounded-lg bg-gray-50 border border-gray-100">
+              <div className="p-3 rounded-lg bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-100 dark:border-dark-border-secondary">
                 <div className="flex items-center space-x-3">
                   <span className="text-2xl opacity-50">{item.icon}</span>
                   <div>
-                    <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">
+                    <p className="text-xs text-gray-500 dark:text-dark-text-secondary font-medium uppercase tracking-wide">
                       {item.title}
                     </p>
-                    <p className="text-sm text-gray-400 italic">No data yet</p>
+                    <p className="text-sm text-gray-400 dark:text-dark-text-tertiary italic">No data yet</p>
                   </div>
                 </div>
               </div>
@@ -99,7 +99,7 @@ export function TopPerformersWidget({ topPerformers, onPlayerClick }: TopPerform
       </div>
 
       {!topScorer && !topAssists && !mostAppearances && !cleanSheetKing && (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-gray-500 dark:text-dark-text-secondary">
           <p className="text-sm">Play some matches to see your top performers!</p>
         </div>
       )}
