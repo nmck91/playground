@@ -184,15 +184,15 @@ export default function Dashboard() {
               {mounted && (
                 <img
                   src={theme === 'dark' || (theme === 'system' && systemTheme === 'dark')
-                    ? '/football-director-logo-text-white.svg'
-                    : '/football-director-logo-text.svg'
+                    ? '/football-director-logo-text.svg'
+                    : '/football-director-logo-text-white.svg'
                   }
                   alt="Football Director"
-                  className="h-10"
+                  className="h-14"
                 />
               )}
               {!mounted && (
-                <div className="h-10 w-48 bg-gray-200 dark:bg-dark-bg-tertiary animate-pulse rounded" />
+                <div className="h-14 w-64 bg-gray-200 dark:bg-dark-bg-tertiary animate-pulse rounded" />
               )}
               <p className="text-slate-600 dark:text-dark-text-secondary text-sm">{gameState.playerTeam.name}</p>
             </div>
