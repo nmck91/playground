@@ -322,6 +322,112 @@ export class StaffManager {
   }
 
   /**
+   * Calculate style compatibility between club philosophy and manager style
+   * Returns 0-100 score (100 = perfect match)
+   */
+  calculateStyleCompatibility(
+    managerStyle: ManagerStyle | undefined,
+    clubPhilosophy: string | undefined
+  ): number {
+    if (!managerStyle || !clubPhilosophy) {
+      return 50; // Neutral if either is undefined
+    }
+
+    // Perfect match = 100
+    if (managerStyle === clubPhilosophy) {
+      return 100;
+    }
+
+    // Compatible styles = 75
+    const compatiblePairs: Record<string, string[]> = {
+      attacking: ['balanced', 'direct'],
+      possession: ['balanced', 'attacking'],
+      defensive: ['counter-attack', 'balanced'],
+      balanced: ['attacking', 'possession', 'defensive'],
+      direct: ['attacking', 'counter-attack'],
+      'counter-attack': ['defensive', 'direct'],
+    };
+
+    if (compatiblePairs[managerStyle]?.includes(clubPhilosophy)) {
+      return 75;
+    }
+
+    // Incompatible styles = 40
+    return 40;
+  }
+
+  /**
+   * Update manager happiness based on various factors
+   */
+  updateManagerHappiness(
+    manager: Staff,
+    team: Team,
+    recentResults: ('W' | 'D' | 'L')[], // Last 5 matches
+    boardSatisfaction: number // 0-100
+  ): Staff {
+    if (manager.role !== 'manager' || manager.happiness === undefined) {
+      return manager;
+    }
+
+    let happiness = manager.happiness;
+
+    // Factor 1: Recent Results (±20 points)
+    const wins = recentResults.filter(r => r === 'W').length;
+    const losses = recentResults.filter(r => r === 'L').length;
+    const resultsFactor = (wins * 4) - (losses * 4); // -20 to +20
+    happiness += resultsFactor;
+
+    // Factor 2: Board Satisfaction (±15 points)
+    // If board is happy (>60), manager is relieved (+5 to +15)
+    // If board is unhappy (<40), manager is stressed (-15 to -5)
+    const boardFactor = ((boardSatisfaction - 50) / 10) * 3;
+    happiness += boardFactor;
+
+    // Factor 3: Philosophy Match (±10 points)
+    const compatibility = this.calculateStyleCompatibility(manager.style, team.philosophy);
+    const philosophyFactor = ((compatibility - 50) / 10); // -5 to +5
+    happiness += philosophyFactor;
+
+    // Factor 4: Budget/Spending (±5 points)
+    // Managers are happier if they can spend (budget > £1M)
+    const budgetFactor = team.budget > 1000000 ? 3 : team.budget > 500000 ? 0 : -3;
+    happiness += budgetFactor;
+
+    // Clamp between 0-100
+    happiness = Math.max(0, Math.min(100, happiness));
+
+    return {
+      ...manager,
+      happiness: Math.round(happiness),
+    };
+  }
+
+  /**
+   * Get manager happiness effect on team performance
+   * Returns multiplier: 1.0 = neutral, 1.05 = 5% boost, 0.95 = 5% penalty
+   */
+  getManagerHappinessEffect(manager: Staff): number {
+    if (manager.role !== 'manager' || manager.happiness === undefined) {
+      return 1.0;
+    }
+
+    // Happiness 80-100 = +5% boost
+    // Happiness 40-60 = neutral
+    // Happiness 0-20 = -5% penalty
+    if (manager.happiness >= 80) {
+      return 1.05;
+    } else if (manager.happiness >= 60) {
+      return 1.02;
+    } else if (manager.happiness >= 40) {
+      return 1.0;
+    } else if (manager.happiness >= 20) {
+      return 0.98;
+    } else {
+      return 0.95;
+    }
+  }
+
+  /**
    * Seeded random number generator for deterministic generation
    */
   private seededRandom(seed: number): () => number {
