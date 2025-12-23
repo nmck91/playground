@@ -1,6 +1,8 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
 import { useGameState } from '../../hooks/useGameState';
 
@@ -12,7 +14,9 @@ interface MenuItem {
 }
 
 export default function MorePage() {
-  const { gameState } = useGameState();
+  const { gameState, actions } = useGameState();
+  const router = useRouter();
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const unreadNews = gameState?.newsFeed?.filter(n => !n.read).length || 0;
 
   const menuItems: MenuItem[] = [
@@ -65,7 +69,10 @@ export default function MorePage() {
           <h2 className="text-sm font-semibold text-gray-500 dark:text-dark-text-tertiary uppercase tracking-wide mb-3 px-1">
             Settings
           </h2>
-          <button className="flex items-center justify-between w-full h-14 px-5 bg-white dark:bg-dark-bg-secondary rounded-xl border border-gray-200 dark:border-dark-border-primary hover:shadow-md active:scale-98 transition-all text-red-600 dark:text-red-400">
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="flex items-center justify-between w-full h-14 px-5 bg-white dark:bg-dark-bg-secondary rounded-xl border border-gray-200 dark:border-dark-border-primary hover:shadow-md active:scale-98 transition-all text-red-600 dark:text-red-400"
+          >
             <div className="flex items-center gap-4">
               <span className="text-2xl">🗑️</span>
               <span className="text-base font-medium">Delete Save</span>
@@ -73,6 +80,38 @@ export default function MorePage() {
           </button>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-2xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-dark-text-primary mb-4">
+              Delete Save?
+            </h3>
+            <p className="text-slate-600 dark:text-dark-text-secondary mb-6">
+              Are you sure you want to delete your save? This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-4 py-3 bg-gray-100 dark:bg-dark-bg-tertiary hover:bg-gray-200 dark:hover:bg-dark-bg-primary text-slate-900 dark:text-dark-text-primary font-semibold rounded-lg transition-all active:scale-98"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  actions.deleteSave();
+                  setShowDeleteConfirm(false);
+                  router.push('/');
+                }}
+                className="flex-1 px-4 py-3 bg-red-500 dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700 text-white font-semibold rounded-lg transition-all active:scale-98"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
