@@ -76,6 +76,22 @@ export interface Player {
 
 export type StaffRole = 'manager' | 'coach' | 'scout';
 
+export type ClubPhilosophy =
+  | 'attacking'       // High-risk, high-reward, lots of goals
+  | 'possession'      // Control the ball, patient buildup
+  | 'defensive'       // Solid at the back, counter-attack
+  | 'balanced'        // Well-rounded approach
+  | 'direct'          // Long balls, physical play
+  | 'counter-attack'; // Sit deep, hit on the break
+
+export type ManagerStyle =
+  | 'attacking'       // Prefers offensive formations (4-3-3, 3-4-3)
+  | 'possession'      // Prefers ball control (4-5-1, 3-5-2)
+  | 'defensive'       // Prefers solid defense (5-3-2, 4-4-2 defensive)
+  | 'balanced'        // Adapts to situation (4-4-2, 4-3-3)
+  | 'direct'          // Long ball tactics
+  | 'counter-attack'; // Defensive with pace on break
+
 export interface Staff {
   id: string;
   name: string;
@@ -83,6 +99,9 @@ export interface Staff {
   skill: number; // 1-20 scale (affects their effectiveness)
   salary: number; // Weekly wage
   specialty?: string; // e.g., "Youth Development", "South America", "Tactics"
+  // Manager-specific fields
+  style?: ManagerStyle; // Only for managers - their tactical philosophy
+  happiness?: number; // Only for managers - 0-100 scale
 }
 
 export type FormationType =
@@ -107,6 +126,7 @@ export interface Team {
   staff: Staff[]; // Manager, coaches, scouts
   budget: number;
   tactics?: Tactics; // Team's tactical setup
+  philosophy?: ClubPhilosophy; // Club's playing philosophy (set by director)
 }
 
 export interface Match {
