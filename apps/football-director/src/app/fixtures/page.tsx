@@ -5,6 +5,7 @@ import { Fixture, MatchPreview } from '@playground/football-director-engine';
 import Link from 'next/link';
 import { useState } from 'react';
 import { MatchPreviewModal } from '../../components/game/MatchPreviewModal';
+import { ThemeToggle } from '../../components/ui/ThemeToggle';
 
 export default function FixturesPage() {
   const { gameState, loading, error } = useGameState();
@@ -167,22 +168,16 @@ export default function FixturesPage() {
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary pb-20">
       {/* Header */}
-      <header className="bg-teal-500 dark:bg-dark-teal-600 text-cream-100 dark:text-dark-text-primary shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 md:px-6 py-4 md:py-8">
+      <header className="bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-border-primary">
+        <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl md:text-4xl font-bold">Fixtures</h1>
-              <p className="text-teal-100 dark:text-dark-text-secondary mt-1 md:mt-2 text-sm md:text-base">
-                Season {gameState.season.year} - Week {gameState.season.currentWeek}
-              </p>
+            <div className="flex items-center gap-3">
+              <Link href="/" className="text-slate-900 dark:text-dark-text-primary hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
+                <span className="text-2xl">←</span>
+              </Link>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-dark-text-primary">Fixtures</h1>
             </div>
-            <Link
-              href="/"
-              className="bg-white dark:bg-dark-bg-secondary text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-dark-bg-tertiary font-medium px-3 md:px-6 py-2 md:py-3 rounded-lg shadow-sm transition-normal text-sm md:text-base"
-            >
-              <span className="hidden md:inline">← Back to Dashboard</span>
-              <span className="md:hidden">← Back</span>
-            </Link>
+            <ThemeToggle />
           </div>
         </div>
       </header>

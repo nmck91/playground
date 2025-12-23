@@ -3,6 +3,7 @@
 import { useGameState } from '../../hooks/useGameState';
 import { StaffManager } from '@playground/football-director-engine';
 import Link from 'next/link';
+import { ThemeToggle } from '../../components/ui/ThemeToggle';
 
 export default function StaffPage() {
   const { gameState, loading, error, actions } = useGameState();
@@ -69,21 +70,16 @@ export default function StaffPage() {
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary pb-20">
       {/* Header */}
-      <header className="bg-teal-500 dark:bg-dark-teal-600 text-cream-100 dark:text-dark-text-primary shadow-lg">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <header className="bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-border-primary">
+        <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold">⚽ Staff Management</h1>
-              <p className="text-teal-100 dark:text-teal-200 mt-2">
-                Budget: £{gameState.finances.budget.toLocaleString()}
-              </p>
+            <div className="flex items-center gap-3">
+              <Link href="/" className="text-slate-900 dark:text-dark-text-primary hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
+                <span className="text-2xl">←</span>
+              </Link>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-dark-text-primary">Staff</h1>
             </div>
-            <Link
-              href="/"
-              className="bg-white dark:bg-dark-bg-secondary text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-dark-bg-tertiary px-6 py-3 rounded-lg font-semibold transition-normal"
-            >
-              ← Back to Dashboard
-            </Link>
+            <ThemeToggle />
           </div>
         </div>
       </header>

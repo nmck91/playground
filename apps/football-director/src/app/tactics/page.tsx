@@ -4,6 +4,7 @@ import { useGameState } from '../../hooks/useGameState';
 import Link from 'next/link';
 import { ClubPhilosophy, StaffManager } from '@playground/football-director-engine';
 import { useState, useEffect } from 'react';
+import { ThemeToggle } from '../../components/ui/ThemeToggle';
 
 export default function BoardroomPage() {
   const { gameState, loading, error, actions } = useGameState();
@@ -123,21 +124,16 @@ export default function BoardroomPage() {
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary pb-20">
       {/* Header */}
-      <header className="bg-gradient-to-br from-purple-500 to-purple-600 dark:from-purple-600 dark:to-purple-700 text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <header className="bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-border-primary">
+        <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold">🏛️ Boardroom</h1>
-              <p className="text-purple-100 dark:text-purple-200 mt-2">
-                Set objectives and define your club philosophy
-              </p>
+            <div className="flex items-center gap-3">
+              <Link href="/" className="text-slate-900 dark:text-dark-text-primary hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
+                <span className="text-2xl">←</span>
+              </Link>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-dark-text-primary">Boardroom</h1>
             </div>
-            <Link
-              href="/"
-              className="bg-white dark:bg-dark-bg-secondary text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-dark-bg-tertiary px-6 py-3 rounded-lg font-semibold transition-all"
-            >
-              ← Back to Dashboard
-            </Link>
+            <ThemeToggle />
           </div>
         </div>
       </header>

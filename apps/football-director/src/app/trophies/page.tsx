@@ -2,6 +2,7 @@
 
 import { useGameState } from '../../hooks/useGameState';
 import Link from 'next/link';
+import { ThemeToggle } from '../../components/ui/ThemeToggle';
 
 export default function TrophiesPage() {
   const { gameState, loading } = useGameState();
@@ -27,21 +28,16 @@ export default function TrophiesPage() {
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary pb-20">
       {/* Header */}
-      <header className="bg-gradient-to-br from-yellow-500 to-yellow-600 dark:from-yellow-600 dark:to-yellow-700 text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <header className="bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-border-primary">
+        <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold">🏆 Trophy Cabinet</h1>
-              <p className="text-yellow-100 dark:text-yellow-200 mt-2">
-                {seasonAwards.length} season{seasonAwards.length === 1 ? '' : 's'} of awards
-              </p>
+            <div className="flex items-center gap-3">
+              <Link href="/more" className="text-slate-900 dark:text-dark-text-primary hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
+                <span className="text-2xl">←</span>
+              </Link>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-dark-text-primary">Trophies</h1>
             </div>
-            <Link
-              href="/more"
-              className="bg-white dark:bg-dark-bg-secondary text-yellow-600 dark:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-dark-bg-tertiary px-6 py-3 rounded-lg font-semibold transition-all"
-            >
-              ← Back
-            </Link>
+            <ThemeToggle />
           </div>
         </div>
       </header>

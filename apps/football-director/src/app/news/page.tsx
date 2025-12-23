@@ -3,6 +3,7 @@
 import { useGameState } from '../../hooks/useGameState';
 import Link from 'next/link';
 import { NewsArticle, NewsArticleType, NewsImportance } from '@playground/football-director-engine';
+import { ThemeToggle } from '../../components/ui/ThemeToggle';
 
 export default function NewsPage() {
   const { gameState, loading, actions } = useGameState();
@@ -92,21 +93,16 @@ export default function NewsPage() {
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary pb-20">
       {/* Header */}
-      <header className="bg-gradient-to-br from-orange-500 to-orange-600 dark:from-orange-600 dark:to-orange-700 text-white shadow-lg">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <header className="bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-border-primary">
+        <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-4xl font-bold">📰 News Feed</h1>
-              <p className="text-orange-100 dark:text-orange-200 mt-2">
-                {unreadCount > 0 ? `${unreadCount} unread article${unreadCount === 1 ? '' : 's'}` : 'All caught up!'}
-              </p>
+            <div className="flex items-center gap-3">
+              <Link href="/more" className="text-slate-900 dark:text-dark-text-primary hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
+                <span className="text-2xl">←</span>
+              </Link>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-dark-text-primary">News</h1>
             </div>
-            <Link
-              href="/more"
-              className="bg-white dark:bg-dark-bg-secondary text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-dark-bg-tertiary px-6 py-3 rounded-lg font-semibold transition-all"
-            >
-              ← Back
-            </Link>
+            <ThemeToggle />
           </div>
         </div>
       </header>

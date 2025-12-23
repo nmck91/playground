@@ -31,12 +31,19 @@ export default function MorePage() {
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary pb-20">
       {/* Header */}
-      <div className="bg-gradient-to-br from-teal-500 to-teal-600 px-4 py-8">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-white">More</h1>
-          <ThemeToggle />
+      <header className="bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-border-primary">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Link href="/" className="text-slate-900 dark:text-dark-text-primary hover:text-teal-600 dark:hover:text-teal-400 transition-colors">
+                <span className="text-2xl">←</span>
+              </Link>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-dark-text-primary">More</h1>
+            </div>
+            <ThemeToggle />
+          </div>
         </div>
-      </div>
+      </header>
 
       {/* Menu Items */}
       <div className="max-w-7xl mx-auto px-4 py-6">
