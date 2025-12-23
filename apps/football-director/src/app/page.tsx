@@ -365,6 +365,12 @@ export default function Dashboard() {
             href="/stats"
             gradient="from-purple-500 to-purple-600"
           />
+          <GradientButton
+            icon="•••"
+            label="More"
+            href="/more"
+            gradient="from-gradient-more-from to-gradient-more-to"
+          />
         </div>
 
         {/* Board Status (Collapsible on mobile) */}
