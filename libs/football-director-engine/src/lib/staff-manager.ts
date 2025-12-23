@@ -3,7 +3,7 @@
  * Manages hiring, firing, and effects of staff (managers, coaches, scouts)
  */
 
-import { Staff, StaffRole, Team } from './types';
+import { Staff, StaffRole, Team, ManagerStyle } from './types';
 
 export class StaffManager {
   /**
@@ -38,6 +38,15 @@ export class StaffManager {
     'Youth Players', 'Bargain Deals', 'Hidden Gems', 'Elite Talent', 'Lower Leagues',
   ];
 
+  private readonly managerStyles: ManagerStyle[] = [
+    'attacking',
+    'possession',
+    'defensive',
+    'balanced',
+    'direct',
+    'counter-attack',
+  ];
+
   /**
    * Generate a random staff member
    */
@@ -69,6 +78,15 @@ export class StaffManager {
     }
     const specialty = specialtyPool[Math.floor(random() * specialtyPool.length)];
 
+    // Manager-specific properties
+    let style: ManagerStyle | undefined;
+    let happiness: number | undefined;
+
+    if (role === 'manager') {
+      style = this.managerStyles[Math.floor(random() * this.managerStyles.length)];
+      happiness = 80; // New managers start with good happiness
+    }
+
     return {
       id: `staff-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name,
@@ -76,6 +94,8 @@ export class StaffManager {
       skill,
       salary,
       specialty,
+      style,
+      happiness,
     };
   }
 
