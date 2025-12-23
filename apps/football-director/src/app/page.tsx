@@ -181,6 +181,7 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 pb-safe">
+        
 
         {/* Secondary Stats (2 columns on mobile, 4 on desktop) */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
@@ -228,6 +229,86 @@ export default function Dashboard() {
           </div>
         </div>
 
+
+        {/* League Position & Table (Collapsible) */}
+        <div className="mb-6">
+          <CollapsibleSection
+            title={
+              <div className="flex items-center justify-between w-full">
+                <div className="flex items-baseline gap-3">
+                  <div className="text-sm font-medium text-slate-500 dark:text-dark-text-secondary">
+                    League Position:
+                  </div>
+                  <div className="text-3xl font-bold text-slate-900 dark:text-dark-text-primary">
+                    {playerPosition}
+                    {playerPosition === 1 && <span className="ml-2 text-2xl">🏆</span>}
+                  </div>
+                  <div className="text-base text-slate-600 dark:text-dark-text-secondary">
+                    / {sortedTable.length}
+                  </div>
+                </div>
+                <Link
+                  href="/table"
+                  onClick={(e) => e.stopPropagation()}
+                  className="px-3 py-1.5 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white text-xs font-medium rounded-lg transition-all active:scale-95"
+                >
+                  Full Table →
+                </Link>
+              </div>
+            }
+            defaultOpen={true}
+          >
+            <div className="pt-4">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b-2 border-gray-200 dark:border-dark-border-primary">
+                      <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Pos</th>
+                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Team</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">P</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">W</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">D</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">L</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">GF</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">GA</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">GD</th>
+                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {condensedTable.map((entry) => {
+                      const position = sortedTable.findIndex(t => t.teamId === entry.teamId) + 1;
+                      return (
+                        <tr
+                          key={entry.teamId}
+                          className={`border-b border-gray-100 dark:border-dark-border-secondary ${
+                            entry.teamId === gameState.playerTeam.id
+                              ? 'bg-teal-50 dark:bg-dark-teal-50 font-semibold'
+                              : ''
+                          }`}
+                        >
+                          <td className="py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{position}</td>
+                          <td className="py-3 px-4 text-sm text-slate-900 dark:text-dark-text-primary">{entry.teamName}</td>
+                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.played}</td>
+                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.won}</td>
+                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.drawn}</td>
+                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.lost}</td>
+                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.goalsFor}</td>
+                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.goalsAgainst}</td>
+                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">
+                            {entry.goalDifference > 0 ? '+' : ''}{entry.goalDifference}
+                          </td>
+                          <td className="text-center py-3 px-2 text-sm font-bold text-teal-600 dark:text-teal-400">{entry.points}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </CollapsibleSection>
+        </div>
+        
         {/* Simulate Button (Full-Width, Bold) */}
         <button
           onClick={actions.simulateNextWeek}
@@ -346,85 +427,6 @@ export default function Dashboard() {
           news={gameState.newsFeed}
           onNewsClick={() => setShowNewsFeed(true)}
         />
-
-        {/* League Position & Table (Collapsible) */}
-        <div className="mb-6">
-          <CollapsibleSection
-            title={
-              <div className="flex items-center justify-between w-full">
-                <div className="flex items-baseline gap-3">
-                  <div className="text-sm font-medium text-slate-500 dark:text-dark-text-secondary">
-                    League Position:
-                  </div>
-                  <div className="text-3xl font-bold text-slate-900 dark:text-dark-text-primary">
-                    {playerPosition}
-                    {playerPosition === 1 && <span className="ml-2 text-2xl">🏆</span>}
-                  </div>
-                  <div className="text-base text-slate-600 dark:text-dark-text-secondary">
-                    / {sortedTable.length}
-                  </div>
-                </div>
-                <Link
-                  href="/table"
-                  onClick={(e) => e.stopPropagation()}
-                  className="px-3 py-1.5 bg-slate-900 dark:bg-slate-700 hover:bg-slate-800 dark:hover:bg-slate-600 text-white text-xs font-medium rounded-lg transition-all active:scale-95"
-                >
-                  Full Table →
-                </Link>
-              </div>
-            }
-            defaultOpen={true}
-          >
-            <div className="pt-4">
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b-2 border-gray-200 dark:border-dark-border-primary">
-                      <th className="text-left py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Pos</th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Team</th>
-                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">P</th>
-                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">W</th>
-                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">D</th>
-                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">L</th>
-                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">GF</th>
-                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">GA</th>
-                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">GD</th>
-                      <th className="text-center py-3 px-2 text-sm font-semibold text-slate-700 dark:text-dark-text-secondary">Pts</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {condensedTable.map((entry) => {
-                      const position = sortedTable.findIndex(t => t.teamId === entry.teamId) + 1;
-                      return (
-                        <tr
-                          key={entry.teamId}
-                          className={`border-b border-gray-100 dark:border-dark-border-secondary ${
-                            entry.teamId === gameState.playerTeam.id
-                              ? 'bg-teal-50 dark:bg-dark-teal-50 font-semibold'
-                              : ''
-                          }`}
-                        >
-                          <td className="py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{position}</td>
-                          <td className="py-3 px-4 text-sm text-slate-900 dark:text-dark-text-primary">{entry.teamName}</td>
-                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.played}</td>
-                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.won}</td>
-                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.drawn}</td>
-                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.lost}</td>
-                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.goalsFor}</td>
-                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">{entry.goalsAgainst}</td>
-                          <td className="text-center py-3 px-2 text-sm text-slate-700 dark:text-dark-text-secondary">
-                            {entry.goalDifference > 0 ? '+' : ''}{entry.goalDifference}
-                          </td>
-                          <td className="text-center py-3 px-2 text-sm font-bold text-teal-600 dark:text-teal-400">{entry.points}</td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </CollapsibleSection>
-        </div>
       </main>
 
       {/* Match Highlights Modal */}
