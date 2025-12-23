@@ -101,6 +101,9 @@ export default function Dashboard() {
 
   const playerPosition = sortedTable.findIndex((entry) => entry.teamId === gameState.playerTeam.id) + 1;
 
+  // Get manager info for happiness display
+  const manager = gameState.playerTeam.staff.find(s => s.role === 'manager');
+
   // Get condensed table (5 teams centered around player position)
   const getCondensedTable = () => {
     const totalTeams = sortedTable.length;
@@ -296,7 +299,63 @@ export default function Dashboard() {
           </CollapsibleSection>
         </div>
 
-        
+        {/* Manager Happiness */}
+        {manager && manager.happiness !== undefined && (
+          <div className="mb-6">
+            <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-6 border border-gray-200 dark:border-dark-border-primary">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Manager Happiness</div>
+                  <div className="text-lg font-bold text-slate-900 dark:text-dark-text-primary">
+                    👔 {manager.name}
+                  </div>
+                  {manager.style && (
+                    <div className="text-xs text-slate-600 dark:text-dark-text-secondary capitalize mt-1">
+                      Style: {manager.style}
+                    </div>
+                  )}
+                </div>
+                <div className="text-right">
+                  <div className={`text-4xl font-bold ${
+                    manager.happiness >= 80
+                      ? 'text-green-600 dark:text-green-400'
+                      : manager.happiness >= 60
+                      ? 'text-teal-600 dark:text-teal-400'
+                      : manager.happiness >= 40
+                      ? 'text-yellow-600 dark:text-yellow-400'
+                      : 'text-red-600 dark:text-red-400'
+                  }`}>
+                    {manager.happiness}%
+                  </div>
+                  <div className="text-xs text-slate-500 dark:text-dark-text-secondary mt-1">
+                    {manager.happiness >= 80 && '😊 Very Happy'}
+                    {manager.happiness >= 60 && manager.happiness < 80 && '🙂 Content'}
+                    {manager.happiness >= 40 && manager.happiness < 60 && '😐 Neutral'}
+                    {manager.happiness >= 20 && manager.happiness < 40 && '😟 Unhappy'}
+                    {manager.happiness < 20 && '😡 Very Unhappy'}
+                  </div>
+                </div>
+              </div>
+              <div className="mt-4">
+                <div className="flex-1 bg-gray-200 dark:bg-dark-bg-tertiary rounded-full h-3">
+                  <div
+                    className={`h-3 rounded-full transition-all ${
+                      manager.happiness >= 80
+                        ? 'bg-green-500'
+                        : manager.happiness >= 60
+                        ? 'bg-teal-500'
+                        : manager.happiness >= 40
+                        ? 'bg-yellow-500'
+                        : 'bg-red-500'
+                    }`}
+                    style={{ width: `${manager.happiness}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Simulate Button (Full-Width, Bold) */}
         <button
           onClick={actions.simulateNextWeek}
