@@ -15,7 +15,7 @@ export function CollapsibleSection({ title, defaultOpen = false, children }: Pro
     <div className="bg-white dark:bg-dark-bg-secondary rounded-xl border border-gray-200 dark:border-dark-border-primary overflow-hidden">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex items-center justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors"
+        className="w-full flex items-center h-14 justify-between px-5 py-4 hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors"
       >
         {typeof title === 'string' ? (
           <h3 className="text-lg font-semibold text-slate-900 dark:text-dark-text-primary">
