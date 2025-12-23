@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTheme } from 'next-themes';
 import { Player } from '@playground/football-director-engine';
 import { useGameState } from '../hooks/useGameState';
 import { MatchHighlights } from '../components/game/MatchHighlights';
@@ -22,7 +23,14 @@ import Link from 'next/link';
 
 export default function Dashboard() {
   const { gameState, loading, error, lastSimulationResults, developmentReports, seasonTopPerformers, seasonEvaluation, pendingAchievements, youthProspects, actions } = useGameState();
+  const { theme, systemTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
   const [showHighlights, setShowHighlights] = useState(false);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [showDevelopment, setShowDevelopment] = useState(false);
   const [showEvaluation, setShowEvaluation] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
@@ -172,9 +180,21 @@ export default function Dashboard() {
       <header className="bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-border-primary">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 dark:text-dark-text-primary">Football Director</h1>
-              <p className="text-slate-600 dark:text-dark-text-secondary mt-1 text-sm">{gameState.playerTeam.name}</p>
+            <div className="flex items-center gap-4">
+              {mounted && (
+                <img
+                  src={theme === 'dark' || (theme === 'system' && systemTheme === 'dark')
+                    ? '/football-director-logo-text-white.svg'
+                    : '/football-director-logo-text.svg'
+                  }
+                  alt="Football Director"
+                  className="h-10"
+                />
+              )}
+              {!mounted && (
+                <div className="h-10 w-48 bg-gray-200 dark:bg-dark-bg-tertiary animate-pulse rounded" />
+              )}
+              <p className="text-slate-600 dark:text-dark-text-secondary text-sm">{gameState.playerTeam.name}</p>
             </div>
             <ThemeToggle />
           </div>
