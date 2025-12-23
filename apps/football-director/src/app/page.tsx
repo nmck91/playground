@@ -180,7 +180,7 @@ export default function Dashboard() {
       <header className="bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-border-primary">
         <div className="max-w-7xl mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div>
               {mounted && (
                 <img
                   src={theme === 'dark' || (theme === 'system' && systemTheme === 'dark')
@@ -194,7 +194,6 @@ export default function Dashboard() {
               {!mounted && (
                 <div className="h-[40px] w-48 bg-gray-200 dark:bg-dark-bg-tertiary animate-pulse rounded" />
               )}
-              <p className="text-slate-600 dark:text-dark-text-secondary text-sm">{gameState.playerTeam.name}</p>
             </div>
             <ThemeToggle />
           </div>
@@ -210,9 +209,9 @@ export default function Dashboard() {
             href="/fixtures"
             className="bg-white dark:bg-dark-bg-secondary rounded-xl p-8 border border-gray-200 dark:border-dark-border-primary hover:shadow-md hover:border-teal-300 dark:hover:border-teal-600 transition-all active:scale-98"
           >
-            <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Week</div>
+            <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">{gameState.playerTeam.name}</div>
             <div className="text-2xl font-bold text-slate-900 dark:text-dark-text-primary">
-              {gameState.season.currentWeek}/{gameState.season.totalWeeks}
+              Week {gameState.season.currentWeek}/{gameState.season.totalWeeks}
             </div>
             <div className="text-xs mt-1">
               {gameState.season.phase === 'pre-season' ? (
