@@ -196,6 +196,17 @@ export default function StaffPage() {
               {availableManagers.map((staff) => {
                 const canAfford = gameState.finances.budget >= staff.salary * 4;
                 const hasManager = !!manager;
+                const compatibility = staffManager.calculateStyleCompatibility(
+                  staff.style,
+                  gameState.playerTeam.philosophy
+                );
+
+                const getCompatibilityColor = (score: number) => {
+                  if (score >= 90) return 'text-green-600 dark:text-green-400';
+                  if (score >= 70) return 'text-teal-600 dark:text-teal-400';
+                  if (score >= 50) return 'text-yellow-600 dark:text-yellow-400';
+                  return 'text-red-600 dark:text-red-400';
+                };
 
                 return (
                   <div
@@ -208,6 +219,11 @@ export default function StaffPage() {
                           {getRoleIcon(staff.role)} {staff.name}
                         </h3>
                         <p className="text-sm text-slate-500 dark:text-dark-text-secondary">{staff.specialty}</p>
+                        {staff.style && (
+                          <p className="text-xs text-teal-600 dark:text-teal-400 font-semibold mt-1 capitalize">
+                            Style: {staff.style}
+                          </p>
+                        )}
                       </div>
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-semibold ${getRoleColor(
@@ -218,7 +234,7 @@ export default function StaffPage() {
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 mb-4 text-sm">
+                    <div className="grid grid-cols-2 gap-2 mb-3 text-sm">
                       <div>
                         <span className="text-slate-500 dark:text-dark-text-secondary">Skill:</span>
                         <span className="ml-2 font-semibold text-teal-600 dark:text-teal-400">
@@ -232,6 +248,17 @@ export default function StaffPage() {
                         </span>
                       </div>
                     </div>
+
+                    {gameState.playerTeam.philosophy && (
+                      <div className="bg-gray-50 dark:bg-dark-bg-primary rounded p-2 mb-3">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-slate-600 dark:text-dark-text-secondary">Club Match:</span>
+                          <span className={`font-bold text-base ${getCompatibilityColor(compatibility)}`}>
+                            {compatibility}%
+                          </span>
+                        </div>
+                      </div>
+                    )}
 
                     <button
                       onClick={() => actions.hireStaff(staff)}
