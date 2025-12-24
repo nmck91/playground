@@ -8,6 +8,10 @@ export const metadata = {
   title: 'Football Director',
   description: 'Build, manage, and lead your football team to glory. Make tactical decisions, sign players, and compete for trophies in this immersive football management simulator.',
   manifest: '/manifest.json',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/icon-192x192.png',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
