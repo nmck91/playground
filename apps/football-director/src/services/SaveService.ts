@@ -225,12 +225,31 @@ export class SaveService {
     const MAX_MATCH_HISTORY = 76; // Keep last 2 seasons worth of matches
     const MAX_NEWS_FEED = 100; // Keep last 100 news items
 
+    // Optimize AI teams by removing unnecessary data
+    const optimizeAITeams = (teams: Team[]): Team[] => {
+      return teams.map(team => ({
+        ...team,
+        players: team.players.map(player => ({
+          ...player,
+          // Remove player history for AI teams (keep stats but not history)
+          history: [],
+        })),
+      }));
+    };
+
     return {
       ...gameState,
       // Limit match history to prevent bloat
       matchHistory: gameState.matchHistory.slice(-MAX_MATCH_HISTORY),
       // Limit news feed to prevent bloat
       newsFeed: gameState.newsFeed.slice(-MAX_NEWS_FEED),
+      // Optimize AI teams
+      aiTeams: optimizeAITeams(gameState.aiTeams),
+      // Limit transactions history
+      finances: {
+        ...gameState.finances,
+        transactions: gameState.finances.transactions.slice(-50), // Keep last 50 transactions
+      },
     };
   }
 
@@ -282,11 +301,17 @@ export class SaveService {
           // If quota exceeded, try with more aggressive optimization
           console.warn('Storage quota exceeded, applying aggressive optimization...');
 
-          // More aggressive: Keep only last season of matches
+          // More aggressive: Keep only last season of matches and minimal data
           const aggressiveState = {
             ...optimizedState,
-            matchHistory: optimizedState.matchHistory.slice(-38),
-            newsFeed: optimizedState.newsFeed.slice(-50),
+            matchHistory: optimizedState.matchHistory.slice(-38), // Last season only
+            newsFeed: optimizedState.newsFeed.slice(-30), // Last 30 news items
+            finances: {
+              ...optimizedState.finances,
+              transactions: optimizedState.finances.transactions.slice(-20), // Last 20 transactions
+            },
+            // Remove season records except current season
+            seasonRecords: optimizedState.seasonRecords.slice(-1),
           };
 
           const aggressiveSlot: SaveSlot = {
