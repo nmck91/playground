@@ -5,6 +5,7 @@
 
 'use client';
 
+import Link from 'next/link';
 import { SeasonTopPerformers, Player } from '@playground/football-director-engine';
 
 export interface TopPerformersWidgetProps {
@@ -51,9 +52,17 @@ export function TopPerformersWidget({ topPerformers, onPlayerClick }: TopPerform
 
   return (
     <div className="bg-white dark:bg-dark-bg-secondary rounded-lg border border-gray-200 dark:border-dark-border-primary p-6">
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary mb-4">
-        🏆 Top Performers
-      </h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-dark-text-primary">
+          🏆 Top Performers
+        </h3>
+        <Link
+          href="/stats"
+          className="text-sm font-medium text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors"
+        >
+          View Statistics →
+        </Link>
+      </div>
 
       {hasData ? (
         <div className="space-y-4">

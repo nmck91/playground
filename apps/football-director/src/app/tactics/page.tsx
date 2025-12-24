@@ -322,13 +322,42 @@ export default function BoardroomPage() {
         </div>
 
         {/* Save Button */}
-        <div className="flex justify-center">
+        <div className="flex justify-center mb-8">
           <button
             onClick={handleSave}
             className="bg-purple-500 dark:bg-purple-600 hover:bg-purple-600 dark:hover:bg-purple-700 text-white font-bold py-4 px-12 rounded-lg text-lg shadow-lg transition-all active:scale-98"
           >
             💾 Save Philosophy
           </button>
+        </div>
+
+        {/* Club History */}
+        <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-dark-border-primary">
+          <h2 className="text-2xl font-semibold text-slate-900 dark:text-dark-text-primary mb-6">
+            Club History
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Link
+              href="/records"
+              className="flex items-center justify-between h-14 px-5 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:shadow-lg text-white font-semibold rounded-xl active:scale-98 transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🏆</span>
+                <span className="text-base">Club Records</span>
+              </div>
+              <span className="text-white/60">›</span>
+            </Link>
+            <Link
+              href="/trophies"
+              className="flex items-center justify-between h-14 px-5 bg-gradient-to-r from-amber-500 to-amber-600 hover:shadow-lg text-white font-semibold rounded-xl active:scale-98 transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-2xl">🏆</span>
+                <span className="text-base">Trophy Cabinet</span>
+              </div>
+              <span className="text-white/60">›</span>
+            </Link>
+          </div>
         </div>
       </main>
     </div>

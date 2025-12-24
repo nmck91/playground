@@ -18,7 +18,6 @@ import { SaveSlotManager } from '../components/saves/SaveSlotManager';
 import { YouthAcademyModal } from '../components/game/YouthAcademyModal';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { CollapsibleSection } from '../components/ui/CollapsibleSection';
-import { GradientButton } from '../components/ui/GradientButton';
 import Link from 'next/link';
 
 export default function Dashboard() {
@@ -39,6 +38,7 @@ export default function Dashboard() {
   const [showTrophyCabinet, setShowTrophyCabinet] = useState(false);
   const [showNewsFeed, setShowNewsFeed] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Show highlights after simulation
   useEffect(() => {
@@ -266,13 +266,24 @@ export default function Dashboard() {
           </Link>
         </div>
 
-        {/* Manager Happiness */}
-        {manager && manager.happiness !== undefined && (
-          <div className="mb-6">
+        {/* Manager Happiness & Squad Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          {/* Manager Happiness */}
+          {manager && manager.happiness !== undefined && (
             <div className="bg-white dark:bg-dark-bg-secondary rounded-xl p-6 border border-gray-200 dark:border-dark-border-primary">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-dark-text-primary">
+                  Manager Happiness
+                </h3>
+                <Link
+                  href="/staff"
+                  className="text-sm font-medium text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors"
+                >
+                  View Staff →
+                </Link>
+              </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm text-slate-500 dark:text-dark-text-secondary mb-1">Manager Happiness</div>
                   <div className="text-lg font-bold text-slate-900 dark:text-dark-text-primary">
                     👔 {manager.name}
                   </div>
@@ -320,8 +331,49 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+
+          {/* Squad Overview */}
+          <Link
+            href="/squad"
+            className="bg-white dark:bg-dark-bg-secondary rounded-xl p-6 border border-gray-200 dark:border-dark-border-primary hover:shadow-md transition-all"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-dark-text-primary">
+                Squad Overview
+              </h3>
+              <span className="text-sm font-medium text-teal-600 dark:text-teal-400">
+                View Squad →
+              </span>
+            </div>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-slate-500 dark:text-dark-text-secondary">
+                  Overall Rating
+                </div>
+                <div className="text-2xl font-bold text-teal-600 dark:text-teal-400">
+                  {Math.round(gameState.playerTeam.players.reduce((sum, p) => sum + p.skill, 0) / gameState.playerTeam.players.length)}
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-slate-500 dark:text-dark-text-secondary">
+                  Squad Size
+                </div>
+                <div className="text-xl font-semibold text-slate-900 dark:text-dark-text-primary">
+                  👥 {gameState.playerTeam.players.length}
+                </div>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-slate-500 dark:text-dark-text-secondary">
+                  Total Wages
+                </div>
+                <div className="text-xl font-semibold text-slate-900 dark:text-dark-text-primary">
+                  £{(gameState.playerTeam.players.reduce((sum, p) => sum + p.wages, 0) / 1000).toFixed(0)}k/wk
+                </div>
+              </div>
+            </div>
+          </Link>
+        </div>
 
         {/* Simulate Button (Full-Width, Bold) */}
         <button
@@ -419,34 +471,6 @@ export default function Dashboard() {
           </CollapsibleSection>
         </div>
 
-        {/* Quick Actions (2 columns on mobile, 2 on desktop) */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          <GradientButton
-            icon="👥"
-            label="Squad"
-            href="/squad"
-            gradient="from-gradient-squad-from to-gradient-squad-to"
-          />
-          <GradientButton
-            icon="🏛️"
-            label="Boardroom"
-            href="/tactics"
-            gradient="from-gradient-tactics-from to-gradient-tactics-to"
-          />
-          <GradientButton
-            icon="📈"
-            label="Statistics"
-            href="/stats"
-            gradient="from-purple-500 to-purple-600"
-          />
-          <GradientButton
-            icon="•••"
-            label="More"
-            href="/more"
-            gradient="from-gradient-more-from to-gradient-more-to"
-          />
-        </div>
-
         {/* Top Performers Widget */}
         {seasonTopPerformers && (
           <div className="mb-8">
@@ -462,6 +486,22 @@ export default function Dashboard() {
           news={gameState.newsFeed}
           onNewsClick={() => setShowNewsFeed(true)}
         />
+
+        {/* Settings Section */}
+        <div className="mt-8">
+          <h2 className="text-sm font-semibold text-gray-500 dark:text-dark-text-tertiary uppercase tracking-wide mb-3 px-1">
+            Settings
+          </h2>
+          <button
+            onClick={() => setShowDeleteConfirm(true)}
+            className="flex items-center justify-between w-full h-14 px-5 bg-white dark:bg-dark-bg-secondary rounded-xl border border-gray-200 dark:border-dark-border-primary hover:shadow-md active:scale-98 transition-all text-red-600 dark:text-red-400"
+          >
+            <div className="flex items-center gap-4">
+              <span className="text-2xl">🗑️</span>
+              <span className="text-base font-medium">Delete Save</span>
+            </div>
+          </button>
+        </div>
       </main>
 
       {/* Match Highlights Modal */}
@@ -550,6 +590,38 @@ export default function Dashboard() {
         onClose={() => actions.selectYouthPlayers([])}
         onConfirm={actions.selectYouthPlayers}
       />
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 dark:bg-opacity-70 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-dark-bg-secondary rounded-xl shadow-2xl max-w-md w-full p-6">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-dark-text-primary mb-4">
+              Delete Save?
+            </h3>
+            <p className="text-slate-600 dark:text-dark-text-secondary mb-6">
+              Are you sure you want to delete your save? This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
+                className="flex-1 px-4 py-3 bg-gray-100 dark:bg-dark-bg-tertiary hover:bg-gray-200 dark:hover:bg-dark-bg-primary text-slate-900 dark:text-dark-text-primary font-semibold rounded-lg transition-all active:scale-98"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  actions.deleteSave();
+                  setShowDeleteConfirm(false);
+                  window.location.reload();
+                }}
+                className="flex-1 px-4 py-3 bg-red-500 dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700 text-white font-semibold rounded-lg transition-all active:scale-98"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
