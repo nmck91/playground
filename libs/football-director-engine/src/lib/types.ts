@@ -136,7 +136,7 @@ export interface Match {
 
 export interface MatchEvent {
   minute: number;
-  type: 'goal' | 'yellow-card' | 'red-card' | 'penalty' | 'own-goal';
+  type: 'goal' | 'yellow-card' | 'red-card' | 'penalty' | 'own-goal' | 'big-chance' | 'save' | 'shot-on-target' | 'shot-off-target' | 'block' | 'near-miss';
   team: 'home' | 'away';
   playerName: string;
   playerId?: string; // For linking to Player

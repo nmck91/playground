@@ -244,17 +244,23 @@ export function MatchHighlights({ results, playerTeamName, onClose }: MatchHighl
         {events.length > 0 && (
           <div className="border-t border-gray-200 dark:border-dark-border-secondary pt-4 mt-4">
             <h4 className="text-sm font-semibold text-slate-700 dark:text-dark-text-primary mb-3">Match Events</h4>
-            <div className="space-y-2">
+            <div className="space-y-2 max-h-96 overflow-y-auto">
               {events.map((event, i) => (
                 <div key={i} className="flex items-start text-sm">
                   <span className="font-medium text-slate-500 dark:text-dark-text-secondary w-12">{event.minute}'</span>
                   <div className="flex-1">
-                    {event.type === 'goal' && <span className="text-green-600 dark:text-green-400">⚽ GOAL</span>}
-                    {event.type === 'yellow-card' && <span className="text-yellow-600 dark:text-yellow-400">🟨 YELLOW CARD</span>}
-                    {event.type === 'red-card' && <span className="text-red-600 dark:text-red-400">🟥 RED CARD</span>}
+                    {event.type === 'goal' && <span className="text-green-600 dark:text-green-400 font-semibold">⚽ GOAL</span>}
+                    {event.type === 'yellow-card' && <span className="text-yellow-600 dark:text-yellow-400 font-semibold">🟨 YELLOW CARD</span>}
+                    {event.type === 'red-card' && <span className="text-red-600 dark:text-red-400 font-semibold">🟥 RED CARD</span>}
+                    {event.type === 'big-chance' && <span className="text-orange-600 dark:text-orange-400">💥 BIG CHANCE</span>}
+                    {event.type === 'save' && <span className="text-blue-600 dark:text-blue-400">🧤 SAVE</span>}
+                    {event.type === 'shot-on-target' && <span className="text-teal-600 dark:text-teal-400">🎯 SHOT</span>}
+                    {event.type === 'shot-off-target' && <span className="text-gray-600 dark:text-gray-400">↗️ OFF TARGET</span>}
+                    {event.type === 'block' && <span className="text-purple-600 dark:text-purple-400">🛡️ BLOCK</span>}
+                    {event.type === 'near-miss' && <span className="text-yellow-700 dark:text-yellow-300">😱 NEAR MISS</span>}
                     <span className="ml-2 text-slate-700 dark:text-dark-text-primary">{event.playerName}</span>
                     {event.description && (
-                      <div className="text-slate-600 dark:text-dark-text-secondary mt-1 ml-6">{event.description}</div>
+                      <div className="text-slate-600 dark:text-dark-text-secondary mt-1 text-xs">{event.description}</div>
                     )}
                   </div>
                 </div>

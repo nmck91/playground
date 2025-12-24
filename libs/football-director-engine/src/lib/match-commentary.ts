@@ -12,20 +12,24 @@ export class MatchCommentary {
   selectGoalScorers(team: Team, numberOfGoals: number, seed?: number): Player[] {
     const scorers: Player[] = [];
 
-    // Weight scorers by position (FWD most likely, GK least likely)
+    // Weight scorers by position (FWD most likely, DEF least likely)
+    // Goalkeepers are excluded from scoring
     const positionWeights = {
       FWD: 5,
       MID: 3,
       DEF: 1,
-      GK: 0.1,
+      GK: 0, // Goalkeepers don't score
     };
 
     for (let i = 0; i < numberOfGoals; i++) {
       const random = seed !== undefined ? this.seededRandom(seed + i) : Math.random();
 
-      // Create weighted player pool
+      // Create weighted player pool (excluding goalkeepers)
       const weightedPlayers: Player[] = [];
       team.players.forEach((player) => {
+        // Skip goalkeepers entirely
+        if (player.position === 'GK') return;
+
         const weight = positionWeights[player.position] * (player.skill / 10);
         const copies = Math.max(1, Math.floor(weight));
         for (let j = 0; j < copies; j++) {
@@ -223,8 +227,211 @@ export class MatchCommentary {
       }
     }
 
+    // Generate detailed match events (shots, saves, chances)
+    events.push(...this.generateDetailedMatchEvents(homeTeam, awayTeam, homeScore, awayScore, seed));
+
     // Sort events by minute
     return events.sort((a, b) => a.minute - b.minute);
+  }
+
+  /**
+   * Generate detailed match events (shots, saves, big chances, blocks, near misses)
+   */
+  private generateDetailedMatchEvents(
+    homeTeam: Team,
+    awayTeam: Team,
+    homeScore: number,
+    awayScore: number,
+    seed?: number
+  ): MatchEvent[] {
+    const detailedEvents: MatchEvent[] = [];
+    const totalGoals = homeScore + awayScore;
+
+    // Generate 2-4 big chances (missed opportunities)
+    const bigChancesCount = 2 + Math.floor((seed !== undefined ? this.seededRandom(seed + 900) : Math.random()) * 3);
+    for (let i = 0; i < bigChancesCount; i++) {
+      const teamRandom = seed !== undefined ? this.seededRandom(seed + 901 + i) : Math.random();
+      const team = teamRandom < 0.5 ? homeTeam : awayTeam;
+      const player = this.selectRandomAttacker(team, seed ? seed + 902 + i : undefined);
+
+      if (player) {
+        const minuteRandom = seed !== undefined ? this.seededRandom(seed + 903 + i) : Math.random();
+        const minute = 5 + Math.floor(minuteRandom * 85);
+
+        const descriptions = [
+          `${player.name} misses a golden opportunity!`,
+          `${player.name} should have scored there!`,
+          `Big chance wasted by ${player.name}!`,
+          `${player.name} can't convert the chance!`,
+        ];
+        const descIndex = Math.floor((seed !== undefined ? this.seededRandom(seed + 904 + i) : Math.random()) * descriptions.length);
+
+        detailedEvents.push({
+          minute,
+          type: 'big-chance',
+          team: teamRandom < 0.5 ? 'home' : 'away',
+          playerName: player.name,
+          playerId: player.id,
+          description: descriptions[descIndex],
+        });
+      }
+    }
+
+    // Generate 3-6 saves
+    const savesCount = 3 + Math.floor((seed !== undefined ? this.seededRandom(seed + 1000) : Math.random()) * 4);
+    for (let i = 0; i < savesCount; i++) {
+      const teamRandom = seed !== undefined ? this.seededRandom(seed + 1001 + i) : Math.random();
+      // Goalkeeper is from opposite team
+      const gkTeam = teamRandom < 0.5 ? awayTeam : homeTeam;
+      const attackTeam = teamRandom < 0.5 ? homeTeam : awayTeam;
+
+      const gk = gkTeam.players.find(p => p.position === 'GK');
+      const attacker = this.selectRandomAttacker(attackTeam, seed ? seed + 1002 + i : undefined);
+
+      if (gk && attacker) {
+        const minuteRandom = seed !== undefined ? this.seededRandom(seed + 1003 + i) : Math.random();
+        const minute = 5 + Math.floor(minuteRandom * 85);
+
+        const descriptions = [
+          `Brilliant save by ${gk.name} to deny ${attacker.name}!`,
+          `${gk.name} makes a crucial save!`,
+          `Great reflexes from ${gk.name}!`,
+          `${gk.name} tips it away from danger!`,
+        ];
+        const descIndex = Math.floor((seed !== undefined ? this.seededRandom(seed + 1004 + i) : Math.random()) * descriptions.length);
+
+        detailedEvents.push({
+          minute,
+          type: 'save',
+          team: teamRandom < 0.5 ? 'away' : 'home', // Goalkeeper's team
+          playerName: gk.name,
+          playerId: gk.id,
+          description: descriptions[descIndex],
+        });
+      }
+    }
+
+    // Generate 2-3 near misses (hitting post/crossbar)
+    const nearMissCount = 2 + Math.floor((seed !== undefined ? this.seededRandom(seed + 1100) : Math.random()) * 2);
+    for (let i = 0; i < nearMissCount; i++) {
+      const teamRandom = seed !== undefined ? this.seededRandom(seed + 1101 + i) : Math.random();
+      const team = teamRandom < 0.5 ? homeTeam : awayTeam;
+      const player = this.selectRandomAttacker(team, seed ? seed + 1102 + i : undefined);
+
+      if (player) {
+        const minuteRandom = seed !== undefined ? this.seededRandom(seed + 1103 + i) : Math.random();
+        const minute = 5 + Math.floor(minuteRandom * 85);
+
+        const target = (seed !== undefined ? this.seededRandom(seed + 1104 + i) : Math.random()) < 0.5 ? 'post' : 'crossbar';
+        const descriptions = [
+          `${player.name} hits the ${target}!`,
+          `So close! ${player.name}'s shot strikes the ${target}!`,
+          `${player.name} rattles the ${target}!`,
+        ];
+        const descIndex = Math.floor((seed !== undefined ? this.seededRandom(seed + 1105 + i) : Math.random()) * descriptions.length);
+
+        detailedEvents.push({
+          minute,
+          type: 'near-miss',
+          team: teamRandom < 0.5 ? 'home' : 'away',
+          playerName: player.name,
+          playerId: player.id,
+          description: descriptions[descIndex],
+        });
+      }
+    }
+
+    // Generate 2-4 blocks
+    const blocksCount = 2 + Math.floor((seed !== undefined ? this.seededRandom(seed + 1200) : Math.random()) * 3);
+    for (let i = 0; i < blocksCount; i++) {
+      const teamRandom = seed !== undefined ? this.seededRandom(seed + 1201 + i) : Math.random();
+      const defTeam = teamRandom < 0.5 ? awayTeam : homeTeam;
+      const attackTeam = teamRandom < 0.5 ? homeTeam : awayTeam;
+
+      const defender = this.selectRandomDefender(defTeam, seed ? seed + 1202 + i : undefined);
+      const attacker = this.selectRandomAttacker(attackTeam, seed ? seed + 1203 + i : undefined);
+
+      if (defender && attacker) {
+        const minuteRandom = seed !== undefined ? this.seededRandom(seed + 1204 + i) : Math.random();
+        const minute = 5 + Math.floor(minuteRandom * 85);
+
+        const descriptions = [
+          `${defender.name} blocks ${attacker.name}'s shot!`,
+          `Crucial block by ${defender.name}!`,
+          `${defender.name} throws his body on the line!`,
+        ];
+        const descIndex = Math.floor((seed !== undefined ? this.seededRandom(seed + 1205 + i) : Math.random()) * descriptions.length);
+
+        detailedEvents.push({
+          minute,
+          type: 'block',
+          team: teamRandom < 0.5 ? 'away' : 'home', // Defender's team
+          playerName: defender.name,
+          playerId: defender.id,
+          description: descriptions[descIndex],
+        });
+      }
+    }
+
+    // Generate 4-8 shots on/off target
+    const shotsCount = 4 + Math.floor((seed !== undefined ? this.seededRandom(seed + 1300) : Math.random()) * 5);
+    for (let i = 0; i < shotsCount; i++) {
+      const teamRandom = seed !== undefined ? this.seededRandom(seed + 1301 + i) : Math.random();
+      const team = teamRandom < 0.5 ? homeTeam : awayTeam;
+      const player = this.selectRandomAttacker(team, seed ? seed + 1302 + i : undefined);
+
+      if (player) {
+        const minuteRandom = seed !== undefined ? this.seededRandom(seed + 1303 + i) : Math.random();
+        const minute = 5 + Math.floor(minuteRandom * 85);
+
+        const isOnTarget = (seed !== undefined ? this.seededRandom(seed + 1304 + i) : Math.random()) < 0.6;
+        const shotType = isOnTarget ? 'shot-on-target' : 'shot-off-target';
+
+        const onTargetDesc = [
+          `${player.name} tests the goalkeeper!`,
+          `Shot from ${player.name}!`,
+          `${player.name} forces a save!`,
+        ];
+        const offTargetDesc = [
+          `${player.name} shoots wide!`,
+          `${player.name}'s effort goes over the bar!`,
+          `Wild shot from ${player.name}!`,
+        ];
+        const descriptions = isOnTarget ? onTargetDesc : offTargetDesc;
+        const descIndex = Math.floor((seed !== undefined ? this.seededRandom(seed + 1305 + i) : Math.random()) * descriptions.length);
+
+        detailedEvents.push({
+          minute,
+          type: shotType,
+          team: teamRandom < 0.5 ? 'home' : 'away',
+          playerName: player.name,
+          playerId: player.id,
+          description: descriptions[descIndex],
+        });
+      }
+    }
+
+    return detailedEvents;
+  }
+
+  /**
+   * Select random attacker (FWD or MID)
+   */
+  private selectRandomAttacker(team: Team, seed?: number): Player | null {
+    const attackers = team.players.filter(p => p.position === 'FWD' || p.position === 'MID');
+    if (attackers.length === 0) return this.selectRandomPlayer(team, seed);
+    const random = seed !== undefined ? this.seededRandom(seed) : Math.random();
+    return attackers[Math.floor(random * attackers.length)];
+  }
+
+  /**
+   * Select random defender
+   */
+  private selectRandomDefender(team: Team, seed?: number): Player | null {
+    const defenders = team.players.filter(p => p.position === 'DEF');
+    if (defenders.length === 0) return this.selectRandomPlayer(team, seed);
+    const random = seed !== undefined ? this.seededRandom(seed) : Math.random();
+    return defenders[Math.floor(random * defenders.length)];
   }
 
   /**
