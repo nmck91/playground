@@ -15,6 +15,9 @@ export interface TopPerformersWidgetProps {
 export function TopPerformersWidget({ topPerformers, onPlayerClick }: TopPerformersWidgetProps) {
   const { topScorer, topAssists, mostAppearances, cleanSheetKing } = topPerformers;
 
+  // Check if any competitive matches have been played
+  const hasData = topScorer || topAssists || mostAppearances || cleanSheetKing;
+
   const performerData = [
     {
       title: 'Top Scorer',
@@ -52,55 +55,61 @@ export function TopPerformersWidget({ topPerformers, onPlayerClick }: TopPerform
         🏆 Top Performers
       </h3>
 
-      <div className="space-y-4">
-        {performerData.map((item) => (
-          <div key={item.title}>
-            {item.player ? (
-              <button
-                onClick={() => item.player && onPlayerClick?.(item.player)}
-                className="w-full text-left p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors border border-gray-100 dark:border-dark-border-secondary"
-              >
-                <div className="flex items-center justify-between">
+      {hasData ? (
+        <div className="space-y-4">
+          {performerData.map((item) => (
+            <div key={item.title}>
+              {item.player ? (
+                <button
+                  onClick={() => item.player && onPlayerClick?.(item.player)}
+                  className="w-full text-left p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-bg-tertiary transition-colors border border-gray-100 dark:border-dark-border-secondary"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <span className="text-2xl">{item.icon}</span>
+                      <div>
+                        <p className="text-xs text-gray-500 dark:text-dark-text-secondary font-medium uppercase tracking-wide">
+                          {item.title}
+                        </p>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary">
+                          {item.player.name}
+                        </p>
+                        <p className="text-xs text-gray-600 dark:text-dark-text-secondary">
+                          {item.player.position} · Skill {item.player.skill}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-2xl font-bold text-teal-600 dark:text-teal-400">{item.stat}</p>
+                      <p className="text-xs text-gray-500 dark:text-dark-text-secondary">{item.statLabel}</p>
+                    </div>
+                  </div>
+                </button>
+              ) : (
+                <div className="p-3 rounded-lg bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-100 dark:border-dark-border-secondary">
                   <div className="flex items-center space-x-3">
-                    <span className="text-2xl">{item.icon}</span>
+                    <span className="text-2xl opacity-50">{item.icon}</span>
                     <div>
                       <p className="text-xs text-gray-500 dark:text-dark-text-secondary font-medium uppercase tracking-wide">
                         {item.title}
                       </p>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-dark-text-primary">
-                        {item.player.name}
-                      </p>
-                      <p className="text-xs text-gray-600 dark:text-dark-text-secondary">
-                        {item.player.position} · Skill {item.player.skill}
-                      </p>
+                      <p className="text-sm text-gray-400 dark:text-dark-text-tertiary italic">No data yet</p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-teal-600 dark:text-teal-400">{item.stat}</p>
-                    <p className="text-xs text-gray-500 dark:text-dark-text-secondary">{item.statLabel}</p>
-                  </div>
                 </div>
-              </button>
-            ) : (
-              <div className="p-3 rounded-lg bg-gray-50 dark:bg-dark-bg-tertiary border border-gray-100 dark:border-dark-border-secondary">
-                <div className="flex items-center space-x-3">
-                  <span className="text-2xl opacity-50">{item.icon}</span>
-                  <div>
-                    <p className="text-xs text-gray-500 dark:text-dark-text-secondary font-medium uppercase tracking-wide">
-                      {item.title}
-                    </p>
-                    <p className="text-sm text-gray-400 dark:text-dark-text-tertiary italic">No data yet</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {!topScorer && !topAssists && !mostAppearances && !cleanSheetKing && (
-        <div className="text-center py-8 text-gray-500 dark:text-dark-text-secondary">
-          <p className="text-sm">Play some matches to see your top performers!</p>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4 opacity-50">⚽</div>
+          <p className="text-base font-medium text-gray-700 dark:text-dark-text-secondary mb-2">
+            No Stats Yet
+          </p>
+          <p className="text-sm text-gray-500 dark:text-dark-text-tertiary">
+            Play competitive matches to see your top performers
+          </p>
         </div>
       )}
     </div>
