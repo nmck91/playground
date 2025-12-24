@@ -1037,16 +1037,30 @@ This document outlines potential features and improvements for the Football Dire
 2. ✅ Match Day Atmosphere
 3. ✅ Injuries & Suspensions enhanced
 
-### Phase 4 - Competition (6-8 weeks)
-1. Cup Competitions
-2. Advanced Tactics System
-3. Scouting System
+### 🔄 Phase 4 - Hybrid Approach (6 weeks - IN PROGRESS)
+**Strategy**: Balance technical improvement with feature development
+**Sprint Plan**: See `/docs/HYBRID-SPRINT-PLAN.md`
 
-### Phase 5 - Polish (Ongoing)
-1. Dashboard Customization
-2. Advanced Save Management
-3. Mobile Optimization
-4. All remaining features as desired
+**Week 1-2**: Foundation + Quick Win
+1. ⏳ Refactor useGameState into composable hooks (Story 001)
+2. ⏳ Cup Competitions (Story 002)
+
+**Week 3**: Testing Foundation
+1. ⏳ Test suite for critical engine modules (Story 003)
+
+**Week 4-5**: Advanced Tactics
+1. ⏳ Advanced Tactics System (Story 004)
+
+**Week 6**: Storage + Polish
+1. ⏳ Save compression + mobile optimization (Story 005)
+
+### Phase 5 - Polish & Advanced Features (Future)
+1. Scouting System
+2. Dashboard Customization
+3. Advanced Save Management (cloud sync)
+4. Training System
+5. Press Conferences
+6. All remaining features as desired
 
 ---
 
@@ -1060,4 +1074,4 @@ When implementing features from this roadmap:
 
 ---
 
-*Last Updated: 2025-12-21 - Phase 3: 2/3 Complete (Player Morale & Injuries Enhanced complete)*
+*Last Updated: 2025-12-24 - Phase 3 COMPLETE ✅ | Phase 4 Hybrid Approach IN PROGRESS 🔄*
