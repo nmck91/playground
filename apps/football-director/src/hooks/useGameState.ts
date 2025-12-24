@@ -88,6 +88,15 @@ export function useGameState() {
     }
   }, [gameState, loading]);
 
+  // Calculate season top performers when game state loads or updates
+  useEffect(() => {
+    if (gameState && !loading) {
+      const statsTracker = new PlayerStatsTracker();
+      const currentTopPerformers = statsTracker.getTopPerformers(gameState.playerTeam);
+      setSeasonTopPerformers(currentTopPerformers);
+    }
+  }, [gameState?.playerTeam.players, loading]);
+
   /**
    * Create a new game
    */
