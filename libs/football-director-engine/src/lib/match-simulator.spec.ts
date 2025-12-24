@@ -129,8 +129,8 @@ describe('MatchSimulator', () => {
         awayTeam: mediumTeam,
       };
 
-      const result1 = simulator.simulateMatch(match, 42);
-      const result2 = simulator.simulateMatch(match, 42);
+      const result1 = simulator.simulateMatch(match, 1, 42);
+      const result2 = simulator.simulateMatch(match, 1, 42);
 
       expect(result1).toEqual(result2);
     });

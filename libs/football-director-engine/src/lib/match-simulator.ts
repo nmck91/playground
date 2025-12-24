@@ -435,7 +435,7 @@ export class MatchSimulator {
             awayTeam: teams[j],
           };
           const matchSeed = seed !== undefined ? seed + i * teams.length + j : undefined;
-          results.push(this.simulateMatch(match, matchSeed));
+          results.push(this.simulateMatch(match, 1, matchSeed));
         }
       }
     }

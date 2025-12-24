@@ -59,6 +59,8 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@typescript-eslint/utils": "^8.40.0",
+    "@vitest/coverage-v8": "^4.0.16",
+    "@vitest/ui": "^4.0.16",
     "angular-eslint": "^20.3.0",
     "autoprefixer": "^10.4.23",
     "babel-jest": "^29.7.0",
@@ -82,7 +84,7 @@
     "tslib": "^2.3.0",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.40.0",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.16",
     "yaml": "^2.8.1"
   }
 }

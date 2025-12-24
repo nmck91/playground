@@ -20,10 +20,10 @@ export class WeatherGenerator {
     const condition = this.selectCondition(random, weights);
 
     // Generate temperature based on condition and season
-    const temperature = this.generateTemperature(condition, week);
+    const temperature = this.generateTemperature(condition, week, seed);
 
     // Generate description
-    const description = this.generateDescription(condition);
+    const description = this.generateDescription(condition, seed);
 
     return {
       condition,
@@ -113,7 +113,7 @@ export class WeatherGenerator {
   /**
    * Generate temperature based on condition and week
    */
-  private generateTemperature(condition: MatchWeather['condition'], week: number): number {
+  private generateTemperature(condition: MatchWeather['condition'], week: number, seed?: number): number {
     let baseTemp: number;
 
     // Base temperature by season
@@ -149,7 +149,8 @@ export class WeatherGenerator {
     }
 
     // Add some random variance (±2 degrees)
-    const variance = (Math.random() - 0.5) * 4;
+    const random = seed !== undefined ? this.seededRandom(seed + 100) : Math.random();
+    const variance = (random - 0.5) * 4;
 
     return Math.round(baseTemp + variance);
   }
@@ -157,7 +158,7 @@ export class WeatherGenerator {
   /**
    * Generate descriptive text for weather condition
    */
-  private generateDescription(condition: MatchWeather['condition']): string {
+  private generateDescription(condition: MatchWeather['condition'], seed?: number): string {
     const descriptions: Record<MatchWeather['condition'], string[]> = {
       sunny: [
         'Perfect conditions',
@@ -197,7 +198,8 @@ export class WeatherGenerator {
     };
 
     const options = descriptions[condition];
-    const index = Math.floor(Math.random() * options.length);
+    const random = seed !== undefined ? this.seededRandom(seed + 200) : Math.random();
+    const index = Math.floor(random * options.length);
     return options[index];
   }
 

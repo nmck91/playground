@@ -173,7 +173,7 @@ export class SeasonManager {
    */
   getCurrentWeek(fixtures: Fixture[]): number {
     const unplayedFixture = fixtures.find((fixture) => !fixture.played);
-    return unplayedFixture ? unplayedFixture.week : 1;
+    return unplayedFixture ? unplayedFixture.week : COMPETITIVE_START;
   }
 
   /**

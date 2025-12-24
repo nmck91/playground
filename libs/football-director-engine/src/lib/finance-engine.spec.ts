@@ -102,34 +102,52 @@ describe('FinanceEngine', () => {
 
   describe('calculateWeeklyIncome', () => {
     it('should give higher income for 1st place', () => {
-      const income1st = engine.calculateWeeklyIncome(1, 1);
-      const income10th = engine.calculateWeeklyIncome(10, 1);
+      const income1st = engine.calculateWeeklyIncome(1, 8); // Week 8 = competitive season
+      const income10th = engine.calculateWeeklyIncome(10, 8);
 
       expect(income1st).toBeGreaterThan(income10th);
     });
 
-    it('should calculate correct income for 1st place', () => {
-      const income = engine.calculateWeeklyIncome(1, 1);
-      // Base 50k + (21-1)*2500 = 50k + 50k = 100k
-      expect(income).toBe(100000);
+    it('should calculate correct income for 1st place during competitive season', () => {
+      const income = engine.calculateWeeklyIncome(1, 8); // Week 8 = competitive season
+      // Base 75k + (21-1)*3750 = 75k + 75k = 150k
+      expect(income).toBe(150000);
     });
 
-    it('should calculate correct income for 10th place', () => {
-      const income = engine.calculateWeeklyIncome(10, 1);
-      // Base 50k + (21-10)*2500 = 50k + 27.5k = 77.5k
-      expect(income).toBe(77500);
+    it('should calculate correct income for 10th place during competitive season', () => {
+      const income = engine.calculateWeeklyIncome(10, 8); // Week 8 = competitive season
+      // Base 75k + (21-10)*3750 = 75k + 41.25k = 116.25k
+      expect(income).toBe(116250);
     });
 
-    it('should calculate correct income for 20th place', () => {
-      const income = engine.calculateWeeklyIncome(20, 1);
-      // Base 50k + (21-20)*2500 = 50k + 2.5k = 52.5k
-      expect(income).toBe(52500);
+    it('should calculate correct income for 20th place during competitive season', () => {
+      const income = engine.calculateWeeklyIncome(20, 8); // Week 8 = competitive season
+      // Base 75k + (21-20)*3750 = 75k + 3.75k = 78.75k
+      expect(income).toBe(78750);
     });
 
     it('should give base income for positions beyond 20', () => {
-      const income = engine.calculateWeeklyIncome(25, 1);
-      // Base 50k + max(0, (21-25)*2500) = 50k
-      expect(income).toBe(50000);
+      const income = engine.calculateWeeklyIncome(25, 8); // Week 8 = competitive season
+      // Base 75k + max(0, (21-25)*3750) = 75k
+      expect(income).toBe(75000);
+    });
+
+    it('should reduce income during pre-season (40% of competitive)', () => {
+      const competitiveIncome = engine.calculateWeeklyIncome(1, 8); // Week 8 = competitive
+      const preSeasonIncome = engine.calculateWeeklyIncome(1, 1); // Week 1 = pre-season
+
+      // Pre-season should be 40% of competitive
+      expect(preSeasonIncome).toBe(Math.round(competitiveIncome * 0.4));
+      expect(preSeasonIncome).toBe(60000); // 150k * 0.4 = 60k
+    });
+
+    it('should reduce income during off-season (40% of competitive)', () => {
+      const competitiveIncome = engine.calculateWeeklyIncome(1, 8); // Week 8 = competitive
+      const offSeasonIncome = engine.calculateWeeklyIncome(1, 46); // Week 46 = off-season
+
+      // Off-season should be 40% of competitive
+      expect(offSeasonIncome).toBe(Math.round(competitiveIncome * 0.4));
+      expect(offSeasonIncome).toBe(60000); // 150k * 0.4 = 60k
     });
   });
 
@@ -157,10 +175,10 @@ describe('FinanceEngine', () => {
 
       // Starting: 1,000,000
       // Wages: -15,000
-      // Weekly income (pos 5): +90,000 (base 50k + 16*2.5k)
+      // Weekly income (pos 5, week 1 pre-season): +(75k + 16*3.75k) * 0.4 = 135k * 0.4 = 54,000
       // Match day: +30,000
-      // Expected: 1,105,000
-      expect(result.newBudget).toBe(1105000);
+      // Expected: 1,069,000
+      expect(result.newBudget).toBe(1069000);
       expect(result.transactions).toHaveLength(3);
 
       // Check transaction types
@@ -175,7 +193,7 @@ describe('FinanceEngine', () => {
 
       expect(incomeTransaction).toBeDefined();
       expect(incomeTransaction!.type).toBe('income');
-      expect(incomeTransaction!.amount).toBe(90000);
+      expect(incomeTransaction!.amount).toBe(54000);
 
       expect(ticketTransaction).toBeDefined();
       expect(ticketTransaction!.type).toBe('income');
@@ -193,9 +211,9 @@ describe('FinanceEngine', () => {
 
       // Starting: 1,000,000
       // Wages: -15,000
-      // Weekly income (pos 5): +90,000
-      // Expected: 1,075,000
-      expect(result.newBudget).toBe(1075000);
+      // Weekly income (pos 5, week 1 pre-season): +54,000
+      // Expected: 1,039,000
+      expect(result.newBudget).toBe(1039000);
       expect(result.transactions).toHaveLength(2); // No ticket sales
     });
 
@@ -218,10 +236,10 @@ describe('FinanceEngine', () => {
 
       // Starting: 500,000
       // Wages: 0
-      // Weekly income (pos 10): +77,500
+      // Weekly income (pos 10, week 1 pre-season): +(75k + 11*3.75k) * 0.4 = 116.25k * 0.4 = 46,500
       // Match day: +30,000
-      // Expected: 607,500
-      expect(result.newBudget).toBe(607500);
+      // Expected: 576,500
+      expect(result.newBudget).toBe(576500);
       expect(result.transactions).toHaveLength(2); // Only income + tickets (no wages)
     });
 
@@ -236,9 +254,9 @@ describe('FinanceEngine', () => {
 
       // Starting: 10,000
       // Wages: -15,000
-      // Weekly income (pos 20): +52,500
-      // Expected: 47,500
-      expect(result.newBudget).toBe(47500);
+      // Weekly income (pos 20, week 1 pre-season): +(75k + 1*3.75k) * 0.4 = 78.75k * 0.4 = 31,500
+      // Expected: 26,500
+      expect(result.newBudget).toBe(26500);
     });
 
     it('should create unique transaction IDs', () => {

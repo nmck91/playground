@@ -365,4 +365,118 @@ describe('SeasonManager', () => {
       expect(manager.getTotalWeeks([])).toBe(0);
     });
   });
+
+  describe('generateFriendlyFixtures', () => {
+    it('should generate friendly fixtures for pre-season weeks', () => {
+      const friendlies = manager.generateFriendlyFixtures(testTeams);
+
+      // Should have fixtures for each friendly week (4, 5, 6)
+      // With 4 teams, we get 2 matches per week = 6 total
+      expect(friendlies.length).toBeGreaterThan(0);
+      expect(friendlies.every((f) => f.matchType === 'friendly')).toBe(true);
+    });
+
+    it('should create friendlies for weeks 4, 5, 6', () => {
+      const friendlies = manager.generateFriendlyFixtures(testTeams);
+
+      const weeks = [...new Set(friendlies.map((f) => f.week))];
+      expect(weeks).toContain(4);
+      expect(weeks).toContain(5);
+      expect(weeks).toContain(6);
+    });
+
+    it('should return empty array for less than 2 teams', () => {
+      const oneTeam = [testTeams[0]];
+      const friendlies = manager.generateFriendlyFixtures(oneTeam);
+
+      expect(friendlies).toHaveLength(0);
+    });
+
+    it('should mark all friendlies as unplayed', () => {
+      const friendlies = manager.generateFriendlyFixtures(testTeams);
+
+      expect(friendlies.every((f) => !f.played)).toBe(true);
+    });
+
+    it('should create unique fixture IDs', () => {
+      const friendlies = manager.generateFriendlyFixtures(testTeams);
+
+      const ids = friendlies.map((f) => f.id);
+      const uniqueIds = new Set(ids);
+
+      expect(uniqueIds.size).toBe(ids.length);
+    });
+  });
+
+  describe('getSeasonPhase', () => {
+    it('should return pre-season for weeks 1-7', () => {
+      expect(manager.getSeasonPhase(1)).toBe('pre-season');
+      expect(manager.getSeasonPhase(7)).toBe('pre-season');
+    });
+
+    it('should return competitive for weeks 8-45', () => {
+      expect(manager.getSeasonPhase(8)).toBe('competitive');
+      expect(manager.getSeasonPhase(20)).toBe('competitive');
+      expect(manager.getSeasonPhase(45)).toBe('competitive');
+    });
+
+    it('should return off-season for weeks 46-52', () => {
+      expect(manager.getSeasonPhase(46)).toBe('off-season');
+      expect(manager.getSeasonPhase(52)).toBe('off-season');
+    });
+  });
+
+  describe('getTransferWindowStatus', () => {
+    it('should return open for pre-season transfer window (weeks 1-8)', () => {
+      expect(manager.getTransferWindowStatus(1)).toBe('open');
+      expect(manager.getTransferWindowStatus(8)).toBe('open');
+    });
+
+    it('should return open for winter transfer window (weeks 28-32)', () => {
+      expect(manager.getTransferWindowStatus(28)).toBe('open');
+      expect(manager.getTransferWindowStatus(30)).toBe('open');
+      expect(manager.getTransferWindowStatus(32)).toBe('open');
+    });
+
+    it('should return closed outside transfer windows', () => {
+      expect(manager.getTransferWindowStatus(15)).toBe('closed');
+      expect(manager.getTransferWindowStatus(20)).toBe('closed');
+      expect(manager.getTransferWindowStatus(40)).toBe('closed');
+    });
+  });
+
+  describe('hasMatchesThisWeek', () => {
+    it('should return true for friendly weeks (4, 5, 6)', () => {
+      expect(manager.hasMatchesThisWeek(4)).toBe(true);
+      expect(manager.hasMatchesThisWeek(5)).toBe(true);
+      expect(manager.hasMatchesThisWeek(6)).toBe(true);
+    });
+
+    it('should return true for competitive weeks (8-45)', () => {
+      expect(manager.hasMatchesThisWeek(8)).toBe(true);
+      expect(manager.hasMatchesThisWeek(20)).toBe(true);
+      expect(manager.hasMatchesThisWeek(45)).toBe(true);
+    });
+
+    it('should return false for weeks without matches', () => {
+      expect(manager.hasMatchesThisWeek(1)).toBe(false);
+      expect(manager.hasMatchesThisWeek(2)).toBe(false);
+      expect(manager.hasMatchesThisWeek(3)).toBe(false);
+      expect(manager.hasMatchesThisWeek(7)).toBe(false);
+      expect(manager.hasMatchesThisWeek(46)).toBe(false);
+      expect(manager.hasMatchesThisWeek(52)).toBe(false);
+    });
+  });
+
+  describe('getFullSeasonWeeks', () => {
+    it('should return 52 weeks for full season', () => {
+      expect(manager.getFullSeasonWeeks()).toBe(52);
+    });
+  });
+
+  describe('getCompetitiveWeeks', () => {
+    it('should return 38 weeks for competitive season', () => {
+      expect(manager.getCompetitiveWeeks()).toBe(38);
+    });
+  });
 });
