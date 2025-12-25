@@ -14,6 +14,7 @@ import {
   Player,
   BoardObjective,
   SeasonAward,
+  SeasonTopPerformers,
 } from '@playground/football-director-engine';
 import { useGamePersistence } from './useGamePersistence';
 import { useDerivedGameState } from './useDerivedGameState';
@@ -47,7 +48,7 @@ export function useGameState() {
   // UI state (results/reports to display)
   const [lastSimulationResults, setLastSimulationResults] = useState<MatchResult[]>([]);
   const [developmentReports, setDevelopmentReports] = useState<DevelopmentReport[]>([]);
-  const [seasonTopPerformers, setSeasonTopPerformers] = useState<any>(null);
+  const [seasonTopPerformers, setSeasonTopPerformers] = useState<SeasonTopPerformers | null>(null);
   const [seasonEvaluation, setSeasonEvaluation] = useState<{
     objective: BoardObjective;
     satisfied: boolean;
@@ -100,7 +101,7 @@ export function useGameState() {
     error,
     lastSimulationResults,
     developmentReports,
-    seasonTopPerformers: derived.seasonTopPerformers,
+    seasonTopPerformers: derived.seasonTopPerformers || seasonTopPerformers,
     seasonEvaluation,
     pendingAchievements,
     youthProspects,

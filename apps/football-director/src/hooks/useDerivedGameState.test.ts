@@ -9,24 +9,26 @@ import { PlayerStatsTracker } from '@playground/football-director-engine';
 import type { GameState, SeasonTopPerformers } from '@playground/football-director-engine';
 
 // Mock PlayerStatsTracker
+let mockGetTopPerformers: ReturnType<typeof vi.fn>;
+
 vi.mock('@playground/football-director-engine', async () => {
   const actual = await vi.importActual('@playground/football-director-engine');
+
+  class MockPlayerStatsTracker {
+    getTopPerformers = (...args: any[]) => mockGetTopPerformers(...args);
+  }
+
   return {
     ...actual,
-    PlayerStatsTracker: vi.fn(),
+    PlayerStatsTracker: MockPlayerStatsTracker,
   };
 });
 
 describe('useDerivedGameState', () => {
   let mockGameState: GameState | null;
-  let mockGetTopPerformers: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     mockGetTopPerformers = vi.fn();
-    vi.mocked(PlayerStatsTracker).mockImplementation(() => ({
-      getTopPerformers: mockGetTopPerformers,
-    }) as any);
-    vi.clearAllMocks();
   });
 
   describe('seasonTopPerformers', () => {

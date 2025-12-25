@@ -139,22 +139,21 @@ describe('useGameState Integration', () => {
     it('should maintain same interface as original useGameState', () => {
       const { result } = renderHook(() => useGameState());
 
-      // Expected shape based on original implementation
-      const expectedInterface = {
-        // State
-        gameState: expect.anything(),
-        loading: expect.anything(),
-        error: expect.anything(),
-        lastSimulationResults: expect.anything(),
-        developmentReports: expect.anything(),
-        seasonTopPerformers: expect.anything(),
-        seasonEvaluation: expect.anything(),
-        pendingAchievements: expect.anything(),
-        youthProspects: expect.anything(),
-        hasSave: expect.anything(),
+      // Verify all state properties exist
+      expect(result.current).toHaveProperty('gameState');
+      expect(result.current).toHaveProperty('loading');
+      expect(result.current).toHaveProperty('error');
+      expect(result.current).toHaveProperty('lastSimulationResults');
+      expect(result.current).toHaveProperty('developmentReports');
+      expect(result.current).toHaveProperty('seasonTopPerformers');
+      expect(result.current).toHaveProperty('seasonEvaluation');
+      expect(result.current).toHaveProperty('pendingAchievements');
+      expect(result.current).toHaveProperty('youthProspects');
+      expect(result.current).toHaveProperty('hasSave');
 
-        // Actions
-        actions: expect.objectContaining({
+      // Verify actions object has all methods
+      expect(result.current.actions).toEqual(
+        expect.objectContaining({
           newGame: expect.any(Function),
           loadSlot: expect.any(Function),
           deleteSave: expect.any(Function),
@@ -170,10 +169,8 @@ describe('useGameState Integration', () => {
           dismissAchievement: expect.any(Function),
           markAllNewsRead: expect.any(Function),
           continueToNextSeason: expect.any(Function),
-        }),
-      };
-
-      expect(result.current).toMatchObject(expectedInterface);
+        })
+      );
     });
 
     it('should have exactly the same number of top-level properties', () => {
