@@ -24,6 +24,14 @@ export default function TrophiesPage() {
   }
 
   const seasonAwards = [...gameState.seasonAwards].reverse(); // Most recent first
+  const cupHistory = gameState.cupHistory || [];
+
+  // Filter cups won by the player's team
+  const cupsWon = cupHistory.filter(cup =>
+    cup.winner?.teamId === gameState.playerTeam.id
+  ).reverse(); // Most recent first
+
+  const hasAnyTrophies = seasonAwards.length > 0 || cupsWon.length > 0;
 
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary pb-20">
@@ -43,7 +51,7 @@ export default function TrophiesPage() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {seasonAwards.length === 0 ? (
+        {!hasAnyTrophies ? (
           <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-12 text-center border border-gray-200 dark:border-dark-border-primary">
             <div className="text-6xl mb-4">🏆</div>
             <p className="text-gray-500 dark:text-dark-text-secondary text-lg mb-2">
@@ -55,6 +63,44 @@ export default function TrophiesPage() {
           </div>
         ) : (
           <div className="space-y-8">
+            {/* Cup Trophies */}
+            {cupsWon.length > 0 && (
+              <div className="bg-white dark:bg-dark-bg-secondary rounded-lg shadow-md p-6 border border-gray-200 dark:border-dark-border-primary">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-dark-text-primary mb-6 pb-4 border-b border-gray-200 dark:border-dark-border-secondary flex items-center gap-3">
+                  <span className="text-3xl">🏆</span>
+                  Cup Trophies
+                  <span className="ml-auto text-lg font-normal text-slate-600 dark:text-dark-text-secondary">
+                    {cupsWon.length} {cupsWon.length === 1 ? 'Cup' : 'Cups'} Won
+                  </span>
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {cupsWon.map((cup) => (
+                    <div
+                      key={cup.id}
+                      className="bg-gradient-to-br from-yellow-50 to-amber-100 dark:from-yellow-900/30 dark:to-amber-800/30 rounded-lg p-6 border-2 border-yellow-400 dark:border-yellow-600 hover:shadow-lg transition-shadow"
+                    >
+                      <div className="flex flex-col items-center text-center">
+                        <span className="text-5xl mb-3">🏆</span>
+                        <h3 className="text-xl font-bold text-yellow-900 dark:text-yellow-200 mb-1">
+                          {cup.name}
+                        </h3>
+                        <p className="text-lg font-semibold text-yellow-800 dark:text-yellow-300 mb-2">
+                          {cup.season}/{cup.season + 1}
+                        </p>
+                        {cup.runnerUp && (
+                          <p className="text-sm text-yellow-700 dark:text-yellow-400">
+                            Beat {cup.runnerUp.teamName} in final
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Season Awards */}
             {seasonAwards.map((seasonAward) => {
               const hasAnyAward =
                 seasonAward.awards.playerOfYear ||
