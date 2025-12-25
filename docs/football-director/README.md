@@ -16,6 +16,7 @@ Complete documentation for the Football Director game application.
 
 ### Stories
 - **[Story 001: Refactor useGameState](stories/story-001-refactor-usegamestate.md)** - ✅ Completed Dec 2025
+- **[Story 002: Cup Competitions](stories/story-002-cup-competitions.md)** - 🎯 Ready for Development (Days 4-10, Week 1-2)
 
 ## Architecture & Design
 
