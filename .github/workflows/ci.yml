@@ -47,9 +47,17 @@ jobs:
 
       # Prepend any command with "nx-cloud record --" to record its logs to Nx Cloud
       # - run: npx nx-cloud record -- echo Hello World
-      # Run lint and build (required to pass), test is informational only
-      - run: npx nx run-many -t lint build --exclude=football-director-spike,football-director-spike-e2e,football-director
-      - run: npx nx run-many -t test --exclude=football-director-spike,football-director-spike-e2e,football-director || true
+
+      # Build all projects (required to pass)
+      - run: npx nx run-many -t build --exclude=football-director-spike,football-director-spike-e2e
+
+      # Lint all projects except spikes (informational only for now)
+      - run: npx nx run-many -t lint --exclude=football-director-spike,football-director-spike-e2e || true
+
+      # Test all projects (required to pass for engine, informational for app and others)
+      - run: npx nx test football-director-engine
+      - run: npx nx test football-director || true
+      - run: npx nx run-many -t test --exclude=football-director-spike,football-director-spike-e2e,football-director,football-director-engine || true
 
   merge-to-release:
     name: Merge to Release Branch
