@@ -21,10 +21,11 @@ export default function MorePage() {
 
   const menuItems: MenuItem[] = [
     { label: 'League Table', icon: '📊', href: '/table' },
+    { label: 'Cup Competition', icon: '🏆', href: '/cup' },
     { label: 'Statistics', icon: '📈', href: '/stats' },
     { label: 'Staff', icon: '👔', href: '/staff' },
-    { label: 'Club Records', icon: '🏆', href: '/records' },
-    { label: 'Trophy Cabinet', icon: '🏆', href: '/trophies' },
+    { label: 'Club Records', icon: '📅', href: '/records' },
+    { label: 'Trophy Cabinet', icon: '🏅', href: '/trophies' },
     { label: 'News', icon: '📰', href: '/news', badge: unreadNews },
   ];
 
