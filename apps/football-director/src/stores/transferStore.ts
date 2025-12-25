@@ -118,31 +118,27 @@ export const useTransferStore = create<TransferStore>()(
         if (!gameState) return;
 
         const transferMarket = new TransferMarket();
+        const currentWeek = gameState.season?.currentWeek || 1;
 
-        // Generate listings from free agents and AI team players
+        // Generate listings from AI team players
+        const aiListings = transferMarket.generateMarket(gameState.teams, currentWeek, 30);
+
+        // Generate listings from free agents (no fee, just wages)
         const freeAgents = gameState.freeAgents || [];
-        const allTeamPlayers = gameState.teams.flatMap((team) => team.players);
+        const freeAgentListings: TransferListing[] = freeAgents.slice(0, 20).map((player) => ({
+          id: `listing-${player.id}`,
+          player,
+          sellingTeamId: 'free-agent',
+          sellingTeamName: 'Free Agent',
+          askingPrice: 0,
+          listedWeek: currentWeek,
+        }));
 
-        // Create listings (simplified - actual implementation would be more sophisticated)
-        const listings: TransferListing[] = [
-          // Free agents (no fee, just wages)
-          ...freeAgents.slice(0, 20).map((player) => ({
-            id: `listing-${player.id}`,
-            player,
-            sellingTeamId: null,
-            askingPrice: 0,
-            wage: player.contract?.wage || player.skill * 0.5,
-            listed: new Date(),
-          })),
-          // AI team players for sale (with fee)
-          ...transferMarket
-            .generateListings(gameState, 30)
-            .filter((listing) => listing.player.id !== gameState.playerTeam.id),
-        ];
+        const allListings = [...freeAgentListings, ...aiListings];
 
         set(
           {
-            transferListings: listings,
+            transferListings: allListings,
             marketLastRefreshed: new Date(),
           },
           false,
@@ -151,7 +147,7 @@ export const useTransferStore = create<TransferStore>()(
 
         useUIStore.getState().addNotification({
           type: 'info',
-          message: `Transfer market refreshed - ${listings.length} players available`,
+          message: `Transfer market refreshed - ${allListings.length} players available`,
           duration: 3000,
         });
       },
@@ -190,11 +186,14 @@ export const useTransferStore = create<TransferStore>()(
           financeStore.updateBudget(-totalCost, `Signed ${listing.player.name}`);
         }
 
+        // Calculate wage based on player skill
+        const wage = listing.player.contract?.wage || listing.player.skill * 0.05;
+
         // Add player to squad
         const playerWithContract = {
           ...listing.player,
           contract: {
-            wage: listing.wage,
+            wage,
             weeksRemaining: 52 * 3, // 3-year contract
             bonuses: 0,
           },
@@ -206,8 +205,8 @@ export const useTransferStore = create<TransferStore>()(
         const updatedListings = get().transferListings.filter((l) => l.id !== listing.id);
         set({ transferListings: updatedListings }, false, 'transferStore/buyPlayer');
 
-        // Remove from free agents if applicable
-        if (!listing.sellingTeamId) {
+        // Remove from free agents if applicable (free agents have sellingTeamId === 'free-agent')
+        if (listing.sellingTeamId === 'free-agent') {
           const updatedFreeAgents = gameState.freeAgents?.filter(
             (p) => p.id !== listing.player.id
           ) || [];
@@ -340,7 +339,7 @@ export const transferSelectors = {
   allListings: (state: TransferStore) => state.transferListings,
   listingCount: (state: TransferStore) => state.transferListings.length,
   freeAgents: (state: TransferStore) =>
-    state.transferListings.filter((l) => !l.sellingTeamId),
+    state.transferListings.filter((l) => l.sellingTeamId === 'free-agent'),
 
   // Queries
   availableListings: (state: TransferStore) => state.availableListings(),

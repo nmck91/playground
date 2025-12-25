@@ -18,6 +18,7 @@ import {
   type Fixture,
   type MatchEvent,
   type PlayerMatchStats,
+  type Match,
 } from '@playground/football-director-engine';
 
 /**
@@ -122,7 +123,7 @@ export const useMatchStore = create<MatchStore>()(
 
         // Determine if player team is home or away
         const isPlayerHome = fixture.homeTeamId === gameState.playerTeam.id;
-        const playerTeam = gameState.playerTeam;
+        const playerTeam = { ...gameState.playerTeam, tactics };
         const opponentTeam = gameState.teams.find(
           (t) => t.id === (isPlayerHome ? fixture.awayTeamId : fixture.homeTeamId)
         );
@@ -131,10 +132,21 @@ export const useMatchStore = create<MatchStore>()(
           throw new Error('Opponent team not found');
         }
 
+        // Create Match object
+        const match = isPlayerHome
+          ? { homeTeam: playerTeam, awayTeam: opponentTeam }
+          : { homeTeam: opponentTeam, awayTeam: playerTeam };
+
         // Simulate the match
-        const result = isPlayerHome
-          ? simulator.simulateMatch(playerTeam, opponentTeam, tactics, opponentTeam.tactics)
-          : simulator.simulateMatch(opponentTeam, playerTeam, opponentTeam.tactics, tactics);
+        const simResult = simulator.simulateMatch(match, gameState.season?.currentWeek || 1);
+
+        // Add fixture metadata to result
+        const result = {
+          ...simResult,
+          fixtureId: fixture.id,
+          homeTeamId: fixture.homeTeamId,
+          awayTeamId: fixture.awayTeamId,
+        };
 
         // Update player stats from match
         result.events.forEach((event) => {
