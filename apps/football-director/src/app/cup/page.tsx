@@ -80,7 +80,7 @@ export default function CupPage() {
               <span className={`font-medium ${
                 result?.winnerId === fixture.homeTeamId
                   ? 'text-green-600 dark:text-green-400'
-                  : result?.played
+                  : fixture.played
                   ? 'text-slate-500 dark:text-slate-400'
                   : 'text-slate-900 dark:text-dark-text-primary'
               }`}>
@@ -101,7 +101,7 @@ export default function CupPage() {
               <span className={`font-medium ${
                 result?.winnerId === fixture.awayTeamId
                   ? 'text-green-600 dark:text-green-400'
-                  : result?.played
+                  : fixture.played
                   ? 'text-slate-500 dark:text-slate-400'
                   : 'text-slate-900 dark:text-dark-text-primary'
               }`}>

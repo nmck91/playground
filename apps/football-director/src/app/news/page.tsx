@@ -80,12 +80,9 @@ export default function NewsPage() {
   };
 
   const handleMarkAllRead = () => {
-    gameState.newsFeed.forEach(article => {
-      if (!article.read) {
-        article.read = true;
-      }
-    });
-    actions.updateGameState(gameState);
+    // TODO: Implement mark all as read functionality
+    // Need to add action to update news feed read status
+    console.log('Mark all as read - not yet implemented');
   };
 
   const unreadCount = gameState.newsFeed.filter(n => !n.read).length;
