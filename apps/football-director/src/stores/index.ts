@@ -23,6 +23,15 @@ export type { TacticsStore } from './tacticsStore';
 export { useStaffStore, staffSelectors } from './staffStore';
 export type { StaffStore } from './staffStore';
 
+export { usePlayerStore, playerSelectors } from './playerStore';
+export type { PlayerStore } from './playerStore';
+
+export { useMatchStore, matchSelectors } from './matchStore';
+export type { MatchStore } from './matchStore';
+
+export { useTransferStore, transferSelectors } from './transferStore';
+export type { TransferStore } from './transferStore';
+
 /**
  * Reset all stores (useful for testing and logout)
  */
@@ -44,4 +53,7 @@ export const syncAllStores = () => {
   useFinanceStore.getState().syncFromGameState();
   useTacticsStore.getState().syncFromGameState();
   useStaffStore.getState().syncFromGameState();
+  usePlayerStore.getState().syncFromGameState();
+  useMatchStore.getState().syncFromGameState();
+  useTransferStore.getState().syncFromGameState();
 };
