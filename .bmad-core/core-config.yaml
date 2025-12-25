@@ -14,9 +14,9 @@ architecture:
   architectureShardedLocation: docs/architecture
 customTechnicalDocuments: null
 devLoadAlwaysFiles:
-  - docs/architecture/coding-standards.md
-  - docs/architecture/tech-stack.md
-  - docs/architecture/source-tree.md
+  - docs/football-director/coding-standards.md
+  - docs/football-director/tech-stack.md
+  - docs/football-director/source-tree.md
 devDebugLog: .ai/debug-log.md
 devStoryLocation: docs/stories
 slashPrefix: BMad

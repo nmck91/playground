@@ -83,11 +83,21 @@ src/
 │       ├── Skeleton.tsx
 │       └── index.ts              # UI exports
 ├── hooks/
-│   └── useGameState.ts           # **CRITICAL** Main game state hook (1,220 lines)
+│   ├── useGameState.ts           # **CRITICAL** Main orchestrator hook (143 lines)
+│   ├── useGamePersistence.ts     # Save/load operations (saves to localStorage)
+│   ├── useDerivedGameState.ts    # Derived state calculations (memoized)
+│   ├── useGameActions.ts         # User actions (buy/sell/hire/fire/tactics)
+│   ├── useWeeklySimulation.ts    # Weekly simulation orchestration
+│   ├── useGameState.test.ts      # Integration tests for composed hook
+│   ├── useGamePersistence.test.ts # Unit tests for persistence
+│   ├── useDerivedGameState.test.ts # Unit tests for derived state
+│   └── useGameActions.test.ts    # Unit tests for actions
 ├── providers/
 │   └── ThemeProvider.tsx         # next-themes wrapper
-└── services/
-    └── SaveService.ts            # localStorage save/load service (653 lines)
+├── services/
+│   └── SaveService.ts            # localStorage save/load service (653 lines)
+├── vitest.config.ts              # Vitest configuration for testing
+└── vitest.setup.ts               # Test setup (jsdom environment, mocks)
 ```
 
 ## Game Engine Structure (libs/football-director-engine/src/lib)
@@ -124,13 +134,41 @@ lib/
 
 ## Key Modules and Their Purpose
 
-### State Management
-- **useGameState.ts** (1,220 lines): Central orchestration of all game logic
-  - Load/save game state from localStorage
-  - Orchestrate weekly simulation (matches, injuries, morale, contracts, finances)
-  - Coordinate all engine modules
-  - Manage UI state (modals, highlights, notifications)
-  - Handle user actions (buy/sell players, set tactics, hire staff)
+### State Management (Composable Hooks Architecture)
+
+**Hook Composition Pattern**: The game state is managed through composable hooks that each handle a specific concern, then unified through a main orchestrator hook.
+
+- **useGameState.ts** (143 lines): Main orchestrator hook
+  - Composes all sub-hooks into unified interface
+  - Maintains backward compatibility with original API
+  - Coordinates state updates between hooks
+  - Returns complete game state and actions
+
+- **useGamePersistence.ts**: Save/load operations
+  - Load game from localStorage on mount
+  - Auto-save when game state changes
+  - Multi-slot save operations (up to 5 slots)
+  - Handles save migration for old formats
+
+- **useDerivedGameState.ts**: Derived state calculations
+  - Calculates season top performers (memoized)
+  - Determines if save exists
+  - Other computed values from game state
+  - Uses useMemo for performance optimization
+
+- **useGameActions.ts**: User action handlers
+  - Player transfers (buy/sell)
+  - Staff management (hire/fire)
+  - Tactics updates (formation, mentality, philosophy)
+  - Contract offers and youth academy selection
+  - All actions properly memoized with useCallback
+
+- **useWeeklySimulation.ts**: Weekly simulation orchestration
+  - Orchestrates all engine modules in correct order
+  - Processes injuries, morale, contracts, finances
+  - Generates match results and news
+  - Handles end-of-season logic and evaluations
+  - Updates achievements and records
 
 ### Save System
 - **SaveService.ts** (653 lines): Persist game state to browser localStorage
@@ -163,12 +201,12 @@ Engine modules are stateless and pure - they take input, perform calculations, a
 
 - `apps/football-director/ROADMAP.md` - Feature roadmap with completed/planned features
 - `apps/football-director/MOBILE-FIRST-PLAN.md` - Mobile-first design approach
-- `docs/football-director-brief.md` - Original project brief
-- `docs/football-director-spike-report.md` - Initial prototype analysis
-- `docs/football-director-architecture.md` - Comprehensive architecture document
-- `docs/architecture/coding-standards.md` - Coding conventions (this project)
-- `docs/architecture/tech-stack.md` - Technology stack details
-- `docs/architecture/source-tree.md` - This document
+- `docs/football-director/brief.md` - Original project brief
+- `docs/football-director/spike-report.md` - Initial prototype analysis
+- `docs/football-director/architecture.md` - Comprehensive architecture document
+- `docs/football-director/coding-standards.md` - Coding conventions (this project)
+- `docs/football-director/tech-stack.md` - Technology stack details
+- `docs/football-director/source-tree.md` - This document
 
 ## Critical Files for Understanding the System
 
@@ -180,8 +218,13 @@ Engine modules are stateless and pure - they take input, perform calculations, a
 - `tailwind.config.js` - Tailwind configuration using shared workspace preset
 
 **Core State Management:**
-- `src/hooks/useGameState.ts` - **CRITICAL** Main game logic orchestration (1,220 lines)
+- `src/hooks/useGameState.ts` - **CRITICAL** Main orchestrator hook (143 lines) - composes all sub-hooks
+- `src/hooks/useGamePersistence.ts` - Save/load operations and auto-save logic
+- `src/hooks/useDerivedGameState.ts` - Memoized derived state calculations
+- `src/hooks/useGameActions.ts` - User action handlers (buy/sell/hire/fire)
+- `src/hooks/useWeeklySimulation.ts` - Weekly simulation orchestration
 - `src/services/SaveService.ts` - localStorage persistence with multi-slot saves (653 lines)
+- **Test Suite**: 42 unit and integration tests covering all hooks
 
 **Game Engine Library:**
 - `libs/football-director-engine/src/lib/types.ts` - Core type definitions

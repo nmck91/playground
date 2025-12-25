@@ -8,10 +8,13 @@
 - **Service Layer**: Minimal (only SaveService for now)
 
 ### State Management
-- **Pattern**: Single source of truth (GameState in useGameState)
+- **Pattern**: Composable hooks architecture - single source of truth composed from specialized hooks
+- **Main Hook**: `useGameState` orchestrates all sub-hooks and maintains backward compatibility
+- **Sub-Hooks**: Each handles a specific concern (persistence, actions, simulation, derived state)
 - **Updates**: Immutable state updates with spread operators
-- **Persistence**: Auto-save on every state change
-- **Derivation**: Calculate derived state (like top performers) via useEffect
+- **Persistence**: Auto-save on every state change via `useGamePersistence`
+- **Derivation**: Calculate derived state (like top performers) via `useDerivedGameState` with useMemo
+- **Memoization**: All action handlers use useCallback, all computed values use useMemo
 
 ### Component Patterns
 - **Client Components**: All components use `'use client'` directive
@@ -101,5 +104,15 @@ export class MatchSimulator {
 - Verify save/load still works
 
 ### For Refactoring
-- **High-Value Targets**: Breaking up useGameState (1,220 lines), consolidating news generation
+- **Completed**: ✅ Refactored useGameState (1,220 lines → 143 lines) into composable hooks (Dec 2025)
+  - Created 4 specialized hooks: useGamePersistence, useDerivedGameState, useGameActions, useWeeklySimulation
+  - Added comprehensive test suite (42 tests)
+  - Maintained 100% backward compatibility
+- **Composable Hook Pattern**: When creating complex hooks, follow the established pattern:
+  1. Extract concerns into focused sub-hooks (single responsibility)
+  2. Use proper memoization (useMemo for values, useCallback for functions)
+  3. Create a main orchestrator hook that composes sub-hooks
+  4. Maintain backward compatibility in the main hook's API
+  5. Write unit tests for each sub-hook + integration test for composition
+- **Future Targets**: Consolidating news generation modules
 - **Caution Areas**: SaveService migrations, match simulation, contract system, season transitions
