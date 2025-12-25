@@ -12,6 +12,7 @@ import { Player, TransferMarket } from '@playground/football-director-engine';
 import { PlayerStatsModal } from '../../components/game/PlayerStatsModal';
 import { ContractBadge } from '../../components/ui/ContractBadge';
 import { ContractNegotiationModal } from '../../components/game/ContractNegotiationModal';
+import { TacticsManager } from '../../components/game/TacticsManager';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
 
 type SortBy = 'position' | 'skill' | 'age' | 'wages' | 'name';
@@ -24,6 +25,7 @@ export default function SquadPage() {
   const [showSellModal, setShowSellModal] = useState(false);
   const [showPlayerStats, setShowPlayerStats] = useState(false);
   const [showContractModal, setShowContractModal] = useState(false);
+  const [showTactics, setShowTactics] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const transferMarket = new TransferMarket();
 
@@ -155,7 +157,17 @@ export default function SquadPage() {
               </Link>
               <h1 className="text-3xl font-bold text-slate-900 dark:text-dark-text-primary">Squad</h1>
             </div>
-            <ThemeToggle />
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowTactics(true)}
+                className="px-4 py-2 bg-teal-500 dark:bg-teal-600 hover:bg-teal-600 dark:hover:bg-teal-700 text-white font-semibold rounded-lg transition-all flex items-center gap-2"
+              >
+                <span>🎯</span>
+                <span className="hidden sm:inline">Change Tactics</span>
+                <span className="sm:hidden">Tactics</span>
+              </button>
+              <ThemeToggle />
+            </div>
           </div>
         </div>
       </header>
@@ -475,6 +487,20 @@ export default function SquadPage() {
           }
         }}
         currentBudget={gameState.finances.budget}
+      />
+
+      {/* Tactics Manager Modal */}
+      <TacticsManager
+        currentFormation={gameState.playerTeam.tactics?.formation || '4-4-2'}
+        currentMentality={gameState.playerTeam.tactics?.mentality || 'balanced'}
+        currentTactics={gameState.playerTeam.tactics}
+        players={gameState.playerTeam.players}
+        onSave={(tactics) => {
+          actions.setTeamTactics(tactics);
+          setShowTactics(false);
+        }}
+        onClose={() => setShowTactics(false)}
+        isOpen={showTactics}
       />
     </div>
   );
