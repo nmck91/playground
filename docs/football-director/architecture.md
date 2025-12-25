@@ -36,6 +36,7 @@ This document captures the **CURRENT STATE** of the Football Director applicatio
 - **Match Simulator**: `match-simulator.ts` - Match simulation engine with detailed events
 - **Season Manager**: `season-manager.ts` - 52-week season orchestration, fixtures generation
 - **League Table Manager**: `league-table-manager.ts` - Table updates, sorting, position tracking
+- **Cup Manager**: `cup-manager.ts` - Cup competition system with knockout mechanics
 - **Transfer Market**: `transfer-market.ts` - Player transfer system, AI transfer logic
 - **Finance Engine**: `finance-engine.ts` - Budget management, wage processing
 - **Player Development**: `player-development.ts` - Age-based skill progression
@@ -72,6 +73,7 @@ This document captures the **CURRENT STATE** of the Football Director applicatio
 - `/squad` - Squad management, player details
 - `/fixtures` - Fixture list with form guide
 - `/table` - League table with form indicators
+- `/cup` - Cup competition bracket and results
 - `/stats` - League-wide statistics (top scorers, assists, team stats)
 - `/transfers` - Transfer market and selling players
 - `/tactics` - Formation and mentality selection
@@ -165,6 +167,7 @@ src/
 │   ├── squad/page.tsx            # Squad management page
 │   ├── stats/page.tsx            # League statistics page
 │   ├── table/page.tsx            # League table page
+│   ├── cup/page.tsx              # Cup competition page
 │   ├── tactics/page.tsx          # Tactics selection page
 │   ├── transfers/page.tsx        # Transfer market page
 │   ├── staff/page.tsx            # Staff management page
@@ -220,9 +223,10 @@ src/
 ```
 lib/
 ├── types.ts                      # Core type definitions (GameState, Player, Team, etc.)
-├── match-simulator.ts            # Match simulation with events, goals, cards
+├── match-simulator.ts            # Match simulation with events, goals, cards, knockout mechanics
 ├── season-manager.ts             # 52-week season system, fixtures generation
 ├── league-table-manager.ts       # Table updates, sorting, position calculations
+├── cup-manager.ts                # Cup competition system (knockout tournament, prize money)
 ├── transfer-market.ts            # Player transfers, AI transfer logic
 ├── finance-engine.ts             # Budget, wages, prize money, transactions
 ├── player-development.ts         # Age-based development, peak years, decline
