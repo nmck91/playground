@@ -2,6 +2,21 @@
 
 Complete documentation for the Football Director game application.
 
+## Product & Planning
+
+### Requirements & Vision
+- **[PRD (Product Requirements)](prd.md)** - Brownfield enhancement plan and technical roadmap
+- **[Project Brief](brief.md)** - Original project requirements and vision
+- **[Spike Report](spike-report.md)** - Initial prototype analysis and findings
+
+### Sprint Planning
+- **[Hybrid Sprint Plan](hybrid-sprint-plan.md)** - 6-week balanced technical + feature sprint (Dec 2025 - Feb 2026)
+- **[Getting Started - Hybrid Sprint](getting-started-hybrid-sprint.md)** - Pre-flight checklist and setup guide
+- **[Phase 1 Sprint Plan](sprint-plan-phase1.md)** - Original Phase 1 technical foundation plan
+
+### Stories
+- **[Story 001: Refactor useGameState](stories/story-001-refactor-usegamestate.md)** - ✅ Completed Dec 2025
+
 ## Architecture & Design
 
 ### Core Documentation
@@ -9,10 +24,6 @@ Complete documentation for the Football Director game application.
 - **[Source Tree](source-tree.md)** - File structure and module organization
 - **[Tech Stack](tech-stack.md)** - Technology choices and versions
 - **[Coding Standards](coding-standards.md)** - Patterns, conventions, and best practices
-
-### Project History
-- **[Project Brief](brief.md)** - Original project requirements and vision
-- **[Spike Report](spike-report.md)** - Initial prototype analysis and findings
 
 ## Quick Start
 
