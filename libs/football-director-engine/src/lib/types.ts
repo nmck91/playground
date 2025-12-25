@@ -114,9 +114,48 @@ export type FormationType =
 
 export type Mentality = 'defensive' | 'balanced' | 'attacking';
 
+/**
+ * Player roles define tactical behavior for each position
+ */
+export type DefenderRole = 'full-back' | 'wing-back' | 'ball-playing-defender';
+export type MidfielderRole = 'defensive-midfielder' | 'box-to-box' | 'attacking-midfielder';
+export type ForwardRole = 'target-man' | 'poacher' | 'false-nine';
+
+/**
+ * Player role assignments by position group
+ */
+export interface PlayerRoles {
+  defenders?: DefenderRole;
+  midfielders?: MidfielderRole;
+  forwards?: ForwardRole;
+}
+
+/**
+ * Team-wide tactical instructions
+ */
+export interface TeamInstructions {
+  tempo: 'slow' | 'balanced' | 'fast';
+  width: 'narrow' | 'balanced' | 'wide';
+  pressing: 'low' | 'medium' | 'high';
+  passingStyle: 'short' | 'mixed' | 'long';
+}
+
+/**
+ * Set piece taker assignments (player IDs)
+ */
+export interface SetPieceAssignments {
+  cornerTaker?: string;
+  freeKickTaker?: string;
+  penaltyTaker?: string;
+}
+
 export interface Tactics {
   formation: FormationType;
   mentality: Mentality;
+  // Advanced tactics (optional for backward compatibility)
+  roles?: PlayerRoles;
+  instructions?: TeamInstructions;
+  setPieces?: SetPieceAssignments;
 }
 
 export interface Team {

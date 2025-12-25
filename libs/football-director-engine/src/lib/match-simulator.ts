@@ -74,9 +74,13 @@ export class MatchSimulator {
       homeTactics
     );
 
-    // Home advantage (10% boost) + tactical modifier
-    const adjustedHomeStrength = homeStrength * 1.1 * homeTacticalModifier;
-    const adjustedAwayStrength = awayStrength * awayTacticalModifier;
+    // Apply advanced tactics modifiers (roles + instructions)
+    const homeAdvancedModifier = this.tacticsManager.calculateAdvancedTacticsModifier(homeTactics);
+    const awayAdvancedModifier = this.tacticsManager.calculateAdvancedTacticsModifier(awayTactics);
+
+    // Home advantage (10% boost) + tactical modifier + advanced tactics
+    const adjustedHomeStrength = homeStrength * 1.1 * (homeTacticalModifier + homeAdvancedModifier);
+    const adjustedAwayStrength = awayStrength * (awayTacticalModifier + awayAdvancedModifier);
 
     // Calculate goal probabilities based on strength difference
     const homeGoals = this.generateGoals(adjustedHomeStrength, adjustedAwayStrength, seed);
@@ -552,14 +556,18 @@ export class MatchSimulator {
       homeTactics
     );
 
-    const adjustedHomeStrength = homeStrength * 1.1 * homeTacticalModifier;
-    const adjustedAwayStrength = awayStrength * awayTacticalModifier;
+    // Apply advanced tactics modifiers (roles + instructions)
+    const homeAdvancedModifier = this.tacticsManager.calculateAdvancedTacticsModifier(homeTactics);
+    const awayAdvancedModifier = this.tacticsManager.calculateAdvancedTacticsModifier(awayTactics);
+
+    const adjustedHomeStrength = homeStrength * 1.1 * (homeTacticalModifier + homeAdvancedModifier);
+    const adjustedAwayStrength = awayStrength * (awayTacticalModifier + awayAdvancedModifier);
 
     // Extra time: 30 minutes vs 90 minutes = 1/3 the time
     // Reduce goal probability accordingly
     const etSeed = seed !== undefined ? seed + 9000 : undefined;
-    let homeExtraGoals = this.generateGoals(adjustedHomeStrength * 0.33, adjustedAwayStrength * 0.33, etSeed);
-    let awayExtraGoals = this.generateGoals(
+    const homeExtraGoals = this.generateGoals(adjustedHomeStrength * 0.33, adjustedAwayStrength * 0.33, etSeed);
+    const awayExtraGoals = this.generateGoals(
       adjustedAwayStrength * 0.33,
       adjustedHomeStrength * 0.33,
       etSeed ? etSeed + 1 : undefined
@@ -594,6 +602,30 @@ export class MatchSimulator {
    * @param seed - Optional seed for reproducibility
    * @returns Penalty score and updated result
    */
+  /**
+   * Get penalty takers, prioritizing designated taker if set
+   */
+  private getPenaltyTakers(team: Team): Player[] {
+    const injuryManager = new InjuryManager();
+    const available = injuryManager.getAvailablePlayers(team, 1);
+
+    // Sort by skill
+    const sorted = available.sort((a, b) => b.skill - a.skill).slice(0, 11);
+
+    // If there's a designated penalty taker, move them to first position
+    const designatedTakerId = team.tactics?.setPieces?.penaltyTaker;
+    if (designatedTakerId) {
+      const takerIndex = sorted.findIndex(p => p.id === designatedTakerId);
+      if (takerIndex > 0) {
+        // Move designated taker to first position
+        const taker = sorted.splice(takerIndex, 1)[0];
+        sorted.unshift(taker);
+      }
+    }
+
+    return sorted;
+  }
+
   private simulatePenalties(
     match: Match,
     seed?: number
@@ -601,13 +633,9 @@ export class MatchSimulator {
     let homePenalties = 0;
     let awayPenalties = 0;
 
-    // Get penalty takers (best skilled available players)
-    const injuryManager = new InjuryManager();
-    const homeAvailable = injuryManager.getAvailablePlayers(match.homeTeam, 1);
-    const awayAvailable = injuryManager.getAvailablePlayers(match.awayTeam, 1);
-
-    const homeTakers = homeAvailable.sort((a, b) => b.skill - a.skill).slice(0, 11);
-    const awayTakers = awayAvailable.sort((a, b) => b.skill - a.skill).slice(0, 11);
+    // Get penalty takers (prioritize designated, then by skill)
+    const homeTakers = this.getPenaltyTakers(match.homeTeam);
+    const awayTakers = this.getPenaltyTakers(match.awayTeam);
 
     // First 5 penalties each (or less if not enough players)
     const maxPenalties = Math.min(5, homeTakers.length, awayTakers.length);

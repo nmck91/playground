@@ -347,10 +347,10 @@ When assigning stories to the Dev Agent (`/dev`):
 ## Sprint Artifacts
 
 ### Documents Created
-- ✅ `story-001-refactor-usegamestate.md` - Ready
-- ⏳ `story-002-cup-competitions.md` - Create before Day 4
-- ⏳ `story-003-testing-foundation.md` - Create before Week 3
-- ⏳ `story-004-advanced-tactics.md` - Create before Week 4
+- ✅ `story-001-refactor-usegamestate.md` - Complete
+- ✅ `story-002-cup-competitions.md` - Complete
+- ✅ `story-003-testing-foundation.md` - Complete
+- ✅ `story-004-advanced-tactics.md` - Ready (created 2025-12-25)
 - ⏳ `story-005-storage-and-polish.md` - Create before Week 6
 
 ### Progress Tracking

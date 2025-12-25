@@ -3,7 +3,16 @@
  * Generates teams, players, and full leagues
  */
 
-import { Team, Player } from './types';
+import {
+  Team,
+  Player,
+  Tactics,
+  FormationType,
+  Mentality,
+  DefenderRole,
+  MidfielderRole,
+  ForwardRole,
+} from './types';
 import { PlayerStatsTracker } from './player-stats-tracker';
 import { StaffManager } from './staff-manager';
 import { TacticsManager } from './tactics-manager';
@@ -114,9 +123,9 @@ export class TeamGenerator {
     const managerSeed = seed !== undefined ? seed + 1000 : undefined;
     const manager = staffManager.generateStaff('manager', managerSeed);
 
-    // Set default tactics
-    const tacticsManager = new TacticsManager();
-    const tactics = tacticsManager.getDefaultTactics();
+    // Generate varied tactics for AI teams
+    const tacticsSeed = seed !== undefined ? seed + 2000 : undefined;
+    const tactics = this.generateVariedTactics(players, tacticsSeed);
 
     return {
       id: `team-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -124,8 +133,80 @@ export class TeamGenerator {
       budget,
       players,
       staff: [manager], // Start with just a manager
-      tactics, // Default 4-4-2 balanced
+      tactics,
     };
+  }
+
+  /**
+   * Generate varied tactics for AI teams
+   * Includes formation, mentality, roles, instructions, and set pieces
+   */
+  private generateVariedTactics(players: Player[], seed?: number): Tactics {
+    const random = seed !== undefined ? this.seededRandom(seed) : Math.random();
+
+    // Random formation
+    const formations: FormationType[] = ['4-4-2', '4-3-3', '3-5-2', '4-5-1', '3-4-3', '5-3-2'];
+    const formation = formations[Math.floor(random * formations.length)];
+
+    // Random mentality (with bias toward balanced)
+    const mentalityRoll = seed !== undefined ? this.seededRandom(seed + 1) : Math.random();
+    let mentality: Mentality;
+    if (mentalityRoll < 0.25) {
+      mentality = 'defensive';
+    } else if (mentalityRoll < 0.75) {
+      mentality = 'balanced';
+    } else {
+      mentality = 'attacking';
+    }
+
+    // Random player roles
+    const defenderRoles: DefenderRole[] = ['full-back', 'wing-back', 'ball-playing-defender'];
+    const midfielderRoles: MidfielderRole[] = ['defensive-midfielder', 'box-to-box', 'attacking-midfielder'];
+    const forwardRoles: ForwardRole[] = ['target-man', 'poacher', 'false-nine'];
+
+    const roleRandom1 = seed !== undefined ? this.seededRandom(seed + 2) : Math.random();
+    const roleRandom2 = seed !== undefined ? this.seededRandom(seed + 3) : Math.random();
+    const roleRandom3 = seed !== undefined ? this.seededRandom(seed + 4) : Math.random();
+
+    const roles = {
+      defenders: defenderRoles[Math.floor(roleRandom1 * defenderRoles.length)],
+      midfielders: midfielderRoles[Math.floor(roleRandom2 * midfielderRoles.length)],
+      forwards: forwardRoles[Math.floor(roleRandom3 * forwardRoles.length)],
+    };
+
+    // Random team instructions (with bias toward balanced)
+    const tempoRandom = seed !== undefined ? this.seededRandom(seed + 5) : Math.random();
+    const widthRandom = seed !== undefined ? this.seededRandom(seed + 6) : Math.random();
+    const pressingRandom = seed !== undefined ? this.seededRandom(seed + 7) : Math.random();
+    const passingRandom = seed !== undefined ? this.seededRandom(seed + 8) : Math.random();
+
+    const instructions = {
+      tempo: tempoRandom < 0.3 ? 'slow' : tempoRandom < 0.7 ? 'balanced' : 'fast',
+      width: widthRandom < 0.3 ? 'narrow' : widthRandom < 0.7 ? 'balanced' : 'wide',
+      pressing: pressingRandom < 0.3 ? 'low' : pressingRandom < 0.7 ? 'medium' : 'high',
+      passingStyle: passingRandom < 0.3 ? 'short' : passingRandom < 0.7 ? 'mixed' : 'long',
+    } as const;
+
+    // Assign set piece takers (best skilled players by position)
+    const sortedBySkill = [...players].sort((a, b) => b.skill - a.skill);
+    const setPieces = {
+      penaltyTaker: sortedBySkill[0]?.id,
+      freeKickTaker: sortedBySkill[1]?.id || sortedBySkill[0]?.id,
+      cornerTaker: sortedBySkill[2]?.id || sortedBySkill[0]?.id,
+    };
+
+    return {
+      formation,
+      mentality,
+      roles,
+      instructions,
+      setPieces,
+    };
+  }
+
+  private seededRandom(seed: number): number {
+    const x = Math.sin(seed) * 10000;
+    return x - Math.floor(x);
   }
 
   /**
@@ -174,14 +255,6 @@ export class TeamGenerator {
     });
 
     return teams;
-  }
-
-  /**
-   * Seeded random number generator
-   */
-  private seededRandom(seed: number): number {
-    const x = Math.sin(seed) * 10000;
-    return x - Math.floor(x);
   }
 
   /**

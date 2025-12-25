@@ -3,7 +3,17 @@
  * Manages team formations and tactical setups
  */
 
-import { FormationType, Mentality, Tactics, Team } from './types';
+import {
+  FormationType,
+  Mentality,
+  Tactics,
+  Team,
+  DefenderRole,
+  MidfielderRole,
+  ForwardRole,
+  TeamInstructions,
+  PlayerRoles,
+} from './types';
 
 export interface FormationRequirements {
   GK: number;
@@ -147,5 +157,193 @@ export class TacticsManager {
       ...team,
       tactics,
     };
+  }
+
+  // ===== ADVANCED TACTICS METHODS =====
+
+  /**
+   * Get default team instructions
+   */
+  getDefaultInstructions(): TeamInstructions {
+    return {
+      tempo: 'balanced',
+      width: 'balanced',
+      pressing: 'medium',
+      passingStyle: 'mixed',
+    };
+  }
+
+  /**
+   * Get default player roles
+   */
+  getDefaultRoles(): PlayerRoles {
+    return {
+      defenders: 'full-back',
+      midfielders: 'box-to-box',
+      forwards: 'poacher',
+    };
+  }
+
+  /**
+   * Get available roles for defenders
+   */
+  getDefenderRoles(): DefenderRole[] {
+    return ['full-back', 'wing-back', 'ball-playing-defender'];
+  }
+
+  /**
+   * Get available roles for midfielders
+   */
+  getMidfielderRoles(): MidfielderRole[] {
+    return ['defensive-midfielder', 'box-to-box', 'attacking-midfielder'];
+  }
+
+  /**
+   * Get available roles for forwards
+   */
+  getForwardRoles(): ForwardRole[] {
+    return ['target-man', 'poacher', 'false-nine'];
+  }
+
+  /**
+   * Get role description
+   */
+  getRoleDescription(role: DefenderRole | MidfielderRole | ForwardRole): string {
+    const descriptions: Record<string, string> = {
+      'full-back': 'Balanced defender, solid at the back',
+      'wing-back': 'Attacking full-back who pushes forward',
+      'ball-playing-defender': 'Technical defender who helps build play',
+      'defensive-midfielder': 'Sits deep, breaks up play',
+      'box-to-box': 'All-action midfielder, contributes both ends',
+      'attacking-midfielder': 'Creative playmaker, focuses on attack',
+      'target-man': 'Physical striker who holds up play',
+      'poacher': 'Goal-focused striker, penalty box threat',
+      'false-nine': 'Deep-lying forward who drops into midfield',
+    };
+    return descriptions[role] || '';
+  }
+
+  /**
+   * Get instruction description
+   */
+  getInstructionDescription(
+    category: keyof TeamInstructions,
+    value: string
+  ): string {
+    const descriptions: Record<string, Record<string, string>> = {
+      tempo: {
+        slow: 'Patient buildup, maintain possession',
+        balanced: 'Moderate pace, mix of styles',
+        fast: 'Quick transitions, high intensity',
+      },
+      width: {
+        narrow: 'Play through the middle',
+        balanced: 'Use full width when needed',
+        wide: 'Stretch the pitch, use wingers',
+      },
+      pressing: {
+        low: 'Sit back, defend deep',
+        medium: 'Press in own half',
+        high: 'Aggressive pressing, win ball early',
+      },
+      passingStyle: {
+        short: 'Keep it on the ground, build patiently',
+        mixed: 'Vary passing length',
+        long: 'Direct play, bypass midfield',
+      },
+    };
+    return descriptions[category]?.[value] || '';
+  }
+
+  /**
+   * Calculate modifier from player roles
+   * Returns adjustment to tactical modifier (-0.1 to +0.1)
+   */
+  calculateRoleModifier(roles: PlayerRoles | undefined): number {
+    if (!roles) return 0;
+
+    let modifier = 0;
+
+    // Defender role modifiers
+    if (roles.defenders === 'wing-back') {
+      modifier += 0.05; // More attacking threat
+    } else if (roles.defenders === 'ball-playing-defender') {
+      modifier += 0.03; // Better build-up play
+    }
+    // full-back is baseline (0)
+
+    // Midfielder role modifiers
+    if (roles.midfielders === 'attacking-midfielder') {
+      modifier += 0.05; // More creative threat
+    } else if (roles.midfielders === 'defensive-midfielder') {
+      modifier -= 0.03; // Less attacking output
+    }
+    // box-to-box is baseline (0)
+
+    // Forward role modifiers
+    if (roles.forwards === 'poacher') {
+      modifier += 0.05; // Clinical finisher
+    } else if (roles.forwards === 'false-nine') {
+      modifier += 0.03; // Creative link-up
+    }
+    // target-man is baseline (0)
+
+    return modifier;
+  }
+
+  /**
+   * Calculate modifier from team instructions
+   * Returns adjustment to tactical modifier (-0.15 to +0.15)
+   */
+  calculateInstructionsModifier(
+    instructions: TeamInstructions | undefined
+  ): number {
+    if (!instructions) return 0;
+
+    let modifier = 0;
+
+    // Tempo modifiers
+    if (instructions.tempo === 'fast') {
+      modifier += 0.05; // More attacking opportunities
+    } else if (instructions.tempo === 'slow') {
+      modifier -= 0.03; // Fewer chances created
+    }
+
+    // Width modifiers
+    if (instructions.width === 'wide') {
+      modifier += 0.03; // Stretch defense, create space
+    } else if (instructions.width === 'narrow') {
+      modifier += 0.02; // Overload center
+    }
+
+    // Pressing modifiers
+    if (instructions.pressing === 'high') {
+      modifier += 0.05; // Win ball in dangerous areas
+    } else if (instructions.pressing === 'low') {
+      modifier -= 0.05; // Less proactive
+    }
+
+    // Passing style modifiers
+    if (instructions.passingStyle === 'long') {
+      modifier += 0.02; // Direct threat
+    } else if (instructions.passingStyle === 'short') {
+      modifier += 0.03; // Control game
+    }
+
+    return modifier;
+  }
+
+  /**
+   * Calculate combined advanced tactics modifier
+   * Integrates with existing calculateTacticalModifier
+   */
+  calculateAdvancedTacticsModifier(tactics: Tactics): number {
+    const roleModifier = this.calculateRoleModifier(tactics.roles);
+    const instructionsModifier = this.calculateInstructionsModifier(
+      tactics.instructions
+    );
+
+    // Combine modifiers (additive)
+    return roleModifier + instructionsModifier;
   }
 }

@@ -14,8 +14,7 @@ import {
   Staff,
   StaffManager,
   TacticsManager,
-  FormationType,
-  Mentality,
+  Tactics,
   ClubPhilosophy,
   ContractManager,
   YouthAcademyManager,
@@ -245,18 +244,15 @@ export function useGameActions(
   );
 
   /**
-   * Update team tactics (formation and mentality)
+   * Update team tactics (formation, mentality, roles, instructions, set pieces)
    */
   const setTeamTactics = useCallback(
-    (formation: FormationType, mentality: Mentality) => {
+    (tactics: Tactics) => {
       if (!gameState) return;
 
       try {
         const tacticsManager = new TacticsManager();
-        const updatedTeam = tacticsManager.setTeamTactics(gameState.playerTeam, {
-          formation,
-          mentality,
-        });
+        const updatedTeam = tacticsManager.setTeamTactics(gameState.playerTeam, tactics);
 
         setGameState({
           ...gameState,

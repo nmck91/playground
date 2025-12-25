@@ -1,12 +1,26 @@
 'use client';
 
-import { FormationType, Mentality, TacticsManager as TacticsEngine } from '@playground/football-director-engine';
+import {
+  FormationType,
+  Mentality,
+  TacticsManager as TacticsEngine,
+  PlayerRoles,
+  TeamInstructions,
+  SetPieceAssignments,
+  Tactics,
+  Player,
+  DefenderRole,
+  MidfielderRole,
+  ForwardRole,
+} from '@playground/football-director-engine';
 import { useState } from 'react';
 
 interface TacticsManagerProps {
   currentFormation: FormationType;
   currentMentality: Mentality;
-  onSave: (formation: FormationType, mentality: Mentality) => void;
+  currentTactics?: Tactics;
+  players?: Player[];
+  onSave: (tactics: Tactics) => void;
   onClose: () => void;
   isOpen: boolean;
 }
@@ -17,19 +31,38 @@ const mentalities: Mentality[] = ['defensive', 'balanced', 'attacking'];
 export function TacticsManager({
   currentFormation,
   currentMentality,
+  currentTactics,
+  players = [],
   onSave,
   onClose,
   isOpen,
 }: TacticsManagerProps) {
+  const tacticsEngine = new TacticsEngine();
+
   const [selectedFormation, setSelectedFormation] = useState<FormationType>(currentFormation);
   const [selectedMentality, setSelectedMentality] = useState<Mentality>(currentMentality);
-
-  const tacticsEngine = new TacticsEngine();
+  const [roles, setRoles] = useState<PlayerRoles>(
+    currentTactics?.roles || tacticsEngine.getDefaultRoles()
+  );
+  const [instructions, setInstructions] = useState<TeamInstructions>(
+    currentTactics?.instructions || tacticsEngine.getDefaultInstructions()
+  );
+  const [setPieces, setSetPieces] = useState<SetPieceAssignments>(
+    currentTactics?.setPieces || {}
+  );
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   if (!isOpen) return null;
 
   const handleSave = () => {
-    onSave(selectedFormation, selectedMentality);
+    const tactics: Tactics = {
+      formation: selectedFormation,
+      mentality: selectedMentality,
+      roles,
+      instructions,
+      setPieces,
+    };
+    onSave(tactics);
     onClose();
   };
 
@@ -127,6 +160,234 @@ export function TacticsManager({
               </p>
             </div>
           </div>
+
+          {/* Advanced Tactics Toggle */}
+          <div className="border-t border-gray-200 dark:border-dark-border-primary pt-6">
+            <button
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="w-full flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-lg border border-purple-200 dark:border-purple-700 hover:border-purple-300 dark:hover:border-purple-600 transition-all"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">🎯</span>
+                <span className="font-semibold text-purple-900 dark:text-purple-400">Advanced Tactics</span>
+              </div>
+              <span className="text-purple-600 dark:text-purple-400 text-xl">
+                {showAdvanced ? '▼' : '▶'}
+              </span>
+            </button>
+          </div>
+
+          {/* Advanced Tactics Sections */}
+          {showAdvanced && (
+            <div className="space-y-6 border border-purple-200 dark:border-purple-700 rounded-lg p-6 bg-purple-50/50 dark:bg-purple-900/10">
+              {/* Player Roles */}
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-dark-text-primary mb-3 flex items-center gap-2">
+                  <span>👥</span> Player Roles
+                </h3>
+                <div className="space-y-3">
+                  {/* Defender Roles */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-dark-text-secondary mb-2">
+                      Defenders
+                    </label>
+                    <select
+                      value={roles.defenders || 'full-back'}
+                      onChange={(e) => setRoles({ ...roles, defenders: e.target.value as DefenderRole })}
+                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-dark-border-primary bg-white dark:bg-dark-bg-tertiary text-slate-900 dark:text-dark-text-primary"
+                    >
+                      {tacticsEngine.getDefenderRoles().map((role) => (
+                        <option key={role} value={role}>
+                          {role.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())} - {tacticsEngine.getRoleDescription(role)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Midfielder Roles */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-dark-text-secondary mb-2">
+                      Midfielders
+                    </label>
+                    <select
+                      value={roles.midfielders || 'box-to-box'}
+                      onChange={(e) => setRoles({ ...roles, midfielders: e.target.value as MidfielderRole })}
+                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-dark-border-primary bg-white dark:bg-dark-bg-tertiary text-slate-900 dark:text-dark-text-primary"
+                    >
+                      {tacticsEngine.getMidfielderRoles().map((role) => (
+                        <option key={role} value={role}>
+                          {role.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())} - {tacticsEngine.getRoleDescription(role)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Forward Roles */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-dark-text-secondary mb-2">
+                      Forwards
+                    </label>
+                    <select
+                      value={roles.forwards || 'poacher'}
+                      onChange={(e) => setRoles({ ...roles, forwards: e.target.value as ForwardRole })}
+                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-dark-border-primary bg-white dark:bg-dark-bg-tertiary text-slate-900 dark:text-dark-text-primary"
+                    >
+                      {tacticsEngine.getForwardRoles().map((role) => (
+                        <option key={role} value={role}>
+                          {role.replace(/-/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())} - {tacticsEngine.getRoleDescription(role)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Team Instructions */}
+              <div className="border-t border-purple-200 dark:border-purple-700 pt-6">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-dark-text-primary mb-3 flex items-center gap-2">
+                  <span>📋</span> Team Instructions
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Tempo */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-dark-text-secondary mb-2">
+                      Tempo
+                    </label>
+                    <select
+                      value={instructions.tempo}
+                      onChange={(e) => setInstructions({ ...instructions, tempo: e.target.value as 'slow' | 'balanced' | 'fast' })}
+                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-dark-border-primary bg-white dark:bg-dark-bg-tertiary text-slate-900 dark:text-dark-text-primary text-sm"
+                    >
+                      {['slow', 'balanced', 'fast'].map((tempo) => (
+                        <option key={tempo} value={tempo}>
+                          {tempo.charAt(0).toUpperCase() + tempo.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Width */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-dark-text-secondary mb-2">
+                      Width
+                    </label>
+                    <select
+                      value={instructions.width}
+                      onChange={(e) => setInstructions({ ...instructions, width: e.target.value as 'narrow' | 'balanced' | 'wide' })}
+                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-dark-border-primary bg-white dark:bg-dark-bg-tertiary text-slate-900 dark:text-dark-text-primary text-sm"
+                    >
+                      {['narrow', 'balanced', 'wide'].map((width) => (
+                        <option key={width} value={width}>
+                          {width.charAt(0).toUpperCase() + width.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Pressing */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-dark-text-secondary mb-2">
+                      Pressing
+                    </label>
+                    <select
+                      value={instructions.pressing}
+                      onChange={(e) => setInstructions({ ...instructions, pressing: e.target.value as 'low' | 'medium' | 'high' })}
+                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-dark-border-primary bg-white dark:bg-dark-bg-tertiary text-slate-900 dark:text-dark-text-primary text-sm"
+                    >
+                      {['low', 'medium', 'high'].map((pressing) => (
+                        <option key={pressing} value={pressing}>
+                          {pressing.charAt(0).toUpperCase() + pressing.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Passing Style */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-dark-text-secondary mb-2">
+                      Passing
+                    </label>
+                    <select
+                      value={instructions.passingStyle}
+                      onChange={(e) => setInstructions({ ...instructions, passingStyle: e.target.value as 'short' | 'mixed' | 'long' })}
+                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-dark-border-primary bg-white dark:bg-dark-bg-tertiary text-slate-900 dark:text-dark-text-primary text-sm"
+                    >
+                      {['short', 'mixed', 'long'].map((passing) => (
+                        <option key={passing} value={passing}>
+                          {passing.charAt(0).toUpperCase() + passing.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Set Pieces */}
+              <div className="border-t border-purple-200 dark:border-purple-700 pt-6">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-dark-text-primary mb-3 flex items-center gap-2">
+                  <span>⚽</span> Set Piece Takers
+                </h3>
+                <div className="space-y-3">
+                  {/* Penalty Taker */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-dark-text-secondary mb-2">
+                      Penalties
+                    </label>
+                    <select
+                      value={setPieces.penaltyTaker || ''}
+                      onChange={(e) => setSetPieces({ ...setPieces, penaltyTaker: e.target.value })}
+                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-dark-border-primary bg-white dark:bg-dark-bg-tertiary text-slate-900 dark:text-dark-text-primary"
+                    >
+                      <option value="">Best Available</option>
+                      {players.sort((a, b) => b.skill - a.skill).map((player) => (
+                        <option key={player.id} value={player.id}>
+                          {player.name} ({player.position}) - Skill: {player.skill}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Free Kick Taker */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-dark-text-secondary mb-2">
+                      Free Kicks
+                    </label>
+                    <select
+                      value={setPieces.freeKickTaker || ''}
+                      onChange={(e) => setSetPieces({ ...setPieces, freeKickTaker: e.target.value })}
+                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-dark-border-primary bg-white dark:bg-dark-bg-tertiary text-slate-900 dark:text-dark-text-primary"
+                    >
+                      <option value="">Best Available</option>
+                      {players.sort((a, b) => b.skill - a.skill).map((player) => (
+                        <option key={player.id} value={player.id}>
+                          {player.name} ({player.position}) - Skill: {player.skill}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Corner Taker */}
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-dark-text-secondary mb-2">
+                      Corners
+                    </label>
+                    <select
+                      value={setPieces.cornerTaker || ''}
+                      onChange={(e) => setSetPieces({ ...setPieces, cornerTaker: e.target.value })}
+                      className="w-full p-2 rounded-lg border border-gray-300 dark:border-dark-border-primary bg-white dark:bg-dark-bg-tertiary text-slate-900 dark:text-dark-text-primary"
+                    >
+                      <option value="">Best Available</option>
+                      {players.sort((a, b) => b.skill - a.skill).map((player) => (
+                        <option key={player.id} value={player.id}>
+                          {player.name} ({player.position}) - Skill: {player.skill}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Tactical Preview */}
           <div className="bg-gradient-to-br from-green-100 to-green-50 dark:from-green-900/20 dark:to-green-900/10 p-4 rounded-lg border border-green-300 dark:border-green-700">
