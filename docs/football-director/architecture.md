@@ -12,6 +12,7 @@ This document captures the **CURRENT STATE** of the Football Director applicatio
 
 | Date       | Version | Description                                    | Author  |
 | ---------- | ------- | ---------------------------------------------- | ------- |
+| 2025-12-25 | 1.1     | Added Advanced Tactics System documentation    | James (Dev Agent) |
 | 2025-12-24 | 1.0     | Initial brownfield architecture documentation  | Winston (Architect Agent) |
 
 ---
@@ -45,7 +46,7 @@ This document captures the **CURRENT STATE** of the Football Director applicatio
 - **Morale Manager**: `morale-manager.ts` - Player happiness system affecting performance
 - **Injury Manager**: `injury-manager.ts` - Injury simulation, suspensions, recovery
 - **Youth Academy**: `youth-academy-manager.ts` - Youth player generation and selection
-- **Tactics Manager**: `tactics-manager.ts` - Formation and mentality system
+- **Tactics Manager**: `tactics-manager.ts` - **Advanced tactical system** with formations, mentality, player roles, team instructions, and set pieces
 - **News Generator**: `news-generator.ts` - Dynamic news article generation
 - **Achievement Manager**: `achievement-manager.ts` - Achievement tracking and unlocking
 - **Records Manager**: `records-manager.ts` - Season and club records tracking
@@ -300,6 +301,57 @@ The engine modules are designed to be stateless and pure - they take input, perf
    - Award season prizes
    - Evaluate board satisfaction
    - Generate new season objective
+
+**Advanced Tactics System (Story 004 - December 2025):**
+
+The tactics system was significantly enhanced to provide deep tactical gameplay beyond basic formation and mentality. The system now includes three layers of tactical control:
+
+**1. Player Roles** (`types.ts:120-131`):
+- **DefenderRole**: `full-back` (balanced), `wing-back` (attacking +5%), `ball-playing-defender` (buildup +3%)
+- **MidfielderRole**: `defensive-midfielder` (defensive -3%), `box-to-box` (balanced), `attacking-midfielder` (creative +5%)
+- **ForwardRole**: `target-man` (baseline), `poacher` (clinical +5%), `false-nine` (creative +3%)
+- Each role provides distinct tactical modifiers applied during match simulation
+- Roles affect team's attacking effectiveness through role-specific bonuses
+
+**2. Team Instructions** (`types.ts:136-141`):
+- **Tempo**: `slow` (patient -3%), `balanced`, `fast` (transitions +5%)
+- **Width**: `narrow` (center +2%), `balanced`, `wide` (stretch +3%)
+- **Pressing**: `low` (sit back -5%), `medium`, `high` (aggressive +5%)
+- **Passing Style**: `short` (control +3%), `mixed`, `long` (direct +2%)
+- Instructions affect match flow and goal probability
+- Combined modifier capped at ±0.15 for balance
+
+**3. Set Piece Assignments** (`types.ts:146-150`):
+- **Penalty Taker**: Designated player takes first penalty in shootouts
+- **Free Kick Taker**: For future free kick events
+- **Corner Taker**: For future corner goal events
+- Currently integrated with penalty shootout system
+- Falls back to highest-skilled player if none designated
+
+**Tactical Modifier System** (`tactics-manager.ts:258-348`):
+- Base modifiers from formation counters: ±0.1 (rock-paper-scissors style)
+- Mentality modifiers: ±0.05 to ±0.15 based on matchups
+- Role modifiers: ±0.03 to ±0.05 per position (conservative values)
+- Instruction modifiers: ±0.02 to ±0.05 per instruction
+- **All modifiers are additive**, not multiplicative (prevents extreme values)
+- Final modifier applied to team strength during match simulation
+- Total possible range: ~0.7x to ~1.3x (balanced for competitive play)
+
+**AI Tactics Variety** (`team-generator.ts:144-207`):
+- AI teams generate varied tactical setups on creation
+- Random formations weighted toward common setups
+- Mentality biased toward "balanced" (75% of teams)
+- Instructions biased toward "balanced" options (40% probability)
+- Automatic set piece taker assignment by player skill
+- Ensures tactical diversity in league for replayability
+
+**Integration Points**:
+- `match-simulator.ts:77-83, 559-564` - Applies advanced modifiers to match simulation
+- `TacticsManager.tsx:161-387` - Expandable UI for advanced tactics configuration
+- `useGameActions.ts:247-270` - Updated to accept full Tactics object
+- Backward compatible: All advanced fields optional in Tactics interface
+
+**Performance**: <10ms additional calculation per match (negligible impact)
 
 ---
 

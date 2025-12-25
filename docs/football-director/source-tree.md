@@ -107,7 +107,7 @@ src/
 
 ```
 lib/
-├── types.ts                      # Core type definitions (GameState, Player, Team, etc.)
+├── types.ts                      # Core type definitions (GameState, Player, Team, Tactics, PlayerRoles, TeamInstructions, etc.)
 ├── match-simulator.ts            # Match simulation with events, goals, cards, knockout mechanics
 ├── season-manager.ts             # 52-week season system, fixtures generation
 ├── league-table-manager.ts       # Table updates, sorting, position calculations
@@ -120,7 +120,7 @@ lib/
 ├── morale-manager.ts             # Player morale calculation and effects
 ├── injury-manager.ts             # Injury simulation, recovery, suspensions
 ├── youth-academy-manager.ts      # Youth generation, prospect selection
-├── tactics-manager.ts            # Formation, mentality, philosophy
+├── tactics-manager.ts            # Advanced tactics: formation, mentality, player roles, team instructions, set pieces
 ├── news-generator.ts             # Dynamic news article generation
 ├── achievement-manager.ts        # Achievement tracking and unlocking
 ├── records-manager.ts            # Season and club records tracking
