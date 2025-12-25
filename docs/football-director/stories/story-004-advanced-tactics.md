@@ -1,13 +1,41 @@
 # Story 004: Advanced Tactics System - Brownfield Addition
 
-**Status**: 📝 DRAFT
+**Status**: ⚠️ IMPLEMENTATION GAP - Engine complete, UI not integrated
 **Priority**: High
 **Complexity**: Medium-High
 **Estimated Duration**: 2 weeks (Weeks 4-5)
 **Assigned To**: Dev Agent (James)
 **Created**: 2025-12-25
+**Completed**: 2025-12-25 (engine only)
 **Sprint**: Hybrid Approach - Weeks 4-5
 **Dependencies**: Story 001 (Refactored hooks), Story 002 (Cup Competitions), Story 003 (Testing Foundation)
+
+---
+
+## ⚠️ IMPLEMENTATION GAP IDENTIFIED (2025-12-25)
+
+**What was completed:**
+- ✅ All engine logic (types, TacticsManager class, modifiers, AI generation)
+- ✅ Match simulator integration (roles, instructions, set pieces all working)
+- ✅ TacticsManager.tsx UI component (fully built)
+- ✅ Unit tests and documentation
+
+**What's missing:**
+- ❌ No page or modal that uses the TacticsManager component
+- ❌ `/tactics` route shows Boardroom (club philosophy) instead of match tactics
+- ❌ No way for users to actually access the advanced tactics UI
+
+**Root cause:**
+The implementation focused on engine completeness but didn't create/update the tactics page.
+
+**To complete Story 004:**
+1. Create dedicated `/tactics` page that uses TacticsManager component OR
+2. Add TacticsManager modal to Dashboard/Squad page with "Change Tactics" button
+3. Move Boardroom page to different route if using Option 1
+4. Update navigation accordingly
+
+**Impact:**
+Users cannot currently access the advanced tactics features, even though all the underlying functionality works.
 
 ---
 
@@ -135,12 +163,13 @@ This story extends the existing simple tactics system with three new layers of d
   - Set piece events use designated players
   - AI teams generate varied tactics (not all default)
 
-- [x] **UI Component Enhanced**
-  - Advanced tactics section added to TacticsManager.tsx
-  - Player role selection per position
-  - Team instructions controls
-  - Set piece assignment dropdowns
-  - Mobile-responsive design maintained
+- [ ] **UI Component Enhanced** ⚠️ PARTIAL
+  - [x] Advanced tactics section added to TacticsManager.tsx
+  - [x] Player role selection per position
+  - [x] Team instructions controls
+  - [x] Set piece assignment dropdowns
+  - [x] Mobile-responsive design maintained
+  - [ ] **NOT INTEGRATED** - Component exists but not used anywhere
 
 - [x] **Testing Complete**
   - Unit tests for new TacticsManager methods (80%+ coverage)
