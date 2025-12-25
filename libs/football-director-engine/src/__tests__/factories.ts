@@ -13,7 +13,7 @@ import type {
   Fixture,
   Staff,
   PlayerStats,
-  Finances,
+  TeamFinances,
 } from '../lib/types';
 
 /**
@@ -32,8 +32,14 @@ export function createMockPlayer(overrides: Partial<Player> = {}): Player {
     history: [],
     morale: 75,
     contract: {
-      weeksRemaining: 52,
       weeklyWage: 3000,
+      startYear: 2024,
+      startWeek: 1,
+      expiryYear: 2025,
+      expiryWeek: 52,
+      yearsRemaining: 1,
+      weeksRemaining: 52,
+      status: 'active',
     },
   };
 
@@ -85,8 +91,10 @@ export function createMockTeam(overrides: Partial<Team> = {}): Team {
       createMockPlayer({ id: 'fwd2', position: 'FWD', skill: 10 }),
     ],
     staff: [],
-    formation: '4-4-2',
-    mentality: 'balanced',
+    tactics: {
+      formation: '4-4-2',
+      mentality: 'balanced',
+    },
   };
 
   return { ...defaults, ...overrides };
@@ -175,11 +183,13 @@ export function createMockFixture(overrides: Partial<Fixture> = {}): Fixture {
 /**
  * Create mock finances
  */
-export function createMockFinances(overrides: Partial<Finances> = {}): Finances {
-  const defaults: Finances = {
+export function createMockFinances(overrides: Partial<TeamFinances> = {}): TeamFinances {
+  const defaults: TeamFinances = {
     budget: 1000000,
     weeklyIncome: 50000,
     weeklyExpenses: 30000,
+    totalIncome: 0,
+    totalExpenses: 0,
     transactions: [],
   };
 
@@ -195,7 +205,7 @@ export function createMockStaff(overrides: Partial<Staff> = {}): Staff {
     name: 'Test Coach',
     role: 'manager',
     skill: 10,
-    wages: 5000,
+    salary: 5000,
   };
 
   return { ...defaults, ...overrides };

@@ -31,6 +31,8 @@ import {
   Player,
   Achievement,
   MatchPreview,
+  CupManager,
+  CupResult,
 } from '@playground/football-director-engine';
 
 /**
@@ -297,10 +299,97 @@ export function useWeeklySimulation(
         });
       });
 
+      // 1c. Simulate cup matches if scheduled this week
+      let updatedCupCompetition = gameState.cupCompetition;
+      const cupResults: CupResult[] = [];
+
+      if (updatedCupCompetition && !updatedCupCompetition.completed) {
+        const hasCupFixtures = CupManager.hasCupFixturesThisWeek(updatedCupCompetition, currentWeek);
+
+        if (hasCupFixtures) {
+          const cupFixtures = CupManager.getCupFixturesForWeek(updatedCupCompetition, currentWeek);
+
+          // Simulate each cup match
+          cupFixtures.forEach((fixture) => {
+            const homeTeam = fixture.homeTeamId === updatedPlayerTeam.id
+              ? updatedPlayerTeam
+              : updatedAITeams.find(t => t.id === fixture.homeTeamId);
+            const awayTeam = fixture.awayTeamId === updatedPlayerTeam.id
+              ? updatedPlayerTeam
+              : updatedAITeams.find(t => t.id === fixture.awayTeamId);
+
+            if (homeTeam && awayTeam) {
+              const match = { homeTeam, awayTeam };
+              const cupResult = simulator.simulateKnockoutMatch(match, currentWeek);
+              cupResults.push(cupResult);
+
+              // Add cup result to overall results for display
+              results.push(cupResult);
+
+              // Update cup fixture with result
+              const currentRound = updatedCupCompetition!.rounds.find(
+                r => r.roundNumber === updatedCupCompetition!.currentRound
+              );
+              if (currentRound) {
+                const fixtureIndex = currentRound.fixtures.findIndex(f => f.id === fixture.id);
+                if (fixtureIndex !== -1) {
+                  currentRound.fixtures[fixtureIndex] = {
+                    ...fixture,
+                    played: true,
+                    result: cupResult,
+                  };
+                }
+              }
+            }
+          });
+
+          // Update cup progress and check if round is complete
+          updatedCupCompetition = CupManager.updateCupProgress(updatedCupCompetition);
+
+          // Advance tournament if round is complete
+          const currentRound = updatedCupCompetition.rounds.find(
+            r => r.roundNumber === updatedCupCompetition!.currentRound
+          );
+          if (currentRound?.completed) {
+            const allTeams = [updatedPlayerTeam, ...updatedAITeams];
+            const advanced = CupManager.advanceTournament(updatedCupCompetition, allTeams);
+            if (advanced) {
+              updatedCupCompetition = advanced;
+
+              // Award prize money for reaching next round
+              cupResults.forEach((result) => {
+                const isPlayerTeamWinner =
+                  result.winnerId === updatedPlayerTeam.id;
+
+                if (isPlayerTeamWinner) {
+                  const prizeMoney = CupManager.getPrizeMoney(
+                    currentRound.roundNumber,
+                    updatedCupCompetition!.prizePool,
+                    updatedCupCompetition!.completed && result.winnerId === updatedPlayerTeam.id,
+                    updatedCupCompetition!.completed && result.loserId === updatedPlayerTeam.id
+                  );
+
+                  // Add prize money to budget
+                  updatedPlayerTeam = {
+                    ...updatedPlayerTeam,
+                    budget: updatedPlayerTeam.budget + prizeMoney,
+                  };
+                }
+              });
+            }
+          }
+        }
+      }
+
       // 2. Update league table
       let updatedTable = gameState.leagueTable;
       results.forEach((result) => {
-        updatedTable = tableManager.updateTable(updatedTable, result);
+        // Only update table for league matches (not cup matches)
+        if (!cupResults.find(cr =>
+          cr.homeTeam === result.homeTeam && cr.awayTeam === result.awayTeam
+        )) {
+          updatedTable = tableManager.updateTable(updatedTable, result);
+        }
       });
       updatedTable = tableManager.sortTable(updatedTable);
 
@@ -617,6 +706,15 @@ export function useWeeklySimulation(
 
       // Build updated game state
       const nextWeek = currentWeek + 1;
+
+      // If cup is complete, move to history
+      let finalCupCompetition = updatedCupCompetition;
+      let updatedCupHistory = gameState.cupHistory || [];
+      if (updatedCupCompetition?.completed) {
+        updatedCupHistory = [...updatedCupHistory, updatedCupCompetition];
+        finalCupCompetition = undefined;
+      }
+
       const updatedGameState: GameState = {
         ...gameState,
         playerTeam: finalPlayerTeam,
@@ -656,6 +754,8 @@ export function useWeeklySimulation(
         newsFeed: weeklyNews,
         freeAgents: newFreeAgents,
         matchPreviews,
+        cupCompetition: finalCupCompetition,
+        cupHistory: updatedCupHistory,
       };
 
       // 11. Check achievements

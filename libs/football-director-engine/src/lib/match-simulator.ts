@@ -4,7 +4,7 @@
  * Simulates football matches based on team strength
  */
 
-import { Team, Match, MatchResult, MatchStats, PlayerRating, ManOfMatch, Player } from './types';
+import { Team, Match, MatchResult, MatchStats, PlayerRating, ManOfMatch, Player, CupResult } from './types';
 import { MatchCommentary } from './match-commentary';
 import { StaffManager } from './staff-manager';
 import { TacticsManager } from './tactics-manager';
@@ -441,5 +441,235 @@ export class MatchSimulator {
     }
 
     return results;
+  }
+
+  /**
+   * Simulate a knockout cup match with extra time and penalties if needed
+   * Must produce a winner - no draws allowed in knockout competitions
+   *
+   * @param match - The match to simulate
+   * @param currentWeek - Current week number
+   * @param seed - Optional seed for reproducibility
+   * @returns Cup result with winner/loser and ET/penalty flags
+   */
+  simulateKnockoutMatch(match: Match, currentWeek = 1, seed?: number): CupResult {
+    // Simulate normal 90 minutes
+    let result = this.simulateMatch(match, currentWeek, seed);
+
+    let wentToExtraTime = false;
+    let wentToPenalties = false;
+    let penaltyScore: { home: number; away: number } | undefined;
+
+    // If drawn, go to extra time
+    if (result.homeScore === result.awayScore) {
+      wentToExtraTime = true;
+      result = this.simulateExtraTime(result, match, currentWeek, seed);
+
+      // If still drawn, go to penalties
+      if (result.homeScore === result.awayScore) {
+        wentToPenalties = true;
+        const penaltyResult = this.simulatePenalties(match, seed);
+        penaltyScore = penaltyResult.penaltyScore;
+        result = penaltyResult.result;
+      }
+    }
+
+    // Determine winner and loser
+    let winnerId: string;
+    let winnerName: string;
+    let loserId: string;
+    let loserName: string;
+
+    if (wentToPenalties && penaltyScore) {
+      // Winner determined by penalties
+      if (penaltyScore.home > penaltyScore.away) {
+        winnerId = match.homeTeam.id;
+        winnerName = match.homeTeam.name;
+        loserId = match.awayTeam.id;
+        loserName = match.awayTeam.name;
+      } else {
+        winnerId = match.awayTeam.id;
+        winnerName = match.awayTeam.name;
+        loserId = match.homeTeam.id;
+        loserName = match.homeTeam.name;
+      }
+    } else {
+      // Winner determined by goals (after ET or in normal time)
+      if (result.homeScore > result.awayScore) {
+        winnerId = match.homeTeam.id;
+        winnerName = match.homeTeam.name;
+        loserId = match.awayTeam.id;
+        loserName = match.awayTeam.name;
+      } else {
+        winnerId = match.awayTeam.id;
+        winnerName = match.awayTeam.name;
+        loserId = match.homeTeam.id;
+        loserName = match.homeTeam.name;
+      }
+    }
+
+    return {
+      ...result,
+      wentToExtraTime,
+      wentToPenalties,
+      penaltyScore,
+      winnerId,
+      winnerName,
+      loserId,
+      loserName,
+    };
+  }
+
+  /**
+   * Simulate extra time (2x 15 minute periods)
+   * Uses reduced goal generation (30 minutes vs 90 minutes)
+   *
+   * @param normalTimeResult - Result from normal 90 minutes
+   * @param match - The match being played
+   * @param currentWeek - Current week number
+   * @param seed - Optional seed for reproducibility
+   * @returns Updated match result with extra time goals added
+   */
+  private simulateExtraTime(
+    normalTimeResult: MatchResult,
+    match: Match,
+    currentWeek: number,
+    seed?: number
+  ): MatchResult {
+    const homeStrength = this.calculateTeamStrength(match.homeTeam, currentWeek);
+    const awayStrength = this.calculateTeamStrength(match.awayTeam, currentWeek);
+
+    // Apply tactical modifiers (same as normal time)
+    const homeTactics = match.homeTeam.tactics || this.tacticsManager.getDefaultTactics();
+    const awayTactics = match.awayTeam.tactics || this.tacticsManager.getDefaultTactics();
+
+    const homeTacticalModifier = this.tacticsManager.calculateTacticalModifier(
+      homeTactics,
+      awayTactics
+    );
+    const awayTacticalModifier = this.tacticsManager.calculateTacticalModifier(
+      awayTactics,
+      homeTactics
+    );
+
+    const adjustedHomeStrength = homeStrength * 1.1 * homeTacticalModifier;
+    const adjustedAwayStrength = awayStrength * awayTacticalModifier;
+
+    // Extra time: 30 minutes vs 90 minutes = 1/3 the time
+    // Reduce goal probability accordingly
+    const etSeed = seed !== undefined ? seed + 9000 : undefined;
+    let homeExtraGoals = this.generateGoals(adjustedHomeStrength * 0.33, adjustedAwayStrength * 0.33, etSeed);
+    let awayExtraGoals = this.generateGoals(
+      adjustedAwayStrength * 0.33,
+      adjustedHomeStrength * 0.33,
+      etSeed ? etSeed + 1 : undefined
+    );
+
+    // Update scores
+    const newHomeScore = normalTimeResult.homeScore + homeExtraGoals;
+    const newAwayScore = normalTimeResult.awayScore + awayExtraGoals;
+
+    let newResult: 'home' | 'away' | 'draw';
+    if (newHomeScore > newAwayScore) {
+      newResult = 'home';
+    } else if (newAwayScore > newHomeScore) {
+      newResult = 'away';
+    } else {
+      newResult = 'draw';
+    }
+
+    return {
+      ...normalTimeResult,
+      homeScore: newHomeScore,
+      awayScore: newAwayScore,
+      result: newResult,
+    };
+  }
+
+  /**
+   * Simulate penalty shootout
+   * Each team takes 5 penalties minimum, then sudden death if tied
+   *
+   * @param match - The match being played
+   * @param seed - Optional seed for reproducibility
+   * @returns Penalty score and updated result
+   */
+  private simulatePenalties(
+    match: Match,
+    seed?: number
+  ): { penaltyScore: { home: number; away: number }; result: MatchResult } {
+    let homePenalties = 0;
+    let awayPenalties = 0;
+
+    // Get penalty takers (best skilled available players)
+    const injuryManager = new InjuryManager();
+    const homeAvailable = injuryManager.getAvailablePlayers(match.homeTeam, 1);
+    const awayAvailable = injuryManager.getAvailablePlayers(match.awayTeam, 1);
+
+    const homeTakers = homeAvailable.sort((a, b) => b.skill - a.skill).slice(0, 11);
+    const awayTakers = awayAvailable.sort((a, b) => b.skill - a.skill).slice(0, 11);
+
+    // First 5 penalties each (or less if not enough players)
+    const maxPenalties = Math.min(5, homeTakers.length, awayTakers.length);
+    for (let i = 0; i < maxPenalties; i++) {
+      const homeTaker = homeTakers[i];
+      const awayTaker = awayTakers[i];
+
+      // Penalty success based on skill (70-90% success rate)
+      const homeSuccess = this.attemptPenalty(homeTaker, seed ? seed + i * 2 : undefined);
+      const awaySuccess = this.attemptPenalty(awayTaker, seed ? seed + i * 2 + 1 : undefined);
+
+      if (homeSuccess) homePenalties++;
+      if (awaySuccess) awayPenalties++;
+    }
+
+    // Sudden death if still tied
+    let round = maxPenalties;
+    while (homePenalties === awayPenalties && round < Math.max(11, homeTakers.length, awayTakers.length)) {
+      const homeTaker = homeTakers[round % homeTakers.length];
+      const awayTaker = awayTakers[round % awayTakers.length];
+
+      const homeSuccess = this.attemptPenalty(homeTaker, seed ? seed + round * 2 + 1000 : undefined);
+      const awaySuccess = this.attemptPenalty(awayTaker, seed ? seed + round * 2 + 1001 : undefined);
+
+      if (homeSuccess) homePenalties++;
+      if (awaySuccess) awayPenalties++;
+
+      round++;
+    }
+
+    // Determine result based on penalties
+    const result: 'home' | 'away' | 'draw' = homePenalties > awayPenalties ? 'home' : 'away';
+
+    // Create a minimal result object (scores remain from ET)
+    const penaltyResult: MatchResult = {
+      homeScore: 0, // Will be overridden in calling function
+      awayScore: 0,
+      homeTeam: match.homeTeam.name,
+      awayTeam: match.awayTeam.name,
+      result,
+    };
+
+    return {
+      penaltyScore: { home: homePenalties, away: awayPenalties },
+      result: penaltyResult,
+    };
+  }
+
+  /**
+   * Attempt a penalty kick
+   * Success rate based on player skill (70-90%)
+   *
+   * @param player - Player taking the penalty
+   * @param seed - Optional seed for reproducibility
+   * @returns True if penalty is scored
+   */
+  private attemptPenalty(player: Player, seed?: number): boolean {
+    const random = seed !== undefined ? this.seededRandom(seed) : Math.random();
+
+    // Skill-based success rate: 70% (skill 1) to 90% (skill 20)
+    const successRate = 0.7 + (player.skill / 20) * 0.2;
+
+    return random < successRate;
   }
 }

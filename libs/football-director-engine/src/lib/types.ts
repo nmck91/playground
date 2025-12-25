@@ -361,6 +361,71 @@ export interface SeasonTopPerformers {
   cleanSheetKing: { player: Player; cleanSheets: number } | null; // GK
 }
 
+/**
+ * Cup Competition Types
+ */
+
+export interface PrizeMoney {
+  round1: number;        // £10,000
+  round2: number;        // £25,000
+  round3: number;        // £50,000
+  quarterFinal: number;  // £100,000
+  semiFinal: number;     // £250,000
+  runnerUp: number;      // £500,000
+  winner: number;        // £1,000,000
+}
+
+export interface CupFixture {
+  id: string;
+  homeTeamId: string;
+  awayTeamId: string;
+  homeTeamName: string;
+  awayTeamName: string;
+  round: number;         // 1=R1, 2=R2, 3=R3, 4=QF, 5=SF, 6=Final
+  weekNumber: number;    // When this match is played
+  played: boolean;
+  result?: CupResult;
+}
+
+export interface CupResult extends MatchResult {
+  wentToExtraTime: boolean;
+  wentToPenalties: boolean;
+  penaltyScore?: {
+    home: number;
+    away: number;
+  };
+  winnerId: string;      // Team ID of winner
+  winnerName: string;    // Team name of winner
+  loserId: string;       // Team ID of loser
+  loserName: string;     // Team name of loser
+}
+
+export interface CupRound {
+  roundNumber: number;   // 1=R1, 2=R2, 3=R3, 4=QF, 5=SF, 6=Final
+  roundName: string;     // "Round 1", "Quarter-Finals", etc.
+  fixtures: CupFixture[];
+  weekNumber: number;    // When this round is played
+  completed: boolean;
+}
+
+export interface CupCompetition {
+  id: string;
+  name: string;          // "FA Cup", "League Cup", etc.
+  season: number;
+  currentRound: number;  // Current round number (1-6)
+  rounds: CupRound[];
+  winner?: {
+    teamId: string;
+    teamName: string;
+  };
+  runnerUp?: {
+    teamId: string;
+    teamName: string;
+  };
+  prizePool: PrizeMoney;
+  completed: boolean;
+}
+
 export interface GameState {
   id: string;
   createdAt: Date;
@@ -382,6 +447,8 @@ export interface GameState {
   seasonAwards: SeasonAward[]; // Season-by-season awards
   newsFeed: NewsArticle[]; // News articles (ordered by date DESC)
   matchPreviews?: MatchPreview[]; // Pre-match previews for upcoming fixtures (optional for migration)
+  cupCompetition?: CupCompetition; // Current cup competition (optional for backward compatibility)
+  cupHistory: CupCompetition[]; // Past cup competitions
 }
 
 export interface SaveMetadata {

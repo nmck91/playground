@@ -10,6 +10,7 @@ import {
   TeamGenerator,
   LeagueTableManager,
   SeasonManager,
+  CupManager,
   TransferMarket,
   BoardManager,
   PlayerStatsTracker,
@@ -100,6 +101,9 @@ export class SaveService {
     const newsGenerator = new NewsGenerator();
     const welcomeNews = newsGenerator.generateWelcomeNews(playerTeam.name, season.year);
 
+    // Generate cup competition
+    const cupCompetition = CupManager.generateCupCompetition(allTeams, season.year, 'FA Cup');
+
     const gameState: GameState = {
       id: `game-${Date.now()}`,
       createdAt: new Date(),
@@ -120,6 +124,8 @@ export class SaveService {
       achievements,
       seasonAwards: [],
       newsFeed: [welcomeNews],
+      cupCompetition,
+      cupHistory: [],
     };
 
     return gameState;

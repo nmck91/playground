@@ -272,4 +272,212 @@ describe('MatchSimulator', () => {
       expect(endTime - startTime).toBeLessThan(100);
     });
   });
+
+  describe('Knockout Match - simulateKnockoutMatch', () => {
+    it('should return a CupResult with winner when match is decisive', () => {
+      const match: Match = {
+        homeTeam: strongTeam,
+        awayTeam: weakTeam,
+      };
+
+      const result = simulator.simulateKnockoutMatch(match, 1, 1234);
+
+      expect(result).toBeDefined();
+      expect(result.winnerId).toBeDefined();
+      expect(result.winnerName).toBeDefined();
+      expect(result.loserId).toBeDefined();
+      expect(result.loserName).toBeDefined();
+      expect(result.wentToExtraTime).toBeDefined();
+      expect(result.wentToPenalties).toBeDefined();
+    });
+
+    it('should have a winner even if normal time is drawn', () => {
+      // Use seed to try to force a draw (though not guaranteed)
+      const match: Match = {
+        homeTeam: mediumTeam,
+        awayTeam: mediumTeam, // Same team should have equal strength
+      };
+
+      const result = simulator.simulateKnockoutMatch(match, 1, 5555);
+
+      // Must have a winner (no draws in knockout)
+      expect(result.winnerId).toBeDefined();
+      expect(result.winnerName).toBeDefined();
+      expect([mediumTeam.id]).toContain(result.winnerId);
+    });
+
+    it('should set wentToExtraTime false when match decided in normal time', () => {
+      const match: Match = {
+        homeTeam: strongTeam,
+        awayTeam: weakTeam,
+      };
+
+      const result = simulator.simulateKnockoutMatch(match, 1, 1111);
+
+      // Strong team should beat weak team in normal time
+      if (result.homeScore !== result.awayScore) {
+        expect(result.wentToExtraTime).toBe(false);
+        expect(result.wentToPenalties).toBe(false);
+      }
+    });
+
+    it('should correctly identify winner and loser', () => {
+      const match: Match = {
+        homeTeam: strongTeam,
+        awayTeam: weakTeam,
+      };
+
+      const result = simulator.simulateKnockoutMatch(match, 1, 2222);
+
+      // Winner and loser should be from the two teams
+      const teamIds = [strongTeam.id, weakTeam.id];
+      expect(teamIds).toContain(result.winnerId);
+      expect(teamIds).toContain(result.loserId);
+
+      // Winner and loser should be different
+      expect(result.winnerId).not.toBe(result.loserId);
+    });
+
+    it('should preserve all MatchResult fields', () => {
+      const match: Match = {
+        homeTeam: strongTeam,
+        awayTeam: weakTeam,
+      };
+
+      const result = simulator.simulateKnockoutMatch(match, 1, 3333);
+
+      // Should have standard match result fields
+      expect(result.homeScore).toBeGreaterThanOrEqual(0);
+      expect(result.awayScore).toBeGreaterThanOrEqual(0);
+      expect(result.homeTeam).toBe(strongTeam.name);
+      expect(result.awayTeam).toBe(weakTeam.name);
+      expect(result.result).toMatch(/home|away|draw/);
+    });
+  });
+
+  describe('Penalty Shootout Logic', () => {
+    it('should determine winner via penalties when extra time is drawn', () => {
+      // This is testing indirectly via simulateKnockoutMatch
+      // We can't directly test simulatePenalties as it's private
+      const match: Match = {
+        homeTeam: mediumTeam,
+        awayTeam: {
+          ...mediumTeam,
+          id: 'team-4',
+          name: 'Medium City 2',
+        },
+      };
+
+      // Run multiple times to increase chance of penalties
+      let foundPenalties = false;
+      for (let seed = 0; seed < 50; seed++) {
+        const result = simulator.simulateKnockoutMatch(match, 1, seed);
+        if (result.wentToPenalties) {
+          foundPenalties = true;
+          expect(result.penaltyScore).toBeDefined();
+          expect(result.penaltyScore!.home).toBeGreaterThanOrEqual(0);
+          expect(result.penaltyScore!.away).toBeGreaterThanOrEqual(0);
+          expect(result.penaltyScore!.home).not.toBe(result.penaltyScore!.away);
+          break;
+        }
+      }
+
+      // Note: With 50 attempts of equal teams, we should hit penalties at least once
+      // If this fails, the random generation might be too biased
+      expect(foundPenalties).toBe(true);
+    });
+
+    it('should have penalties scored between 0-5 typically', () => {
+      const match: Match = {
+        homeTeam: mediumTeam,
+        awayTeam: {
+          ...mediumTeam,
+          id: 'team-5',
+          name: 'Medium City 3',
+        },
+      };
+
+      // Find a penalties result
+      for (let seed = 0; seed < 100; seed++) {
+        const result = simulator.simulateKnockoutMatch(match, 1, seed);
+        if (result.wentToPenalties && result.penaltyScore) {
+          // Most penalty shootouts end within 5 rounds
+          // (though sudden death can go higher)
+          expect(result.penaltyScore.home).toBeGreaterThanOrEqual(0);
+          expect(result.penaltyScore.away).toBeGreaterThanOrEqual(0);
+          expect(result.penaltyScore.home).toBeLessThan(12); // Reasonable upper bound
+          expect(result.penaltyScore.away).toBeLessThan(12);
+          break;
+        }
+      }
+    });
+  });
+
+  describe('Extra Time Logic', () => {
+    it('should go to extra time when normal time is drawn', () => {
+      const match: Match = {
+        homeTeam: mediumTeam,
+        awayTeam: {
+          ...mediumTeam,
+          id: 'team-6',
+          name: 'Medium City 4',
+        },
+      };
+
+      // Try multiple seeds to find an extra time scenario
+      let foundExtraTime = false;
+      for (let seed = 0; seed < 50; seed++) {
+        const result = simulator.simulateKnockoutMatch(match, 1, seed);
+        if (result.wentToExtraTime) {
+          foundExtraTime = true;
+          break;
+        }
+      }
+
+      // With equal teams, extra time should occur in at least one of 50 attempts
+      expect(foundExtraTime).toBe(true);
+    });
+
+    it('should not go to extra time when normal time has a winner', () => {
+      const match: Match = {
+        homeTeam: strongTeam,
+        awayTeam: weakTeam,
+      };
+
+      // Strong vs weak should almost never draw
+      let noExtraTimeCount = 0;
+      for (let seed = 0; seed < 10; seed++) {
+        const result = simulator.simulateKnockoutMatch(match, 1, seed);
+        if (!result.wentToExtraTime) {
+          noExtraTimeCount++;
+        }
+      }
+
+      // Expect most (if not all) to be decided in normal time
+      expect(noExtraTimeCount).toBeGreaterThan(5);
+    });
+  });
+
+  describe('Knockout Match Determinism', () => {
+    it('should produce same result with same seed', () => {
+      const match: Match = {
+        homeTeam: strongTeam,
+        awayTeam: mediumTeam,
+      };
+
+      const result1 = simulator.simulateKnockoutMatch(match, 1, 7777);
+      const result2 = simulator.simulateKnockoutMatch(match, 1, 7777);
+
+      expect(result1.homeScore).toBe(result2.homeScore);
+      expect(result1.awayScore).toBe(result2.awayScore);
+      expect(result1.winnerId).toBe(result2.winnerId);
+      expect(result1.wentToExtraTime).toBe(result2.wentToExtraTime);
+      expect(result1.wentToPenalties).toBe(result2.wentToPenalties);
+
+      if (result1.penaltyScore && result2.penaltyScore) {
+        expect(result1.penaltyScore.home).toBe(result2.penaltyScore.home);
+        expect(result1.penaltyScore.away).toBe(result2.penaltyScore.away);
+      }
+    });
+  });
 });

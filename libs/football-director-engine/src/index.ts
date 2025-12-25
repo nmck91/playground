@@ -4,6 +4,7 @@ export * from './lib/match-commentary';
 export * from './lib/league-table-manager';
 export * from './lib/finance-engine';
 export * from './lib/season-manager';
+export * from './lib/cup-manager';
 export * from './lib/team-generator';
 export * from './lib/transfer-market';
 export * from './lib/player-development';
