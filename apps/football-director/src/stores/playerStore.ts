@@ -11,8 +11,9 @@ import type {
   Player,
   DevelopmentReport,
   Injury,
-  ContractTerms,
+  PlayerContract,
   PlayerStats,
+  FreeAgent,
 } from '@playground/football-director-engine';
 
 /**
@@ -22,7 +23,7 @@ interface PlayerStoreState {
   // Cached player data (derived from gameState)
   allPlayers: Player[];
   squadPlayers: Player[];
-  freeAgents: Player[];
+  freeAgents: FreeAgent[];
 
   // Development tracking
   developmentReports: DevelopmentReport[];
@@ -55,9 +56,9 @@ interface PlayerStoreActions {
   processInjuryRecovery: () => void;
 
   // Contract operations
-  updatePlayerContract: (playerId: string, contract: Partial<ContractTerms>) => void;
+  updatePlayerContract: (playerId: string, contract: Partial<PlayerContract>) => void;
   processContractExpiries: () => Player[];
-  offerContract: (playerId: string, terms: ContractTerms) => boolean;
+  offerContract: (playerId: string, terms: PlayerContract) => boolean;
 
   // Development operations
   developPlayers: (players: Player[]) => DevelopmentReport[];
@@ -130,7 +131,7 @@ export const usePlayerStore = create<PlayerStore>()(
 
         const allPlayers = [
           ...gameState.playerTeam.players,
-          ...gameState.teams.flatMap((team) => team.players),
+          ...gameState.aiTeams.flatMap((team) => team.players),
         ];
 
         const freeAgents = gameState.freeAgents || [];
@@ -140,7 +141,8 @@ export const usePlayerStore = create<PlayerStore>()(
             allPlayers,
             squadPlayers: gameState.playerTeam.players,
             freeAgents,
-            youthProspects: gameState.youthAcademy?.prospects || [],
+            // TODO: youthAcademy not yet implemented in GameState
+            youthProspects: [],
           },
           false,
           'playerStore/syncFromGameState'
@@ -262,7 +264,8 @@ export const usePlayerStore = create<PlayerStore>()(
         const player = get().getPlayerById(playerId);
         if (!player) return;
 
-        const newMorale = Math.max(0, Math.min(100, player.morale + change));
+        const currentMorale = player.morale ?? 70; // Default morale if not set
+        const newMorale = Math.max(0, Math.min(100, currentMorale + change));
         get().updatePlayer(playerId, { morale: newMorale });
 
         if (reason && Math.abs(change) >= 5) {
@@ -298,7 +301,7 @@ export const usePlayerStore = create<PlayerStore>()(
         const player = get().getPlayerById(playerId);
         if (!player) return;
 
-        get().updatePlayer(playerId, { injury: null });
+        get().updatePlayer(playerId, { injury: undefined });
 
         useUIStore.getState().addNotification({
           type: 'success',
@@ -317,7 +320,7 @@ export const usePlayerStore = create<PlayerStore>()(
 
           const weeksRemaining = p.injury.weeksRemaining - 1;
           if (weeksRemaining <= 0) {
-            return { ...p, injury: null };
+            return { ...p, injury: undefined };
           }
 
           return {
@@ -374,8 +377,16 @@ export const usePlayerStore = create<PlayerStore>()(
         // Remove players with expired contracts from squad
         const remainingPlayers = updatedPlayers.filter((p) => p.contract !== null);
 
+        // Convert expired players to FreeAgent format
+        const newFreeAgents: FreeAgent[] = expiredPlayers.map((player) => ({
+          player,
+          becameFreeWeek: gameState.season?.currentWeek || 1,
+          previousTeamId: gameState.playerTeam.id,
+          previousTeamName: gameState.playerTeam.name,
+        }));
+
         // Add expired players to free agents
-        const updatedFreeAgents = [...(gameState.freeAgents || []), ...expiredPlayers];
+        const updatedFreeAgents = [...(gameState.freeAgents || []), ...newFreeAgents];
 
         useGameStore.getState().updateGameState((state) => ({
           ...state,
@@ -443,19 +454,29 @@ export const usePlayerStore = create<PlayerStore>()(
         players.forEach((player) => {
           // Simple development logic - this can be enhanced
           const skillChange = Math.floor(Math.random() * 3) - 1; // -1, 0, or +1
-          const potential = player.potential || player.skill;
+          // TODO: Player.potential not yet implemented in engine, using max skill of 20
+          const maxSkill = 20; // Max skill from Player type (1-20 scale)
           const newSkill = Math.max(
             1,
-            Math.min(potential, player.skill + skillChange)
+            Math.min(maxSkill, player.skill + skillChange)
           );
 
           if (newSkill !== player.skill) {
+            // Determine phase based on age
+            let phase: 'developing' | 'peak' | 'declining' | 'veteran' = 'peak';
+            if (player.age < 23) phase = 'developing';
+            else if (player.age > 30) phase = 'declining';
+            else if (player.age > 33) phase = 'veteran';
+
             reports.push({
               playerId: player.id,
               playerName: player.name,
-              skillChange,
+              oldAge: player.age,
+              newAge: player.age, // Age doesn't change in this function
+              oldSkill: player.skill,
               newSkill,
-              reason: skillChange > 0 ? 'Good training' : 'Lack of game time',
+              skillChange,
+              phase,
             });
 
             get().updatePlayer(player.id, { skill: newSkill });
@@ -490,46 +511,14 @@ export const usePlayerStore = create<PlayerStore>()(
 
       // Add youth prospect
       addYouthProspect: (player) => {
-        const gameState = useGameStore.getState().gameState;
-        if (!gameState) return;
-
-        const prospects = [...(gameState.youthAcademy?.prospects || []), player];
-
-        useGameStore.getState().updateGameState((state) => ({
-          ...state,
-          youthAcademy: {
-            ...state.youthAcademy!,
-            prospects,
-          },
-        }));
-
-        set({ youthProspects: prospects }, false, 'playerStore/addYouthProspect');
+        // TODO: youthAcademy not yet implemented in GameState
+        console.warn('addYouthProspect: youthAcademy not yet implemented');
       },
 
       // Select youth players to promote to squad
       selectYouthPlayers: (playerIds) => {
-        const gameState = useGameStore.getState().gameState;
-        if (!gameState) return;
-
-        const prospects = gameState.youthAcademy?.prospects || [];
-        const selectedPlayers = prospects.filter((p) => playerIds.includes(p.id));
-        const remainingProspects = prospects.filter((p) => !playerIds.includes(p.id));
-
-        // Add to squad
-        selectedPlayers.forEach((player) => {
-          get().addPlayer(player);
-        });
-
-        // Remove from prospects
-        useGameStore.getState().updateGameState((state) => ({
-          ...state,
-          youthAcademy: {
-            ...state.youthAcademy!,
-            prospects: remainingProspects,
-          },
-        }));
-
-        set({ youthProspects: remainingProspects }, false, 'playerStore/selectYouthPlayers');
+        // TODO: youthAcademy not yet implemented in GameState
+        console.warn('selectYouthPlayers: youthAcademy not yet implemented');
       },
 
       // Get player by ID
@@ -544,7 +533,8 @@ export const usePlayerStore = create<PlayerStore>()(
         players.sort((a, b) => {
           if (category === 'goals') return b.stats.goals - a.stats.goals;
           if (category === 'assists') return b.stats.assists - a.stats.assists;
-          if (category === 'rating') return b.stats.averageRating - a.stats.averageRating;
+          // TODO: PlayerStats.averageRating not yet implemented in engine
+          // if (category === 'rating') return b.stats.averageRating - a.stats.averageRating;
           return 0;
         });
 
@@ -565,7 +555,7 @@ export const usePlayerStore = create<PlayerStore>()(
 
       // Get players with low morale
       playersWithLowMorale: (threshold = 40) => {
-        return get().squadPlayers.filter((p) => p.morale < threshold);
+        return get().squadPlayers.filter((p) => (p.morale ?? 70) < threshold);
       },
 
       // Set selected player
@@ -612,10 +602,6 @@ export const playerSelectors = {
 
 /**
  * Subscribe to GameStore changes to keep player data in sync
+ * Note: Subscription is now set up in stores/index.ts via setupStoreSubscriptions()
+ * to avoid circular dependency issues
  */
-useGameStore.subscribe(
-  (state) => state.gameState?.playerTeam.players,
-  () => {
-    usePlayerStore.getState().syncFromGameState();
-  }
-);

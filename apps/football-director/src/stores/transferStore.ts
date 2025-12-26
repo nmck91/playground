@@ -121,13 +121,13 @@ export const useTransferStore = create<TransferStore>()(
         const currentWeek = gameState.season?.currentWeek || 1;
 
         // Generate listings from AI team players
-        const aiListings = transferMarket.generateMarket(gameState.teams, currentWeek, 30);
+        const aiListings = transferMarket.generateMarket(gameState.aiTeams, currentWeek, 30);
 
         // Generate listings from free agents (no fee, just wages)
         const freeAgents = gameState.freeAgents || [];
-        const freeAgentListings: TransferListing[] = freeAgents.slice(0, 20).map((player) => ({
-          id: `listing-${player.id}`,
-          player,
+        const freeAgentListings: TransferListing[] = freeAgents.slice(0, 20).map((freeAgent) => ({
+          id: `listing-${freeAgent.player.id}`,
+          player: freeAgent.player,
           sellingTeamId: 'free-agent',
           sellingTeamName: 'Free Agent',
           askingPrice: 0,
@@ -187,15 +187,25 @@ export const useTransferStore = create<TransferStore>()(
         }
 
         // Calculate wage based on player skill
-        const wage = listing.player.contract?.wage || listing.player.skill * 0.05;
+        const weeklyWage = listing.player.contract?.weeklyWage || listing.player.skill * 0.05;
+
+        // Create 3-year contract
+        const currentYear = gameState.season?.year || 2024;
+        const currentWeek = gameState.season?.currentWeek || 1;
+        const contractWeeks = 52 * 3; // 3 years
 
         // Add player to squad
         const playerWithContract = {
           ...listing.player,
           contract: {
-            wage,
-            weeksRemaining: 52 * 3, // 3-year contract
-            bonuses: 0,
+            weeklyWage,
+            startYear: currentYear,
+            startWeek: currentWeek,
+            expiryYear: currentYear + 3,
+            expiryWeek: 52,
+            yearsRemaining: 3,
+            weeksRemaining: contractWeeks,
+            status: 'active' as const,
           },
         };
 
@@ -208,7 +218,7 @@ export const useTransferStore = create<TransferStore>()(
         // Remove from free agents if applicable (free agents have sellingTeamId === 'free-agent')
         if (listing.sellingTeamId === 'free-agent') {
           const updatedFreeAgents = gameState.freeAgents?.filter(
-            (p) => p.id !== listing.player.id
+            (freeAgent) => freeAgent.player.id !== listing.player.id
           ) || [];
 
           useGameStore.getState().updateGameState((state) => ({
@@ -244,7 +254,13 @@ export const useTransferStore = create<TransferStore>()(
         }
 
         // Add to free agents or remove from game
-        const updatedFreeAgents = [...(gameState.freeAgents || []), player];
+        const newFreeAgent = {
+          player,
+          becameFreeWeek: gameState.season?.currentWeek || 1,
+          previousTeamId: gameState.playerTeam.id,
+          previousTeamName: gameState.playerTeam.name,
+        };
+        const updatedFreeAgents = [...(gameState.freeAgents || []), newFreeAgent];
 
         useGameStore.getState().updateGameState((state) => ({
           ...state,
@@ -267,7 +283,7 @@ export const useTransferStore = create<TransferStore>()(
         // In a real implementation, this would be more sophisticated
         const transferMarket = new TransferMarket();
 
-        gameState.teams.forEach((team) => {
+        gameState.aiTeams.forEach((team) => {
           // Random chance AI team makes a transfer
           if (Math.random() < 0.2) {
             // 20% chance

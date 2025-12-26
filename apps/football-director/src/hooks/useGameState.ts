@@ -8,18 +8,13 @@
 import { useState } from 'react';
 import {
   GameState,
-  MatchResult,
-  DevelopmentReport,
   Achievement,
   Player,
-  BoardObjective,
-  SeasonAward,
-  SeasonTopPerformers,
 } from '@playground/football-director-engine';
 import { useGamePersistence } from './useGamePersistence';
 import { useDerivedGameState } from './useDerivedGameState';
 import { useGameActions } from './useGameActions';
-import { useWeeklySimulation } from './useWeeklySimulation';
+import { useSeasonActions } from './useSeasonActions';
 
 /**
  * Main game state hook - composes all sub-hooks into unified interface
@@ -45,18 +40,7 @@ export function useGameState() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // UI state (results/reports to display)
-  const [lastSimulationResults, setLastSimulationResults] = useState<MatchResult[]>([]);
-  const [developmentReports, setDevelopmentReports] = useState<DevelopmentReport[]>([]);
-  const [seasonTopPerformers, setSeasonTopPerformers] = useState<SeasonTopPerformers | null>(null);
-  const [seasonEvaluation, setSeasonEvaluation] = useState<{
-    objective: BoardObjective;
-    satisfied: boolean;
-    sacked: boolean;
-    message: string;
-    brokenRecords?: string[];
-    seasonAwards?: SeasonAward;
-  } | null>(null);
+  // Local UI state for achievements and youth prospects (not managed by useSeasonActions)
   const [pendingAchievements, setPendingAchievements] = useState<Achievement[]>([]);
   const [youthProspects, setYouthProspects] = useState<Player[]>([]);
 
@@ -73,23 +57,12 @@ export function useGameState() {
     setYouthProspects
   );
 
-  const simulation = useWeeklySimulation(
-    gameState,
-    setGameState,
-    setError,
-    setLastSimulationResults,
-    setDevelopmentReports,
-    setSeasonTopPerformers,
-    setSeasonEvaluation,
-    setPendingAchievements,
-    setYouthProspects
-  );
+  // Season actions with validation and simulation UI state
+  const seasonActions = useSeasonActions(gameState, setGameState, setError);
 
   // Clear modal states when continuing to next season
   const continueToNextSeasonWithCleanup = () => {
-    setSeasonEvaluation(null);
-    setDevelopmentReports([]);
-    setLastSimulationResults([]);
+    seasonActions.clearSeasonEvaluation();
     actions.continueToNextSeason();
   };
 
@@ -99,10 +72,11 @@ export function useGameState() {
     gameState,
     loading: persistence.loading,
     error,
-    lastSimulationResults,
-    developmentReports,
-    seasonTopPerformers: derived.seasonTopPerformers || seasonTopPerformers,
-    seasonEvaluation,
+    lastSimulationResults: seasonActions.lastSimulationResults,
+    developmentReports: seasonActions.developmentReports,
+    seasonTopPerformers:
+      derived.seasonTopPerformers || seasonActions.seasonTopPerformers,
+    seasonEvaluation: seasonActions.seasonEvaluation,
     pendingAchievements,
     youthProspects,
     hasSave: derived.hasSave,
@@ -114,8 +88,8 @@ export function useGameState() {
       loadSlot: persistence.loadSlot,
       deleteSave: persistence.deleteSave,
 
-      // Simulation
-      simulateNextWeek: simulation.simulateNextWeek,
+      // Simulation (with SeasonStore validation)
+      simulateNextWeek: seasonActions.simulateNextWeek,
 
       // Player actions
       buyPlayer: actions.buyPlayer,

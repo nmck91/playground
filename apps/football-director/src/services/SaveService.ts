@@ -656,3 +656,6 @@ export class SaveService {
     return activeSlot !== null && this.getSlot(activeSlot) !== null;
   }
 }
+
+// Re-export types from engine for convenience
+export type { SaveMetadata } from '@playground/football-director-engine';

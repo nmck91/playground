@@ -208,7 +208,7 @@ export const useSaveStore = create<SaveStore>()(
 
         try {
           // Save via SaveService
-          SaveService.saveToSlot(gameState, currentSlot);
+          SaveService.saveToSlot(currentSlot, gameState);
 
           // Update timestamps
           const now = new Date();
@@ -249,19 +249,19 @@ export const useSaveStore = create<SaveStore>()(
 
         try {
           // Create new game via SaveService
-          const { game, slot } = SaveService.createNewSave(saveName);
+          const { gameState, slotId } = SaveService.createNewSave(saveName);
 
           // Update GameStore
-          useGameStore.getState().setGameState(game);
-          useGameStore.getState().setGameId(game.id);
-          useGameStore.getState().setCurrentSaveSlot(slot);
+          useGameStore.getState().setGameState(gameState);
+          useGameStore.getState().setGameId(gameState.id);
+          useGameStore.getState().setCurrentSaveSlot(slotId);
           useGameStore.getState().setLastSaved(new Date());
 
           // Update SaveStore
           const now = new Date();
           set(
             {
-              currentSlot: slot,
+              currentSlot: slotId,
               lastSaved: now,
               isLoading: false,
               loadError: null,
@@ -302,7 +302,7 @@ export const useSaveStore = create<SaveStore>()(
         set({ isLoading: true }, false, 'saveStore/deleteSaveStart');
 
         try {
-          SaveService.deleteSave(slot);
+          SaveService.deleteSlot(slot);
 
           // If current save was deleted, reset game
           if (get().currentSlot === slot) {
@@ -398,14 +398,16 @@ export const useSaveStore = create<SaveStore>()(
 
       // Refresh available slots
       refreshAvailableSlots: () => {
-        const slots = SaveService.getAllSaves();
-        set({ availableSlots: slots }, false, 'saveStore/refreshAvailableSlots');
+        const slotsContainer = SaveService.getAllSaves();
+        // Convert SaveSlotContainer to SaveMetadata[]
+        const metadata: SaveMetadata[] = Object.values(slotsContainer).map((slot) => slot.metadata);
+        set({ availableSlots: metadata }, false, 'saveStore/refreshAvailableSlots');
       },
 
       // Get save metadata
       getSaveMetadata: (slot) => {
         const slots = get().availableSlots;
-        return slots.find((s) => s.slot === slot) ?? null;
+        return slots.find((s) => s.slotId === slot) ?? null;
       },
 
       // State setters

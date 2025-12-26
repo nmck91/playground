@@ -91,11 +91,11 @@ export const useStaffStore = create<StaffStore>()(
         if (!gameState) return false;
 
         // Check if can afford
-        const canAfford = useFinanceStore.getState().canAfford(staff.wage * 52); // Annual cost
+        const canAfford = useFinanceStore.getState().canAfford(staff.salary * 52); // Annual cost
         if (!canAfford) {
           useUIStore.getState().addNotification({
             type: 'error',
-            message: `Cannot afford £${staff.wage}m/week for ${staff.name}`,
+            message: `Cannot afford £${staff.salary}m/week for ${staff.name}`,
             duration: 3000,
           });
           return false;
@@ -114,7 +114,7 @@ export const useStaffStore = create<StaffStore>()(
         }));
 
         // Deduct hiring fee (e.g., first year wages)
-        useFinanceStore.getState().updateBudget(-staff.wage * 52, `Hired ${staff.name}`);
+        useFinanceStore.getState().updateBudget(-staff.salary * 52, `Hired ${staff.name}`);
 
         // Sync local state
         set({ currentStaff: updatedStaff }, false, 'staffStore/hireStaff');
@@ -151,7 +151,7 @@ export const useStaffStore = create<StaffStore>()(
 
         // Deduct severance pay (e.g., 6 months wages)
         useFinanceStore.getState().updateBudget(
-          -staff.wage * 26,
+          -staff.salary * 26,
           `Severance for ${staff.name}`
         );
 
@@ -173,7 +173,7 @@ export const useStaffStore = create<StaffStore>()(
 
       // Calculate total staff wages
       totalStaffWages: () => {
-        return get().currentStaff.reduce((sum, s) => sum + s.wage, 0);
+        return get().currentStaff.reduce((sum, s) => sum + s.salary, 0);
       },
 
       // Calculate staff bonus
@@ -184,11 +184,14 @@ export const useStaffStore = create<StaffStore>()(
         staff.forEach((s) => {
           if (type === 'development' && s.role === 'coach') {
             bonus += s.skill * 0.01; // 1% per skill point
-          } else if (type === 'morale' && s.role === 'psychologist') {
-            bonus += s.skill * 0.01;
-          } else if (type === 'recovery' && s.role === 'physio') {
-            bonus += s.skill * 0.01;
-          } else if (s.role === 'scout') {
+          }
+          // TODO: psychologist and physio roles not yet implemented in StaffRole type
+          // else if (type === 'morale' && s.role === 'psychologist') {
+          //   bonus += s.skill * 0.01;
+          // } else if (type === 'recovery' && s.role === 'physio') {
+          //   bonus += s.skill * 0.01;
+          // }
+          else if (s.role === 'scout') {
             // Scouts don't give bonuses directly
           }
         });
@@ -214,8 +217,9 @@ export const staffSelectors = {
   // By role
   coaches: (state: StaffStore) => state.getStaffByRole('coach'),
   scouts: (state: StaffStore) => state.getStaffByRole('scout'),
-  physios: (state: StaffStore) => state.getStaffByRole('physio'),
-  psychologists: (state: StaffStore) => state.getStaffByRole('psychologist'),
+  // TODO: physio and psychologist roles not yet implemented in StaffRole type
+  // physios: (state: StaffStore) => state.getStaffByRole('physio'),
+  // psychologists: (state: StaffStore) => state.getStaffByRole('psychologist'),
 
   // Wages
   totalWages: (state: StaffStore) => state.totalStaffWages(),
@@ -228,10 +232,6 @@ export const staffSelectors = {
 
 /**
  * Subscribe to GameStore changes to keep staff data in sync
+ * Note: Subscription is now set up in stores/index.ts via setupStoreSubscriptions()
+ * to avoid circular dependency issues
  */
-useGameStore.subscribe(
-  (state) => state.gameState?.playerTeam.staff,
-  () => {
-    useStaffStore.getState().syncFromGameState();
-  }
-);

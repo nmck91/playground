@@ -3,7 +3,19 @@
  * Central exports for all Zustand stores
  */
 
-// Core Stores
+// Import stores needed by helper functions
+import { useGameStore } from './gameStore';
+import { useUIStore } from './uiStore';
+import { useSaveStore } from './saveStore';
+import { useFinanceStore } from './financeStore';
+import { useTacticsStore } from './tacticsStore';
+import { useStaffStore } from './staffStore';
+import { usePlayerStore } from './playerStore';
+import { useMatchStore } from './matchStore';
+import { useTransferStore } from './transferStore';
+import { useSeasonStore } from './seasonStore';
+
+// Re-export all stores
 export { useGameStore, gameSelectors } from './gameStore';
 export type { GameStore } from './gameStore';
 
@@ -13,7 +25,6 @@ export type { UIStore, Notification, ModalType } from './uiStore';
 export { useSaveStore, saveSelectors, initializeSaveStore } from './saveStore';
 export type { SaveStore, SyncStatus } from './saveStore';
 
-// Domain Stores
 export { useFinanceStore, financeSelectors } from './financeStore';
 export type { FinanceStore } from './financeStore';
 
@@ -31,6 +42,9 @@ export type { MatchStore } from './matchStore';
 
 export { useTransferStore, transferSelectors } from './transferStore';
 export type { TransferStore } from './transferStore';
+
+export { useSeasonStore, seasonSelectors } from './seasonStore';
+export type { SeasonStore, WeekSummary, ValidationResult } from './seasonStore';
 
 /**
  * Reset all stores (useful for testing and logout)
@@ -56,4 +70,21 @@ export const syncAllStores = () => {
   usePlayerStore.getState().syncFromGameState();
   useMatchStore.getState().syncFromGameState();
   useTransferStore.getState().syncFromGameState();
+  useSeasonStore.getState().syncFromGameState();
+};
+
+/**
+ * Setup store subscriptions
+ * Call this once at app initialization
+ */
+export const setupStoreSubscriptions = () => {
+  // Setup auto-sync subscriptions
+  // Note: This is called after all stores are loaded to avoid circular dependencies
+  useGameStore.subscribe(() => {
+    useFinanceStore.getState().syncFromGameState();
+  });
+
+  useGameStore.subscribe(() => {
+    useSeasonStore.getState().syncFromGameState();
+  });
 };

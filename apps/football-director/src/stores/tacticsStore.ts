@@ -9,23 +9,29 @@ import { useGameStore } from './gameStore';
 import { useUIStore } from './uiStore';
 import type {
   Tactics,
-  Formation,
+  FormationType,
   Mentality,
-  PlayerRole,
+  PlayerRoles,
   TeamInstructions,
-  SetPieceTakers,
+  SetPieceAssignments,
+  DefenderRole,
+  MidfielderRole,
+  ForwardRole,
 } from '@playground/football-director-engine';
+
+// Type alias for individual player role
+type PlayerRole = DefenderRole | MidfielderRole | ForwardRole;
 
 /**
  * Tactics Store State Interface
  */
 interface TacticsStoreState {
   // Cached tactics (derived from gameState.playerTeam.tactics)
-  currentFormation: Formation | null;
+  currentFormationType: FormationType | null;
   currentMentality: Mentality | null;
-  playerRoles: Record<string, PlayerRole>;
+  playerRoles: PlayerRoles | null;
   teamInstructions: TeamInstructions | null;
-  setPieceTakers: SetPieceTakers | null;
+  setPieceTakers: SetPieceAssignments | null;
 }
 
 /**
@@ -33,11 +39,11 @@ interface TacticsStoreState {
  */
 interface TacticsStoreActions {
   // Tactics operations
-  setFormation: (formation: Formation) => void;
+  setFormationType: (formation: FormationType) => void;
   setMentality: (mentality: Mentality) => void;
   setPlayerRole: (playerId: string, role: PlayerRole) => void;
   setTeamInstructions: (instructions: Partial<TeamInstructions>) => void;
-  setSetPieceTakers: (takers: Partial<SetPieceTakers>) => void;
+  setSetPieceAssignments: (takers: Partial<SetPieceAssignments>) => void;
   setTeamTactics: (tactics: Tactics) => void;
 
   // Getters
@@ -57,9 +63,9 @@ export type TacticsStore = TacticsStoreState & TacticsStoreActions;
  * Initial state
  */
 const initialState: TacticsStoreState = {
-  currentFormation: null,
+  currentFormationType: null,
   currentMentality: null,
-  playerRoles: {},
+  playerRoles: null,
   teamInstructions: null,
   setPieceTakers: null,
 };
@@ -73,8 +79,8 @@ const initialState: TacticsStoreState = {
  * @example
  * ```typescript
  * // Change formation
- * const setFormation = useTacticsStore(state => state.setFormation);
- * setFormation('4-4-2');
+ * const setFormationType = useTacticsStore(state => state.setFormationType);
+ * setFormationType('4-4-2');
  *
  * // Set player role
  * const setPlayerRole = useTacticsStore(state => state.setPlayerRole);
@@ -98,11 +104,11 @@ export const useTacticsStore = create<TacticsStore>()(
         const tactics = gameState.playerTeam.tactics;
         set(
           {
-            currentFormation: tactics.formation || null,
+            currentFormationType: tactics.formation || null,
             currentMentality: tactics.mentality || null,
-            playerRoles: tactics.playerRoles || {},
-            teamInstructions: tactics.teamInstructions || null,
-            setPieceTakers: tactics.setPieceTakers || null,
+            playerRoles: tactics.roles || {},
+            teamInstructions: tactics.instructions || null,
+            setPieceTakers: tactics.setPieces || null,
           },
           false,
           'tacticsStore/syncFromGameState'
@@ -110,7 +116,7 @@ export const useTacticsStore = create<TacticsStore>()(
       },
 
       // Set formation
-      setFormation: (formation) => {
+      setFormationType: (formation) => {
         const gameState = useGameStore.getState().gameState;
         if (!gameState) return;
 
@@ -120,19 +126,22 @@ export const useTacticsStore = create<TacticsStore>()(
           playerTeam: {
             ...state.playerTeam,
             tactics: {
-              ...state.playerTeam.tactics,
               formation,
+              mentality: state.playerTeam.tactics?.mentality || 'balanced',
+              roles: state.playerTeam.tactics?.roles,
+              instructions: state.playerTeam.tactics?.instructions,
+              setPieces: state.playerTeam.tactics?.setPieces,
             },
           },
         }));
 
         // Sync local state
-        set({ currentFormation: formation }, false, 'tacticsStore/setFormation');
+        set({ currentFormationType: formation }, false, 'tacticsStore/setFormationType');
 
         // Notify user
         useUIStore.getState().addNotification({
           type: 'success',
-          message: `Formation changed to ${formation}`,
+          message: `FormationType changed to ${formation}`,
           duration: 2000,
         });
       },
@@ -148,8 +157,11 @@ export const useTacticsStore = create<TacticsStore>()(
           playerTeam: {
             ...state.playerTeam,
             tactics: {
-              ...state.playerTeam.tactics,
+              formation: state.playerTeam.tactics?.formation || '4-4-2',
               mentality,
+              roles: state.playerTeam.tactics?.roles,
+              instructions: state.playerTeam.tactics?.instructions,
+              setPieces: state.playerTeam.tactics?.setPieces,
             },
           },
         }));
@@ -171,7 +183,7 @@ export const useTacticsStore = create<TacticsStore>()(
         if (!gameState) return;
 
         const updatedRoles = {
-          ...(gameState.playerTeam.tactics.playerRoles || {}),
+          ...(gameState.playerTeam.tactics?.roles || {}),
           [playerId]: role,
         };
 
@@ -181,8 +193,11 @@ export const useTacticsStore = create<TacticsStore>()(
           playerTeam: {
             ...state.playerTeam,
             tactics: {
-              ...state.playerTeam.tactics,
-              playerRoles: updatedRoles,
+              formation: state.playerTeam.tactics?.formation || '4-4-2',
+              mentality: state.playerTeam.tactics?.mentality || 'balanced',
+              roles: updatedRoles,
+              instructions: state.playerTeam.tactics?.instructions,
+              setPieces: state.playerTeam.tactics?.setPieces,
             },
           },
         }));
@@ -197,7 +212,7 @@ export const useTacticsStore = create<TacticsStore>()(
         if (!gameState) return;
 
         const updatedInstructions = {
-          ...(gameState.playerTeam.tactics.teamInstructions || {}),
+          ...(gameState.playerTeam.tactics?.instructions || {}),
           ...instructions,
         };
 
@@ -207,8 +222,11 @@ export const useTacticsStore = create<TacticsStore>()(
           playerTeam: {
             ...state.playerTeam,
             tactics: {
-              ...state.playerTeam.tactics,
-              teamInstructions: updatedInstructions as TeamInstructions,
+              formation: state.playerTeam.tactics?.formation || '4-4-2',
+              mentality: state.playerTeam.tactics?.mentality || 'balanced',
+              roles: state.playerTeam.tactics?.roles,
+              instructions: updatedInstructions as TeamInstructions,
+              setPieces: state.playerTeam.tactics?.setPieces,
             },
           },
         }));
@@ -229,12 +247,12 @@ export const useTacticsStore = create<TacticsStore>()(
       },
 
       // Set set piece takers
-      setSetPieceTakers: (takers) => {
+      setSetPieceAssignments: (takers) => {
         const gameState = useGameStore.getState().gameState;
         if (!gameState) return;
 
         const updatedTakers = {
-          ...(gameState.playerTeam.tactics.setPieceTakers || {}),
+          ...(gameState.playerTeam.tactics?.setPieces || {}),
           ...takers,
         };
 
@@ -244,17 +262,20 @@ export const useTacticsStore = create<TacticsStore>()(
           playerTeam: {
             ...state.playerTeam,
             tactics: {
-              ...state.playerTeam.tactics,
-              setPieceTakers: updatedTakers as SetPieceTakers,
+              formation: state.playerTeam.tactics?.formation || '4-4-2',
+              mentality: state.playerTeam.tactics?.mentality || 'balanced',
+              roles: state.playerTeam.tactics?.roles,
+              instructions: state.playerTeam.tactics?.instructions,
+              setPieces: updatedTakers as SetPieceAssignments,
             },
           },
         }));
 
         // Sync local state
         set(
-          { setPieceTakers: updatedTakers as SetPieceTakers },
+          { setPieceTakers: updatedTakers as SetPieceAssignments },
           false,
-          'tacticsStore/setSetPieceTakers'
+          'tacticsStore/setSetPieceAssignments'
         );
 
         // Notify user
@@ -282,11 +303,11 @@ export const useTacticsStore = create<TacticsStore>()(
         // Sync local state
         set(
           {
-            currentFormation: tactics.formation || null,
+            currentFormationType: tactics.formation || null,
             currentMentality: tactics.mentality || null,
-            playerRoles: tactics.playerRoles || {},
-            teamInstructions: tactics.teamInstructions || null,
-            setPieceTakers: tactics.setPieceTakers || null,
+            playerRoles: tactics.roles || {},
+            teamInstructions: tactics.instructions || null,
+            setPieceTakers: tactics.setPieces || null,
           },
           false,
           'tacticsStore/setTeamTactics'
@@ -310,7 +331,8 @@ export const useTacticsStore = create<TacticsStore>()(
 
       // Get player role
       getPlayerRole: (playerId) => {
-        return get().playerRoles[playerId] || null;
+        // TODO: PlayerRoles type mismatch - store uses playerId mapping but engine uses position-based structure
+        return (get().playerRoles as any)?.[playerId] || null;
       },
     }),
     {
@@ -324,8 +346,8 @@ export const useTacticsStore = create<TacticsStore>()(
  * Tactics Store Selectors
  */
 export const tacticsSelectors = {
-  // Formation
-  currentFormation: (state: TacticsStore) => state.currentFormation,
+  // FormationType
+  currentFormationType: (state: TacticsStore) => state.currentFormationType,
   currentMentality: (state: TacticsStore) => state.currentMentality,
 
   // Player roles
@@ -343,10 +365,6 @@ export const tacticsSelectors = {
 
 /**
  * Subscribe to GameStore changes to keep tactics data in sync
+ * Note: Subscription is now set up in stores/index.ts via setupStoreSubscriptions()
+ * to avoid circular dependency issues
  */
-useGameStore.subscribe(
-  (state) => state.gameState?.playerTeam.tactics,
-  () => {
-    useTacticsStore.getState().syncFromGameState();
-  }
-);

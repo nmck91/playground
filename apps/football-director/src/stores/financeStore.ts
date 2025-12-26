@@ -7,7 +7,10 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { useGameStore } from './gameStore';
 import { useUIStore } from './uiStore';
-import type { Transaction } from '@playground/football-director-engine';
+import type { FinancialRecord } from '@playground/football-director-engine';
+
+// Type alias for backward compatibility
+type Transaction = FinancialRecord;
 
 /**
  * Finance Store State Interface
@@ -103,15 +106,16 @@ export const useFinanceStore = create<FinanceStore>()(
         // Calculate weekly wage bill
         const players = gameState.playerTeam.players || [];
         const staff = gameState.playerTeam.staff || [];
-        const playerWages = players.reduce((sum, p) => sum + (p.contract?.wage || 0), 0);
-        const staffWages = staff.reduce((sum, s) => sum + s.wage, 0);
+        const playerWages = players.reduce((sum, p) => sum + (p.contract?.weeklyWage || 0), 0);
+        const staffWages = staff.reduce((sum, s) => sum + (s.salary || 0), 0);
         const weeklyWageBill = playerWages + staffWages;
 
         set(
           {
             currentBudget: gameState.playerTeam.budget,
             weeklyWageBill,
-            transactions: gameState.playerTeam.transactions || [],
+            // TODO: Transactions not yet implemented in Team type
+            transactions: [],
           },
           false,
           'financeStore/syncFromGameState'
@@ -140,6 +144,7 @@ export const useFinanceStore = create<FinanceStore>()(
           amount: Math.abs(amount),
           description: reason,
           category: 'other',
+          weekNumber: gameState.season?.currentWeek || 1,
         });
 
         // Sync local state
@@ -172,19 +177,9 @@ export const useFinanceStore = create<FinanceStore>()(
           date: new Date(),
         };
 
-        const updatedTransactions = [
-          ...(gameState.playerTeam.transactions || []),
-          newTransaction,
-        ];
-
-        // Update GameStore
-        useGameStore.getState().updateGameState((state) => ({
-          ...state,
-          playerTeam: {
-            ...state.playerTeam,
-            transactions: updatedTransactions,
-          },
-        }));
+        // TODO: Transactions not yet implemented in Team type
+        // For now, just store locally in the store
+        const updatedTransactions = [...get().transactions, newTransaction];
 
         // Sync local state
         set({ transactions: updatedTransactions }, false, 'financeStore/addTransaction');
@@ -273,10 +268,5 @@ export const financeSelectors = {
 
 /**
  * Subscribe to GameStore changes to keep finance data in sync
+ * Note: Subscription is now set up in stores/index.ts via setupStoreSubscriptions()
  */
-useGameStore.subscribe(
-  (state) => state.gameState?.playerTeam.budget,
-  () => {
-    useFinanceStore.getState().syncFromGameState();
-  }
-);
