@@ -154,10 +154,10 @@ export const gameSelectors = {
   hasGame: (state: GameStore) => state.gameState !== null,
 
   // Get current week
-  currentWeek: (state: GameStore) => state.gameState?.season.currentWeek ?? 0,
+  currentWeek: (state: GameStore) => state.gameState?.season?.currentWeek ?? 0,
 
-  // Get current season
-  currentSeason: (state: GameStore) => state.gameState?.season.currentSeason ?? 0,
+  // Get current season (year)
+  currentSeason: (state: GameStore) => state.gameState?.season?.year ?? 0,
 
   // Get player team
   playerTeam: (state: GameStore) => state.gameState?.playerTeam,
