@@ -88,7 +88,7 @@ const mockOpponentTeam: Team = {
 const mockGameState: Partial<GameState> = {
   id: 'game-123',
   playerTeam: mockPlayerTeam,
-  teams: [mockOpponentTeam],
+  aiTeams: [mockOpponentTeam],
   season: {
     currentWeek: 1,
     currentYear: 2024,
@@ -96,6 +96,7 @@ const mockGameState: Partial<GameState> = {
     leagueTable: [],
     fixtures: [],
   },
+  freeAgents: [],
 } as GameState;
 
 const mockFixture: Fixture = {

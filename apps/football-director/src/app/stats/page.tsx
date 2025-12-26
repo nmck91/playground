@@ -1,6 +1,6 @@
 'use client';
 
-import { useGameState } from '../../hooks/useGameState';
+import { useGameStore, useSaveStore } from '../../stores';
 import { Player } from '@playground/football-director-engine';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -9,7 +9,9 @@ import { ThemeToggle } from '../../components/ui/ThemeToggle';
 type TabType = 'scorers' | 'assisters' | 'teams';
 
 export default function StatsPage() {
-  const { gameState, loading, error } = useGameState();
+  const gameState = useGameStore((state) => state.gameState);
+  const loading = useSaveStore((state) => state.isLoading);
+  const error = useSaveStore((state) => state.loadError);
   const [activeTab, setActiveTab] = useState<TabType>('scorers');
 
   if (loading) {

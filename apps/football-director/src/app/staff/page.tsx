@@ -1,12 +1,16 @@
 'use client';
 
-import { useGameState } from '../../hooks/useGameState';
+import { useGameStore, useSaveStore, useStaffStore } from '../../stores';
 import { StaffManager } from '@playground/football-director-engine';
 import Link from 'next/link';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
 
 export default function StaffPage() {
-  const { gameState, loading, error, actions } = useGameState();
+  const gameState = useGameStore((state) => state.gameState);
+  const loading = useSaveStore((state) => state.isLoading);
+  const error = useSaveStore((state) => state.loadError);
+  const hireStaff = useStaffStore((state) => state.hireStaff);
+  const fireStaff = useStaffStore((state) => state.fireStaff);
 
   if (loading) {
     return (
@@ -170,7 +174,7 @@ export default function StaffPage() {
                   </div>
 
                   <button
-                    onClick={() => actions.fireStaff(staff)}
+                    onClick={() => fireStaff(staff.id)}
                     disabled={!canFire}
                     className="w-full bg-red-500 dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition-normal disabled:opacity-50 disabled:cursor-not-allowed"
                   >
@@ -257,7 +261,7 @@ export default function StaffPage() {
                     )}
 
                     <button
-                      onClick={() => actions.hireStaff(staff)}
+                      onClick={() => hireStaff(staff)}
                       disabled={!canAfford || hasManager}
                       className="w-full bg-teal-500 dark:bg-teal-600 hover:bg-teal-600 dark:hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-lg transition-normal disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -322,7 +326,7 @@ export default function StaffPage() {
                     </div>
 
                     <button
-                      onClick={() => actions.hireStaff(staff)}
+                      onClick={() => hireStaff(staff)}
                       disabled={!canAfford || hasMaxCoaches}
                       className="w-full bg-teal-500 dark:bg-teal-600 hover:bg-teal-600 dark:hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-lg transition-normal disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -387,7 +391,7 @@ export default function StaffPage() {
                     </div>
 
                     <button
-                      onClick={() => actions.hireStaff(staff)}
+                      onClick={() => hireStaff(staff)}
                       disabled={!canAfford || hasScout}
                       className="w-full bg-teal-500 dark:bg-teal-600 hover:bg-teal-600 dark:hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-lg transition-normal disabled:opacity-50 disabled:cursor-not-allowed"
                     >

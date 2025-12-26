@@ -6,7 +6,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useGameState } from '../../hooks/useGameState';
+import { useGameStore, useSaveStore, useTransferStore, useTacticsStore, usePlayerStore } from '../../stores';
 import Link from 'next/link';
 import { Player, TransferMarket } from '@playground/football-director-engine';
 import { PlayerStatsModal } from '../../components/game/PlayerStatsModal';
@@ -19,7 +19,12 @@ type SortBy = 'position' | 'skill' | 'age' | 'wages' | 'name';
 type FilterPosition = 'ALL' | 'GK' | 'DEF' | 'MID' | 'FWD';
 
 export default function SquadPage() {
-  const { gameState, loading, error, actions } = useGameState();
+  const gameState = useGameStore((state) => state.gameState);
+  const loading = useSaveStore((state) => state.isLoading);
+  const error = useSaveStore((state) => state.loadError);
+  const sellPlayer = useTransferStore((state) => state.sellPlayer);
+  const setTeamTactics = useTacticsStore((state) => state.setTeamTactics);
+  const offerContract = usePlayerStore((state) => state.offerContract);
   const [sortBy, setSortBy] = useState<SortBy>('position');
   const [filterPosition, setFilterPosition] = useState<FilterPosition>('ALL');
   const [showSellModal, setShowSellModal] = useState(false);
@@ -139,7 +144,7 @@ export default function SquadPage() {
   const handleSellConfirm = () => {
     if (selectedPlayer) {
       const estimatedValue = transferMarket.calculatePlayerValue(selectedPlayer);
-      actions.sellPlayer(selectedPlayer, estimatedValue);
+      sellPlayer(selectedPlayer.id, estimatedValue);
       setShowSellModal(false);
       setSelectedPlayer(null);
     }
@@ -482,8 +487,15 @@ export default function SquadPage() {
           setSelectedPlayer(null);
         }}
         onOffer={(weeklyWage, years) => {
-          if (selectedPlayer) {
-            actions.offerContract(selectedPlayer, weeklyWage, years);
+          if (selectedPlayer && gameState) {
+            const contract = {
+              weeklyWage,
+              startYear: gameState.season.currentSeason,
+              startWeek: gameState.season.currentWeek,
+              expiryYear: gameState.season.currentSeason + years,
+              expiryWeek: 52,
+            };
+            offerContract(selectedPlayer.id, contract);
           }
         }}
         currentBudget={gameState.finances.budget}
@@ -496,7 +508,7 @@ export default function SquadPage() {
         currentTactics={gameState.playerTeam.tactics}
         players={gameState.playerTeam.players}
         onSave={(tactics) => {
-          actions.setTeamTactics(tactics);
+          setTeamTactics(tactics);
           setShowTactics(false);
         }}
         onClose={() => setShowTactics(false)}

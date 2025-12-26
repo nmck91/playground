@@ -14,6 +14,7 @@ import { usePlayerStore } from './playerStore';
 import { useMatchStore } from './matchStore';
 import { useTransferStore } from './transferStore';
 import { useSeasonStore } from './seasonStore';
+import { useGameOrchestratorStore } from './gameOrchestratorStore';
 
 // Re-export all stores
 export { useGameStore, gameSelectors } from './gameStore';
@@ -46,6 +47,9 @@ export type { TransferStore } from './transferStore';
 export { useSeasonStore, seasonSelectors } from './seasonStore';
 export type { SeasonStore, WeekSummary, ValidationResult } from './seasonStore';
 
+export { useGameOrchestratorStore, orchestratorSelectors } from './gameOrchestratorStore';
+export type { GameOrchestratorStore, SeasonEvaluation } from './gameOrchestratorStore';
+
 /**
  * Reset all stores (useful for testing and logout)
  */
@@ -53,10 +57,12 @@ export const resetAllStores = () => {
   const { resetGame } = useGameStore.getState();
   const { resetUI } = useUIStore.getState();
   const { resetSaveStore } = useSaveStore.getState();
+  const { resetOrchestrator } = useGameOrchestratorStore.getState();
 
   resetGame();
   resetUI();
   resetSaveStore();
+  resetOrchestrator();
 };
 
 /**

@@ -8,7 +8,7 @@ import { useTransferStore, transferSelectors } from './transferStore';
 import { useGameStore } from './gameStore';
 import { usePlayerStore } from './playerStore';
 import { useFinanceStore } from './financeStore';
-import type { TransferListing, Player, GameState, Team } from '@playground/football-director-engine';
+import type { TransferListing, Player, GameState, Team, FreeAgent } from '@playground/football-director-engine';
 
 // Mock player
 const mockPlayer: Player = {
@@ -36,7 +36,7 @@ const mockPlayer: Player = {
   injury: null,
 } as Player;
 
-const mockFreeAgent: Player = {
+const mockFreeAgentPlayer: Player = {
   id: 'free-agent-1',
   name: 'Free Agent',
   age: 28,
@@ -56,6 +56,13 @@ const mockFreeAgent: Player = {
   },
   injury: null,
 } as Player;
+
+const mockFreeAgent: FreeAgent = {
+  player: mockFreeAgentPlayer,
+  becameFreeWeek: 1,
+  previousTeamId: 'team-2',
+  previousTeamName: 'Previous FC',
+};
 
 const mockExpensivePlayer: Player = {
   id: 'expensive-player-1',
@@ -104,7 +111,7 @@ const mockOpponentTeam: Team = {
 const mockGameState: Partial<GameState> = {
   id: 'game-123',
   playerTeam: mockPlayerTeam,
-  teams: [mockOpponentTeam],
+  aiTeams: [mockOpponentTeam],
   freeAgents: [mockFreeAgent],
   season: {
     currentWeek: 1,
@@ -117,7 +124,7 @@ const mockGameState: Partial<GameState> = {
 
 const mockFreeAgentListing: TransferListing = {
   id: 'listing-free-agent-1',
-  player: mockFreeAgent,
+  player: mockFreeAgentPlayer,
   sellingTeamId: 'free-agent',
   sellingTeamName: 'Free Agent',
   askingPrice: 0,
@@ -359,7 +366,7 @@ describe('TransferStore', () => {
       const purchasedPlayer = playerResult.current.getPlayerById('free-agent-1');
       expect(purchasedPlayer?.contract?.weeksRemaining).toBe(52 * 3); // 3 years
       // Wage is calculated as player.skill * 0.05 (65 * 0.05 = 3.25)
-      expect(purchasedPlayer?.contract?.wage).toBe(mockFreeAgent.skill * 0.05);
+      expect(purchasedPlayer?.contract?.weeklyWage).toBe(mockFreeAgentPlayer.skill * 0.05);
     });
 
     it('should return false when no game state', () => {

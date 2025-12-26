@@ -1,12 +1,14 @@
 'use client';
 
-import { useGameState } from '../../../hooks/useGameState';
+import { useGameStore, useSaveStore } from '../../../stores';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useState } from 'react';
 
 export default function MatchDetailsPage() {
-  const { gameState, loading, error } = useGameState();
+  const gameState = useGameStore((state) => state.gameState);
+  const loading = useSaveStore((state) => state.isLoading);
+  const error = useSaveStore((state) => state.loadError);
   const params = useParams();
   const fixtureId = params.id as string;
   const [ratingsSortBy, setRatingsSortBy] = useState<'rating' | 'name'>('rating');

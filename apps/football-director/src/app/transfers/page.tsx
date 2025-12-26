@@ -1,12 +1,16 @@
 'use client';
 
-import { useGameState } from '../../hooks/useGameState';
+import { useGameStore, useSaveStore, useTransferStore } from '../../stores';
 import Link from 'next/link';
 import { TransferMarket } from '@playground/football-director-engine';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
 
 export default function TransfersPage() {
-  const { gameState, loading, error, actions } = useGameState();
+  const gameState = useGameStore((state) => state.gameState);
+  const loading = useSaveStore((state) => state.isLoading);
+  const error = useSaveStore((state) => state.loadError);
+  const buyPlayer = useTransferStore((state) => state.buyPlayer);
+  const sellPlayer = useTransferStore((state) => state.sellPlayer);
 
   if (loading) {
     return (
@@ -123,7 +127,7 @@ export default function TransfersPage() {
                     </div>
 
                     <button
-                      onClick={() => actions.buyPlayer(listing)}
+                      onClick={() => buyPlayer(listing)}
                       disabled={!canAfford || squadFull}
                       className="w-full bg-teal-500 hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-700 text-white font-medium py-2 px-4 rounded-lg transition-normal disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -210,7 +214,7 @@ export default function TransfersPage() {
                     </div>
 
                     <button
-                      onClick={() => actions.sellPlayer(player, estimatedValue)}
+                      onClick={() => sellPlayer(player.id, estimatedValue)}
                       disabled={!canSell}
                       className="w-full bg-orange-500 hover:bg-orange-600 dark:bg-orange-600 dark:hover:bg-orange-700 text-white font-medium py-2 px-4 rounded-lg transition-normal disabled:opacity-50 disabled:cursor-not-allowed"
                     >

@@ -44,7 +44,7 @@ const mockGameState: Partial<GameState> = {
     staff: [],
     tactics: {} as any,
   },
-  teams: [],
+  aiTeams: [],
   freeAgents: [],
 } as GameState;
 

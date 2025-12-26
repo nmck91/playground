@@ -3,7 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import { Player } from '@playground/football-director-engine';
-import { useGameState } from '../hooks/useGameState';
+import {
+  useGameStore,
+  useSaveStore,
+  useGameOrchestratorStore,
+  useUIStore,
+} from '../stores';
 import { MatchHighlights } from '../components/game/MatchHighlights';
 import { DevelopmentReport } from '../components/game/DevelopmentReport';
 import { SeasonEvaluation } from '../components/game/SeasonEvaluation';
@@ -21,15 +26,35 @@ import { CollapsibleSection } from '../components/ui/CollapsibleSection';
 import Link from 'next/link';
 
 export default function Dashboard() {
-  const { gameState, loading, error, lastSimulationResults, developmentReports, seasonTopPerformers, seasonEvaluation, pendingAchievements, youthProspects, actions } = useGameState();
+  // Zustand store selectors
+  const gameState = useGameStore((state) => state.gameState);
+  const loading = useSaveStore((state) => state.isLoading);
+  const error = useSaveStore((state) => state.loadError);
+
+  const lastSimulationResults = useGameOrchestratorStore((state) => state.lastSimulationResults);
+  const developmentReports = useGameOrchestratorStore((state) => state.developmentReports);
+  const seasonTopPerformers = useGameOrchestratorStore((state) => state.seasonTopPerformers);
+  const seasonEvaluation = useGameOrchestratorStore((state) => state.seasonEvaluation);
+  const pendingAchievements = useGameOrchestratorStore((state) => state.pendingAchievements);
+  const youthProspects = useGameOrchestratorStore((state) => state.youthProspects);
+
+  // Store actions
+  const loadGame = useSaveStore((state) => state.loadGame);
+  const newGame = useSaveStore((state) => state.newGame);
+  const deleteSave = useSaveStore((state) => state.deleteSave);
+  const currentSlot = useSaveStore((state) => state.currentSlot);
+
+  const simulateNextWeek = useGameOrchestratorStore((state) => state.simulateNextWeek);
+  const continueToNextSeason = useGameOrchestratorStore((state) => state.continueToNextSeason);
+  const dismissAchievement = useGameOrchestratorStore((state) => state.dismissAchievement);
+  const selectYouthPlayers = useGameOrchestratorStore((state) => state.selectYouthPlayers);
+
+  // Theme
   const { theme, systemTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [showHighlights, setShowHighlights] = useState(false);
 
-  // Prevent hydration mismatch
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // Local UI state
+  const [showHighlights, setShowHighlights] = useState(false);
   const [showDevelopment, setShowDevelopment] = useState(false);
   const [showEvaluation, setShowEvaluation] = useState(false);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
@@ -39,6 +64,11 @@ export default function Dashboard() {
   const [showNewsFeed, setShowNewsFeed] = useState(false);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Show highlights after simulation
   useEffect(() => {
@@ -73,6 +103,24 @@ export default function Dashboard() {
     }
   }, [seasonEvaluation]);
 
+  // Mark all news as read
+  const markAllNewsRead = () => {
+    if (!gameState) return;
+    useGameStore.getState().updateGameState((state) => ({
+      ...state,
+      newsFeed: state.newsFeed.map((news) => ({ ...news, read: true })),
+    }));
+  };
+
+  // Handle delete save
+  const handleDeleteSave = () => {
+    if (currentSlot !== null) {
+      deleteSave(currentSlot);
+      setShowDeleteConfirm(false);
+      window.location.reload();
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-cream-50 flex items-center justify-center">
@@ -92,8 +140,8 @@ export default function Dashboard() {
   if (!gameState) {
     return (
       <SaveSlotManager
-        onLoadSlot={actions.loadSlot}
-        onCreateNew={actions.newGame}
+        onLoadSlot={(slot) => loadGame(slot)}
+        onCreateNew={newGame}
       />
     );
   }
@@ -201,7 +249,7 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 py-6 pb-safe">
-        
+
 
         {/* Key Stats (3 cards) */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
@@ -377,7 +425,7 @@ export default function Dashboard() {
 
         {/* Simulate Button (Full-Width, Bold) */}
         <button
-          onClick={actions.simulateNextWeek}
+          onClick={simulateNextWeek}
           disabled={isSeasonComplete}
           className="w-full h-14 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 dark:from-green-600 dark:to-emerald-700 text-white text-xl font-bold rounded-xl shadow-lg active:scale-98 transition-all disabled:opacity-50 disabled:cursor-not-allowed mb-6"
         >
@@ -526,12 +574,11 @@ export default function Dashboard() {
         <SeasonEvaluation
           evaluation={seasonEvaluation}
           onContinue={() => {
-            actions.continueToNextSeason();
+            continueToNextSeason();
             setShowEvaluation(false);
           }}
           onGameOver={() => {
-            actions.deleteSave();
-            window.location.reload();
+            handleDeleteSave();
           }}
         />
       )}
@@ -573,22 +620,22 @@ export default function Dashboard() {
           news={gameState.newsFeed}
           isOpen={showNewsFeed}
           onClose={() => setShowNewsFeed(false)}
-          onMarkAllRead={actions.markAllNewsRead}
+          onMarkAllRead={markAllNewsRead}
         />
       )}
 
       {/* Achievement Toast */}
       <AchievementToast
         achievements={pendingAchievements}
-        onDismiss={actions.dismissAchievement}
+        onDismiss={dismissAchievement}
       />
 
       {/* Youth Academy Modal */}
       <YouthAcademyModal
         prospects={youthProspects}
         isOpen={youthProspects.length > 0}
-        onClose={() => actions.selectYouthPlayers([])}
-        onConfirm={actions.selectYouthPlayers}
+        onClose={() => selectYouthPlayers([])}
+        onConfirm={selectYouthPlayers}
       />
 
       {/* Delete Confirmation Modal */}
@@ -609,11 +656,7 @@ export default function Dashboard() {
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  actions.deleteSave();
-                  setShowDeleteConfirm(false);
-                  window.location.reload();
-                }}
+                onClick={handleDeleteSave}
                 className="flex-1 px-4 py-3 bg-red-500 dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700 text-white font-semibold rounded-lg transition-all active:scale-98"
               >
                 Delete

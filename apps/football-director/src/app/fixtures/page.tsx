@@ -1,6 +1,6 @@
 'use client';
 
-import { useGameState } from '../../hooks/useGameState';
+import { useGameStore, useSaveStore } from '../../stores';
 import { Fixture, MatchPreview } from '@playground/football-director-engine';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -8,7 +8,9 @@ import { MatchPreviewModal } from '../../components/game/MatchPreviewModal';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
 
 export default function FixturesPage() {
-  const { gameState, loading, error } = useGameState();
+  const gameState = useGameStore((state) => state.gameState);
+  const loading = useSaveStore((state) => state.isLoading);
+  const error = useSaveStore((state) => state.loadError);
   const [filterType, setFilterType] = useState<'all' | 'competitive' | 'friendly'>('all');
   const [selectedPreview, setSelectedPreview] = useState<MatchPreview | null>(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);

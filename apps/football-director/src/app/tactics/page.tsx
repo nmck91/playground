@@ -1,13 +1,16 @@
 'use client';
 
-import { useGameState } from '../../hooks/useGameState';
+import { useGameStore, useSaveStore } from '../../stores';
 import Link from 'next/link';
 import { ClubPhilosophy, StaffManager } from '@playground/football-director-engine';
 import { useState, useEffect } from 'react';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
 
 export default function BoardroomPage() {
-  const { gameState, loading, error, actions } = useGameState();
+  const gameState = useGameStore((state) => state.gameState);
+  const loading = useSaveStore((state) => state.isLoading);
+  const error = useSaveStore((state) => state.loadError);
+  const updateGameState = useGameStore((state) => state.updateGameState);
   const [selectedPhilosophy, setSelectedPhilosophy] = useState<ClubPhilosophy>(
     gameState?.playerTeam.philosophy || 'balanced'
   );
@@ -51,7 +54,13 @@ export default function BoardroomPage() {
     : 50;
 
   const handleSave = () => {
-    actions.setClubPhilosophy(selectedPhilosophy);
+    updateGameState((state) => ({
+      ...state,
+      playerTeam: {
+        ...state.playerTeam,
+        philosophy: selectedPhilosophy,
+      },
+    }));
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   };

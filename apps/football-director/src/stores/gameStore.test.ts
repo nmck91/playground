@@ -11,9 +11,9 @@ import type { GameState } from '@playground/football-director-engine';
 const mockGameState: Partial<GameState> = {
   id: 'game-123',
   season: {
-    currentSeason: 1,
+    year: 1,
     currentWeek: 10,
-    currentPhase: 'regular',
+    phase: 'competitive',
     totalWeeks: 52,
   },
   playerTeam: {

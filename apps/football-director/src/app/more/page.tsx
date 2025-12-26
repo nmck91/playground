@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
-import { useGameState } from '../../hooks/useGameState';
+import { useGameStore, useSaveStore } from '../../stores';
 
 interface MenuItem {
   label: string;
@@ -14,7 +14,10 @@ interface MenuItem {
 }
 
 export default function MorePage() {
-  const { gameState, actions } = useGameState();
+  const gameState = useGameStore((state) => state.gameState);
+  const currentSaveSlot = useGameStore((state) => state.currentSaveSlot);
+  const deleteSave = useSaveStore((state) => state.deleteSave);
+  const resetGame = useGameStore((state) => state.resetGame);
   const router = useRouter();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const unreadNews = gameState?.newsFeed?.filter(n => !n.read).length || 0;
@@ -107,8 +110,11 @@ export default function MorePage() {
                 Cancel
               </button>
               <button
-                onClick={() => {
-                  actions.deleteSave();
+                onClick={async () => {
+                  if (currentSaveSlot !== null) {
+                    await deleteSave(currentSaveSlot);
+                    resetGame();
+                  }
                   setShowDeleteConfirm(false);
                   router.push('/');
                 }}

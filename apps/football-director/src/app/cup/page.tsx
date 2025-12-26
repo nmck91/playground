@@ -1,10 +1,12 @@
 'use client';
 
-import { useGameState } from '../../hooks/useGameState';
+import { useGameStore, useSaveStore } from '../../stores';
 import { CupFixture, CupRound } from '@playground/football-director-engine';
 
 export default function CupPage() {
-  const { gameState, loading, error } = useGameState();
+  const gameState = useGameStore((state) => state.gameState);
+  const loading = useSaveStore((state) => state.isLoading);
+  const error = useSaveStore((state) => state.loadError);
 
   if (loading) {
     return (
