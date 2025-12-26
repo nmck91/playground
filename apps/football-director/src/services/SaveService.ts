@@ -1,6 +1,11 @@
 /**
  * Football Director - Save Service
- * Handles game state persistence to localStorage with multi-slot support
+ * Handles game state persistence with hybrid storage (localStorage + IndexedDB)
+ *
+ * Storage Strategy:
+ * - Active slot: localStorage (compressed) for fast access
+ * - Inactive slots: IndexedDB (50MB+ capacity)
+ * - Compression: LZ-String (50-70% size reduction)
  */
 
 import {
@@ -22,14 +27,19 @@ import {
   Player,
   PlayerContract,
 } from '@playground/football-director-engine';
+import { HybridStorageService } from './storage';
+import { formatBytes } from './storage/compression';
 
 const OLD_SAVE_KEY = 'football-director-save'; // Legacy single-save key
-const SAVES_KEY = 'football-director-saves'; // Multi-slot container
+const SAVES_KEY = 'football-director-saves'; // Legacy multi-slot container (uncompressed)
 const ACTIVE_SLOT_KEY = 'football-director-active-slot'; // Active slot ID
 
 export interface SaveSlotContainer {
   [slotId: number]: SaveSlot;
 }
+
+// Initialize hybrid storage service
+const storage = new HybridStorageService();
 
 export class SaveService {
   /**
@@ -177,94 +187,131 @@ export class SaveService {
   }
 
   /**
-   * Get all save slots (returns empty object if none exist)
+   * Get all save metadata (returns empty array if none exist)
    */
-  static getAllSaves(): SaveSlotContainer {
+  static async getAllSaves(): Promise<SaveMetadata[]> {
     try {
       // Check for migration first
-      this.migrateOldSave();
+      await this.migrateLegacySaves();
 
-      const serialized = localStorage.getItem(SAVES_KEY);
-      if (!serialized || serialized.trim() === '') {
-        return {};
-      }
-
-      const parsed = JSON.parse(serialized);
-
-      // Convert date strings back to Date objects
-      Object.keys(parsed).forEach((slotId) => {
-        const slot = parsed[slotId];
-        slot.metadata.createdAt = new Date(slot.metadata.createdAt);
-        slot.metadata.lastSaved = new Date(slot.metadata.lastSaved);
-        slot.gameState.createdAt = new Date(slot.gameState.createdAt);
-        slot.gameState.lastSaved = new Date(slot.gameState.lastSaved);
-        slot.gameState.finances.transactions = slot.gameState.finances.transactions.map(
-          (t: { date: string | Date; [key: string]: unknown }) => ({
-            ...t,
-            date: new Date(t.date),
-          })
-        );
-
-        // Apply contract migration
-        slot.gameState = this.migratePlayerContracts(slot.gameState);
-      });
-
-      return parsed;
+      return await storage.listAll();
     } catch (error) {
       console.error('Failed to load saves:', error);
-      return {};
+      return [];
     }
   }
 
   /**
    * Get a specific save slot
    */
-  static getSlot(slotId: number): SaveSlot | null {
-    const saves = this.getAllSaves();
-    return saves[slotId] || null;
+  static async getSlot(slotId: number): Promise<SaveSlot | null> {
+    await this.migrateLegacySaves();
+    return await storage.load(slotId);
   }
 
   /**
    * Optimize game state for storage by limiting historical data
+   * Enhanced for Phase 1: More aggressive data trimming
    */
   private static optimizeForStorage(gameState: GameState): GameState {
     const MAX_MATCH_HISTORY = 76; // Keep last 2 seasons worth of matches
     const MAX_NEWS_FEED = 100; // Keep last 100 news items
 
-    // Optimize AI teams by removing unnecessary data
+    // ENHANCED: More aggressive AI team optimization
     const optimizeAITeams = (teams: Team[]): Team[] => {
       return teams.map(team => ({
-        ...team,
+        id: team.id,
+        name: team.name,
+        budget: team.budget,
+        tactics: team.tactics,
+        philosophy: team.philosophy,
         players: team.players.map(player => ({
-          ...player,
-          // Remove player history for AI teams (keep stats but not history)
-          history: [],
+          id: player.id,
+          name: player.name,
+          position: player.position,
+          skill: player.skill,
+          age: player.age,
+          wages: player.wages,
+          contract: player.contract,
+          injury: player.injury,
+          suspendedUntil: player.suspendedUntil,
+          // Keep only essential current season stats for AI players
+          stats: {
+            appearances: player.stats.appearances,
+            goals: player.stats.goals,
+            assists: player.stats.assists,
+            cleanSheets: player.stats.cleanSheets,
+            yellowCards: player.stats.yellowCards,
+            redCards: player.stats.redCards,
+            // Remove career stats for AI players (can be recalculated if needed)
+            careerAppearances: 0,
+            careerGoals: 0,
+            careerAssists: 0,
+            careerCleanSheets: 0,
+          },
+          history: [], // Always empty for AI teams
+          morale: undefined, // Remove morale for AI players
+        })),
+        staff: team.staff.map(s => ({
+          id: s.id,
+          name: s.name,
+          role: s.role,
+          skill: s.skill,
+          salary: s.salary,
+          // Remove specialty, style, happiness for AI staff to save space
+          specialty: undefined,
+          style: s.role === 'manager' ? s.style : undefined, // Keep manager style only
+          happiness: undefined,
         })),
       }));
     };
 
+    // Optimize match history: remove detailed events for older matches
+    const optimizeMatchHistory = (matches: GameState['matchHistory']): GameState['matchHistory'] => {
+      const KEEP_DETAILED = 38; // Keep last season with full details
+      return matches.slice(-MAX_MATCH_HISTORY).map((match, index) => {
+        const isRecent = index >= matches.length - KEEP_DETAILED;
+        if (isRecent) {
+          // Keep full details for recent matches
+          return match;
+        }
+        // For older matches, remove detailed events and player ratings
+        return {
+          ...match,
+          events: [], // Remove detailed events
+          playerRatings: [], // Remove player ratings
+          postMatchAnalysis: undefined, // Remove analysis
+        };
+      });
+    };
+
     return {
       ...gameState,
-      // Limit match history to prevent bloat
-      matchHistory: gameState.matchHistory.slice(-MAX_MATCH_HISTORY),
+      // Limit and optimize match history
+      matchHistory: optimizeMatchHistory(gameState.matchHistory),
       // Limit news feed to prevent bloat
       newsFeed: gameState.newsFeed.slice(-MAX_NEWS_FEED),
-      // Optimize AI teams
+      // ENHANCED: Aggressive AI team optimization
       aiTeams: optimizeAITeams(gameState.aiTeams),
       // Limit transactions history
       finances: {
         ...gameState.finances,
         transactions: gameState.finances.transactions.slice(-50), // Keep last 50 transactions
       },
+      // Remove old match previews (regenerate when needed)
+      matchPreviews: [],
     };
   }
 
   /**
-   * Save game to specific slot
+   * Save game to specific slot (uses hybrid storage with compression)
    */
-  static saveToSlot(slotId: number, gameState: GameState, saveName?: string): void {
+  static async saveToSlot(slotId: number, gameState: GameState, saveName?: string): Promise<void> {
     try {
-      const saves = this.getAllSaves();
+      // Check for legacy saves and migrate if needed
+      await this.migrateLegacySaves();
+
+      const existingSlot = await storage.load(slotId);
       const now = new Date();
 
       // Get current player position
@@ -277,13 +324,13 @@ export class SaveService {
 
       const metadata: SaveMetadata = {
         slotId,
-        saveName: saveName || saves[slotId]?.metadata.saveName || `Save ${slotId}`,
+        saveName: saveName || existingSlot?.metadata.saveName || `Save ${slotId}`,
         teamName: gameState.playerTeam.name,
         season: gameState.season.year,
         week: gameState.season.currentWeek,
         position,
         lastSaved: now,
-        createdAt: saves[slotId]?.metadata.createdAt || now,
+        createdAt: existingSlot?.metadata.createdAt || now,
       };
 
       // Optimize game state before saving to reduce storage size
@@ -297,51 +344,30 @@ export class SaveService {
         gameState: optimizedState,
       };
 
-      saves[slotId] = slot;
+      // Save using hybrid storage (automatically handles compression and routing)
+      await storage.save(slotId, slot);
 
-      // Try to save, catch quota errors
-      try {
-        localStorage.setItem(SAVES_KEY, JSON.stringify(saves));
-      } catch (storageError) {
-        if (storageError instanceof DOMException && storageError.name === 'QuotaExceededError') {
-          // If quota exceeded, try with more aggressive optimization
-          console.warn('Storage quota exceeded, applying aggressive optimization...');
-
-          // More aggressive: Keep only last season of matches and minimal data
-          const aggressiveState = {
-            ...optimizedState,
-            matchHistory: optimizedState.matchHistory.slice(-38), // Last season only
-            newsFeed: optimizedState.newsFeed.slice(-30), // Last 30 news items
-            finances: {
-              ...optimizedState.finances,
-              transactions: optimizedState.finances.transactions.slice(-20), // Last 20 transactions
-            },
-            // Remove season records except current season
-            seasonRecords: optimizedState.seasonRecords.slice(-1),
-          };
-
-          const aggressiveSlot: SaveSlot = {
-            metadata,
-            gameState: aggressiveState,
-          };
-
-          saves[slotId] = aggressiveSlot;
-          localStorage.setItem(SAVES_KEY, JSON.stringify(saves));
-        } else {
-          throw storageError;
-        }
+      // Log storage info (development only)
+      if (process.env.NODE_ENV === 'development') {
+        const storageInfo = await storage.getStorageInfo();
+        console.log(
+          `Saved to slot ${slotId}. Storage: ${formatBytes(storageInfo.used)} / ${formatBytes(storageInfo.quota)} (${storageInfo.percentage.toFixed(1)}%)`
+        );
       }
     } catch (error) {
       console.error('Failed to save to slot:', error);
-      throw new Error(`Failed to save to slot ${slotId}`);
+      throw new Error(`Failed to save to slot ${slotId}: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
   /**
-   * Load game from specific slot
+   * Load game from specific slot (uses hybrid storage with decompression)
    */
-  static loadFromSlot(slotId: number): GameState | null {
-    const slot = this.getSlot(slotId);
+  static async loadFromSlot(slotId: number): Promise<GameState | null> {
+    // Check for legacy saves and migrate if needed
+    await this.migrateLegacySaves();
+
+    const slot = await storage.load(slotId);
     if (!slot) {
       return null;
     }
@@ -451,16 +477,9 @@ export class SaveService {
   /**
    * Delete a specific save slot
    */
-  static deleteSlot(slotId: number): void {
+  static async deleteSlot(slotId: number): Promise<void> {
     try {
-      const saves = this.getAllSaves();
-      delete saves[slotId];
-      localStorage.setItem(SAVES_KEY, JSON.stringify(saves));
-
-      // If this was the active slot, clear it
-      if (this.getActiveSlot() === slotId) {
-        localStorage.removeItem(ACTIVE_SLOT_KEY);
-      }
+      await storage.delete(slotId);
     } catch (error) {
       console.error('Failed to delete slot:', error);
     }
@@ -469,12 +488,12 @@ export class SaveService {
   /**
    * Rename a save slot
    */
-  static renameSlot(slotId: number, newName: string): void {
+  static async renameSlot(slotId: number, newName: string): Promise<void> {
     try {
-      const saves = this.getAllSaves();
-      if (saves[slotId]) {
-        saves[slotId].metadata.saveName = newName;
-        localStorage.setItem(SAVES_KEY, JSON.stringify(saves));
+      const slot = await storage.load(slotId);
+      if (slot) {
+        slot.metadata.saveName = newName;
+        await storage.save(slotId, slot);
       }
     } catch (error) {
       console.error('Failed to rename slot:', error);
@@ -485,57 +504,54 @@ export class SaveService {
    * Get active slot ID
    */
   static getActiveSlot(): number | null {
-    try {
-      const slotId = localStorage.getItem(ACTIVE_SLOT_KEY);
-      return slotId ? parseInt(slotId, 10) : null;
-    } catch {
-      return null;
-    }
+    return storage.getActiveSlot();
   }
 
   /**
    * Set active slot ID
    */
-  static setActiveSlot(slotId: number): void {
+  static async setActiveSlot(slotId: number): Promise<void> {
     try {
-      localStorage.setItem(ACTIVE_SLOT_KEY, slotId.toString());
+      await storage.switchActiveSlot(slotId);
     } catch (error) {
       console.error('Failed to set active slot:', error);
     }
   }
 
   /**
-   * Create a new save in the first available slot (1-5)
+   * Create a new save in the first available slot (1-3)
    */
-  static createNewSave(saveName?: string): { slotId: number; gameState: GameState } {
-    const saves = this.getAllSaves();
+  static async createNewSave(saveName?: string): Promise<{ slotId: number; gameState: GameState }> {
+    const saves = await this.getAllSaves();
 
-    // Find first available slot (1-5)
+    // Find first available slot (1-3)
     let slotId = 1;
-    for (let i = 1; i <= 5; i++) {
-      if (!saves[i]) {
+    const usedSlots = new Set(saves.map(s => s.slotId));
+
+    for (let i = 1; i <= 3; i++) {
+      if (!usedSlots.has(i)) {
         slotId = i;
         break;
       }
     }
 
     // If all slots are full, throw error
-    if (saves[slotId]) {
+    if (usedSlots.has(slotId) && usedSlots.size >= 3) {
       throw new Error('All save slots are full. Please delete a save first.');
     }
 
     const gameState = this.createNewGame();
-    this.saveToSlot(slotId, gameState, saveName);
-    this.setActiveSlot(slotId);
+    await this.saveToSlot(slotId, gameState, saveName);
+    await this.setActiveSlot(slotId);
 
     return { slotId, gameState };
   }
 
   /**
-   * Export save to JSON string
+   * Export save to JSON string (compressed)
    */
-  static exportSave(slotId: number): string | null {
-    const slot = this.getSlot(slotId);
+  static async exportSave(slotId: number): Promise<string | null> {
+    const slot = await this.getSlot(slotId);
     if (!slot) {
       return null;
     }
@@ -545,7 +561,7 @@ export class SaveService {
   /**
    * Import save from JSON string
    */
-  static importSave(jsonString: string, targetSlotId?: number): number {
+  static async importSave(jsonString: string, targetSlotId?: number): Promise<number> {
     try {
       const slot: SaveSlot = JSON.parse(jsonString);
 
@@ -554,28 +570,29 @@ export class SaveService {
         throw new Error('Invalid save file format');
       }
 
-      const saves = this.getAllSaves();
+      const saves = await this.getAllSaves();
+      const usedSlots = new Set(saves.map(s => s.slotId));
 
       // Find target slot
       let slotId = targetSlotId;
       if (!slotId) {
         // Find first available slot
-        for (let i = 1; i <= 5; i++) {
-          if (!saves[i]) {
+        for (let i = 1; i <= 3; i++) {
+          if (!usedSlots.has(i)) {
             slotId = i;
             break;
           }
         }
       }
 
-      if (!slotId || saves[slotId]) {
+      if (!slotId || usedSlots.has(slotId)) {
         throw new Error('Target slot is occupied or no slots available');
       }
 
       // Update slot ID in metadata
       slot.metadata.slotId = slotId;
 
-      this.saveToSlot(slotId, slot.gameState, slot.metadata.saveName);
+      await this.saveToSlot(slotId, slot.gameState, slot.metadata.saveName);
       return slotId;
     } catch (error) {
       console.error('Failed to import save:', error);
@@ -584,56 +601,139 @@ export class SaveService {
   }
 
   /**
-   * Migrate old single-save to slot-1
+   * Migrate legacy saves to new hybrid storage system
+   * Handles both:
+   * 1. Old single-save format (football-director-save)
+   * 2. Old multi-slot uncompressed format (football-director-saves)
    */
-  static migrateOldSave(): void {
+  private static migrationInProgress = false;
+  private static migrationComplete = false;
+
+  static async migrateLegacySaves(): Promise<void> {
+    // Prevent concurrent migrations
+    if (this.migrationInProgress || this.migrationComplete) {
+      return;
+    }
+
+    this.migrationInProgress = true;
+
     try {
+      const legacySaves: { [slotId: number]: SaveSlot } = {};
+
+      // Check for old single-save format
       const oldSave = localStorage.getItem(OLD_SAVE_KEY);
-      const newSaves = localStorage.getItem(SAVES_KEY);
+      if (oldSave && oldSave.trim() !== '') {
+        try {
+          const gameState = JSON.parse(oldSave);
 
-      // Only migrate if old save exists and new saves don't
-      if (oldSave && oldSave.trim() !== '' && !newSaves) {
-        const gameState = JSON.parse(oldSave);
+          // Convert dates
+          gameState.createdAt = new Date(gameState.createdAt);
+          gameState.lastSaved = new Date(gameState.lastSaved);
+          if (gameState.finances?.transactions) {
+            gameState.finances.transactions = gameState.finances.transactions.map(
+              (t: { date: string | Date; [key: string]: unknown }) => ({
+                ...t,
+                date: new Date(t.date),
+              })
+            );
+          }
 
-        // Convert dates
-        gameState.createdAt = new Date(gameState.createdAt);
-        gameState.lastSaved = new Date(gameState.lastSaved);
-        gameState.finances.transactions = gameState.finances.transactions.map(
-          (t: { date: string | Date; [key: string]: unknown }) => ({
-            ...t,
-            date: new Date(t.date),
-          })
-        );
+          // Create slot for old save
+          const metadata: SaveMetadata = {
+            slotId: 1,
+            saveName: 'Migrated Save',
+            teamName: gameState.playerTeam?.name || 'Unknown Team',
+            season: gameState.season?.year || 2024,
+            week: gameState.season?.currentWeek || 1,
+            position: 1,
+            lastSaved: gameState.lastSaved,
+            createdAt: gameState.createdAt,
+          };
 
-        // Save to slot 1
-        this.saveToSlot(1, gameState, 'Migrated Save');
-        this.setActiveSlot(1);
+          legacySaves[1] = {
+            metadata,
+            gameState: this.migratePlayerContracts(gameState),
+          };
 
-        // Remove old save
-        localStorage.removeItem(OLD_SAVE_KEY);
+          console.log('Found legacy single-save, will migrate to slot 1');
+        } catch (error) {
+          console.error('Failed to parse old single save:', error);
+        }
       }
+
+      // Check for old multi-slot uncompressed format
+      const oldMultiSave = localStorage.getItem(SAVES_KEY);
+      if (oldMultiSave && oldMultiSave.trim() !== '') {
+        try {
+          const parsed = JSON.parse(oldMultiSave);
+
+          Object.keys(parsed).forEach((slotId) => {
+            const slot = parsed[slotId];
+            if (slot && slot.gameState) {
+              // Convert dates
+              slot.metadata.createdAt = new Date(slot.metadata.createdAt);
+              slot.metadata.lastSaved = new Date(slot.metadata.lastSaved);
+              slot.gameState.createdAt = new Date(slot.gameState.createdAt);
+              slot.gameState.lastSaved = new Date(slot.gameState.lastSaved);
+              if (slot.gameState.finances?.transactions) {
+                slot.gameState.finances.transactions = slot.gameState.finances.transactions.map(
+                  (t: { date: string | Date; [key: string]: unknown }) => ({
+                    ...t,
+                    date: new Date(t.date),
+                  })
+                );
+              }
+
+              // Apply contract migration
+              slot.gameState = this.migratePlayerContracts(slot.gameState);
+
+              legacySaves[parseInt(slotId)] = slot;
+            }
+          });
+
+          console.log(`Found ${Object.keys(parsed).length} legacy multi-slot saves, will migrate`);
+        } catch (error) {
+          console.error('Failed to parse old multi-slot saves:', error);
+        }
+      }
+
+      // Migrate to hybrid storage if we found any legacy saves
+      if (Object.keys(legacySaves).length > 0) {
+        console.log('Migrating legacy saves to hybrid storage...');
+        await storage.migrateFromLegacyStorage(legacySaves);
+
+        // Clean up old storage keys
+        localStorage.removeItem(OLD_SAVE_KEY);
+        localStorage.removeItem(SAVES_KEY);
+
+        console.log('Legacy save migration complete!');
+      }
+
+      this.migrationComplete = true;
     } catch (error) {
-      console.error('Failed to migrate old save:', error);
+      console.error('Failed to migrate legacy saves:', error);
+    } finally {
+      this.migrationInProgress = false;
     }
   }
 
   /**
    * Legacy method - save to active slot (backward compatible)
    */
-  static saveGame(state: GameState): void {
+  static async saveGame(state: GameState): Promise<void> {
     const activeSlot = this.getActiveSlot();
     if (activeSlot) {
-      this.saveToSlot(activeSlot, state);
+      await this.saveToSlot(activeSlot, state);
     }
   }
 
   /**
    * Legacy method - load from active slot (backward compatible)
    */
-  static loadGame(): GameState | null {
+  static async loadGame(): Promise<GameState | null> {
     const activeSlot = this.getActiveSlot();
     if (activeSlot) {
-      return this.loadFromSlot(activeSlot);
+      return await this.loadFromSlot(activeSlot);
     }
     return null;
   }
@@ -641,19 +741,28 @@ export class SaveService {
   /**
    * Legacy method - delete active slot (backward compatible)
    */
-  static deleteSave(): void {
+  static async deleteSave(): Promise<void> {
     const activeSlot = this.getActiveSlot();
     if (activeSlot) {
-      this.deleteSlot(activeSlot);
+      await this.deleteSlot(activeSlot);
     }
   }
 
   /**
    * Legacy method - check if active slot exists
    */
-  static hasSave(): boolean {
+  static async hasSave(): Promise<boolean> {
     const activeSlot = this.getActiveSlot();
-    return activeSlot !== null && this.getSlot(activeSlot) !== null;
+    if (activeSlot === null) return false;
+    const slot = await this.getSlot(activeSlot);
+    return slot !== null;
+  }
+
+  /**
+   * Get storage usage information
+   */
+  static async getStorageInfo() {
+    return await storage.getStorageInfo();
   }
 }
 

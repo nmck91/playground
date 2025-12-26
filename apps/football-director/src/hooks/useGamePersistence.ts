@@ -1,11 +1,11 @@
 /**
  * Football Director - useGamePersistence Hook
- * Handles game save/load operations
+ * Handles game save/load operations with debounced auto-save
  */
 
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { GameState } from '@playground/football-director-engine';
 import { SaveService } from '../services/SaveService';
 
@@ -22,13 +22,13 @@ import { SaveService } from '../services/SaveService';
  * const persistence = useGamePersistence(gameState, setGameState, setError);
  *
  * // Create new game
- * persistence.newGame('My Save');
+ * await persistence.newGame('My Save');
  *
  * // Load from specific slot
- * persistence.loadSlot(1);
+ * await persistence.loadSlot(1);
  *
  * // Delete current save
- * persistence.deleteSave();
+ * await persistence.deleteSave();
  * ```
  */
 export function useGamePersistence(
@@ -37,30 +37,51 @@ export function useGamePersistence(
   setError: (error: string | null) => void
 ) {
   const [loading, setLoading] = useState(true);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load game on mount
   useEffect(() => {
-    try {
-      const savedGame = SaveService.loadGame();
-      if (savedGame) {
-        setGameState(savedGame);
+    (async () => {
+      try {
+        const savedGame = await SaveService.loadGame();
+        if (savedGame) {
+          setGameState(savedGame);
+        }
+      } catch (err) {
+        setError('Failed to load saved game');
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      setError('Failed to load saved game');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    })();
   }, [setGameState, setError]);
 
-  // Auto-save when game state changes
+  // ENHANCED: Debounced auto-save when game state changes
+  // Saves 2 seconds after last change instead of on every change
   useEffect(() => {
     if (gameState && !loading) {
-      try {
-        SaveService.saveGame(gameState);
-      } catch (err) {
-        console.error('Failed to auto-save:', err);
+      // Clear existing timeout
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
       }
+
+      // Set new timeout to save after 2 seconds of inactivity
+      saveTimeoutRef.current = setTimeout(async () => {
+        try {
+          await SaveService.saveGame(gameState);
+        } catch (err) {
+          console.error('Failed to auto-save:', err);
+          // Don't show error to user for auto-save failures
+          // Manual saves will show errors
+        }
+      }, 2000); // 2 second debounce
+
+      // Cleanup timeout on unmount
+      return () => {
+        if (saveTimeoutRef.current) {
+          clearTimeout(saveTimeoutRef.current);
+        }
+      };
     }
   }, [gameState, loading]);
 
@@ -68,9 +89,9 @@ export function useGamePersistence(
    * Create a new game
    */
   const newGame = useCallback(
-    (saveName?: string) => {
+    async (saveName?: string) => {
       try {
-        const { gameState: newGameState } = SaveService.createNewSave(saveName);
+        const { gameState: newGameState } = await SaveService.createNewSave(saveName);
         setGameState(newGameState);
         setError(null);
       } catch (err) {
@@ -85,11 +106,11 @@ export function useGamePersistence(
    * Load game from specific slot
    */
   const loadSlot = useCallback(
-    (slotId: number) => {
+    async (slotId: number) => {
       try {
-        const loadedState = SaveService.loadFromSlot(slotId);
+        const loadedState = await SaveService.loadFromSlot(slotId);
         if (loadedState) {
-          SaveService.setActiveSlot(slotId);
+          await SaveService.setActiveSlot(slotId);
           setGameState(loadedState);
           setError(null);
         } else {
@@ -106,8 +127,8 @@ export function useGamePersistence(
   /**
    * Delete current save and reset
    */
-  const deleteSave = useCallback(() => {
-    SaveService.deleteSave();
+  const deleteSave = useCallback(async () => {
+    await SaveService.deleteSave();
     setGameState(null);
     setError(null);
   }, [setGameState, setError]);

@@ -1,6 +1,6 @@
 /**
  * Save Slot Manager Component
- * Main save management screen with grid of 5 slots
+ * Main save management screen with grid of 3 slots
  */
 
 'use client';
@@ -28,40 +28,37 @@ export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProp
     loadSlots();
   }, []);
 
-  const loadSlots = () => {
-    const allSaves = SaveService.getAllSaves();
+  const loadSlots = async () => {
+    const allSaves = await SaveService.getAllSaves();
     const metadata: { [slotId: number]: SaveMetadata } = {};
 
-    Object.keys(allSaves).forEach((slotId) => {
-      const slot = allSaves[parseInt(slotId, 10)];
-      if (slot) {
-        metadata[parseInt(slotId, 10)] = slot.metadata;
-      }
+    allSaves.forEach((saveMeta) => {
+      metadata[saveMeta.slotId] = saveMeta;
     });
 
     setSlots(metadata);
     setActiveSlot(SaveService.getActiveSlot());
   };
 
-  const handleLoad = (slotId: number) => {
-    SaveService.setActiveSlot(slotId);
+  const handleLoad = async (slotId: number) => {
+    await SaveService.setActiveSlot(slotId);
     onLoadSlot(slotId);
   };
 
-  const handleDelete = (slotId: number) => {
+  const handleDelete = async (slotId: number) => {
     if (confirm(`Are you sure you want to delete this save?`)) {
-      SaveService.deleteSlot(slotId);
-      loadSlots();
+      await SaveService.deleteSlot(slotId);
+      await loadSlots();
     }
   };
 
-  const handleRename = (slotId: number, newName: string) => {
-    SaveService.renameSlot(slotId, newName);
-    loadSlots();
+  const handleRename = async (slotId: number, newName: string) => {
+    await SaveService.renameSlot(slotId, newName);
+    await loadSlots();
   };
 
-  const handleExport = (slotId: number) => {
-    const jsonString = SaveService.exportSave(slotId);
+  const handleExport = async (slotId: number) => {
+    const jsonString = await SaveService.exportSave(slotId);
     if (!jsonString) {
       alert('Failed to export save');
       return;
@@ -79,13 +76,13 @@ export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProp
     URL.revokeObjectURL(url);
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
     try {
       setImportError(null);
-      const slotId = SaveService.importSave(importText);
+      const slotId = await SaveService.importSave(importText);
       setShowImportDialog(false);
       setImportText('');
-      loadSlots();
+      await loadSlots();
       alert(`Save imported successfully to slot ${slotId}`);
     } catch (error) {
       setImportError(error instanceof Error ? error.message : 'Failed to import save');
@@ -115,7 +112,7 @@ export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProp
     }
   };
 
-  const hasEmptySlot = Object.keys(slots).length < 5;
+  const hasEmptySlot = Object.keys(slots).length < 3;
 
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary">
@@ -158,14 +155,14 @@ export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProp
           </div>
           {!hasEmptySlot && (
             <div className="mt-4 text-sm text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-700 rounded p-3">
-              All save slots are full (5/5). Delete a save to create a new one or import a save.
+              All save slots are full (3/3). Delete a save to create a new one or import a save.
             </div>
           )}
         </div>
 
         {/* Save Slots Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3, 4, 5].map((slotId) => (
+          {[1, 2, 3].map((slotId) => (
             <SaveSlotCard
               key={slotId}
               slotId={slotId}

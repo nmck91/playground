@@ -48,7 +48,7 @@ interface SaveStoreActions {
   deleteSave: (slot: number) => Promise<void>;
 
   // Import/Export
-  exportSave: (slot: number) => string | null;
+  exportSave: (slot: number) => Promise<string | null>;
   importSave: (data: string, slot: number) => Promise<void>;
 
   // Auto-save
@@ -56,7 +56,7 @@ interface SaveStoreActions {
   autoSave: () => Promise<void>;
 
   // Slot management
-  refreshAvailableSlots: () => void;
+  refreshAvailableSlots: () => Promise<void>;
   getSaveMetadata: (slot: number) => SaveMetadata | null;
 
   // State setters
@@ -129,7 +129,7 @@ export const useSaveStore = create<SaveStore>()(
 
         try {
           // Load from SaveService
-          const gameState = SaveService.loadFromSlot(loadSlot);
+          const gameState = await SaveService.loadFromSlot(loadSlot);
 
           if (!gameState) {
             throw new Error('Failed to load game from slot');
@@ -208,7 +208,7 @@ export const useSaveStore = create<SaveStore>()(
 
         try {
           // Save via SaveService
-          SaveService.saveToSlot(currentSlot, gameState);
+          await SaveService.saveToSlot(currentSlot, gameState);
 
           // Update timestamps
           const now = new Date();
@@ -249,7 +249,7 @@ export const useSaveStore = create<SaveStore>()(
 
         try {
           // Create new game via SaveService
-          const { gameState, slotId } = SaveService.createNewSave(saveName);
+          const { gameState, slotId } = await SaveService.createNewSave(saveName);
 
           // Update GameStore
           useGameStore.getState().setGameState(gameState);
@@ -302,7 +302,7 @@ export const useSaveStore = create<SaveStore>()(
         set({ isLoading: true }, false, 'saveStore/deleteSaveStart');
 
         try {
-          SaveService.deleteSlot(slot);
+          await SaveService.deleteSlot(slot);
 
           // If current save was deleted, reset game
           if (get().currentSlot === slot) {
@@ -334,9 +334,9 @@ export const useSaveStore = create<SaveStore>()(
       },
 
       // Export save
-      exportSave: (slot) => {
+      exportSave: async (slot) => {
         try {
-          return SaveService.exportSave(slot);
+          return await SaveService.exportSave(slot);
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : 'Failed to export save';
           useUIStore.getState().addNotification({
@@ -353,7 +353,7 @@ export const useSaveStore = create<SaveStore>()(
         set({ isLoading: true }, false, 'saveStore/importSaveStart');
 
         try {
-          SaveService.importSave(data, slot);
+          await SaveService.importSave(data, slot);
 
           set({ isLoading: false }, false, 'saveStore/importSaveSuccess');
 
@@ -397,10 +397,8 @@ export const useSaveStore = create<SaveStore>()(
         ),
 
       // Refresh available slots
-      refreshAvailableSlots: () => {
-        const slotsContainer = SaveService.getAllSaves();
-        // Convert SaveSlotContainer to SaveMetadata[]
-        const metadata: SaveMetadata[] = Object.values(slotsContainer).map((slot) => slot.metadata);
+      refreshAvailableSlots: async () => {
+        const metadata = await SaveService.getAllSaves();
         set({ availableSlots: metadata }, false, 'saveStore/refreshAvailableSlots');
       },
 
