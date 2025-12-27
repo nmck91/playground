@@ -142,11 +142,6 @@ export class SaveService {
       cupHistory: [],
     };
 
-    // DEBUG: Verify finances is properly set
-    console.log('[CreateNewGame] finances object:', finances);
-    console.log('[CreateNewGame] gameState.finances:', gameState.finances);
-    console.log('[CreateNewGame] gameState.finances?.budget:', gameState.finances?.budget);
-
     return gameState;
   }
 
@@ -325,9 +320,6 @@ export class SaveService {
    */
   static async saveToSlot(slotId: number, gameState: GameState, saveName?: string): Promise<void> {
     try {
-      // DEBUG: Verify finances exists before saving
-      console.log('[SaveToSlot] Input gameState.finances:', gameState.finances);
-
       // Check for legacy saves and migrate if needed
       await this.migrateLegacySaves();
 
@@ -358,9 +350,6 @@ export class SaveService {
         ...gameState,
         lastSaved: now,
       });
-
-      // DEBUG: Verify finances exists after optimization
-      console.log('[SaveToSlot] Optimized gameState.finances:', optimizedState.finances);
 
       const slot: SaveSlot = {
         metadata,
@@ -395,14 +384,8 @@ export class SaveService {
       return null;
     }
 
-    // DEBUG: Check finances before migration
-    console.log('[LoadFromSlot] Raw slot gameState.finances:', slot.gameState.finances);
-
     // Story 1.5.2: Use new migration system for v1 → v2 migration
     let gameState = migrateGameState(slot.gameState);
-
-    // DEBUG: Check finances after migration
-    console.log('[LoadFromSlot] After migration gameState.finances:', gameState.finances);
 
     // Post-migration: Legacy migrations for features added before v2 system
     // These handle migrations from old save format to the intermediate v1 format
@@ -501,12 +484,6 @@ export class SaveService {
         ...fixture,
         matchType: (fixture.week >= 4 && fixture.week <= 6) ? 'friendly' as const : 'competitive' as const,
       }));
-    }
-
-    // DEBUG: Final check before returning
-    console.log('[LoadFromSlot] Final gameState.finances before return:', gameState.finances);
-    if (!gameState.finances) {
-      console.error('[LoadFromSlot] ERROR: finances is missing from gameState!');
     }
 
     return gameState;

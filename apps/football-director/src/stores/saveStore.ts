@@ -185,10 +185,6 @@ export const useSaveStore = create<SaveStore>()(
         const gameState = useGameStore.getState().gameState;
         const currentSlot = get().currentSlot;
 
-        // DEBUG: Check what gameState we got
-        console.log('[SaveStore.saveGame] gameState:', gameState);
-        console.log('[SaveStore.saveGame] gameState?.finances:', gameState?.finances);
-
         if (!gameState) {
           useUIStore.getState().addNotification({
             type: 'error',
@@ -212,7 +208,6 @@ export const useSaveStore = create<SaveStore>()(
 
         try {
           // Save via SaveService
-          console.log('[SaveStore.saveGame] About to call SaveService.saveToSlot with finances:', gameState.finances);
           await SaveService.saveToSlot(currentSlot, gameState);
 
           // Update timestamps

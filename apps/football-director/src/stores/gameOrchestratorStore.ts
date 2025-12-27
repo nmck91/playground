@@ -221,12 +221,8 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
               (f) => f.week === currentWeek && !f.played
             );
 
-            console.log(`[SimulateWeek] Week ${currentWeek}: Found ${weekFixtures.length} fixtures`);
-
             // Generate match previews
-            console.log('[SimulateWeek] Step 1: Starting match preview generation');
-            const previews = weekFixtures.map((fixture, index) => {
-              console.log(`[SimulateWeek] Generating preview ${index + 1}/${weekFixtures.length} for fixture ${fixture.id}`);
+            const previews = weekFixtures.map((fixture) => {
               const homeTeam =
                 fixture.homeTeamId === updatedPlayerTeam.id
                   ? updatedPlayerTeam
@@ -237,8 +233,6 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
                   : updatedAITeams.find((t) => t.id === fixture.awayTeamId);
 
               if (!homeTeam || !awayTeam) {
-                console.error(`[SimulateWeek] Missing team in preview generation for fixture ${fixture.id}`);
-                console.error('homeTeam:', homeTeam, 'awayTeam:', awayTeam);
                 throw new Error(`Missing team for preview: home=${fixture.homeTeamId}, away=${fixture.awayTeamId}`);
               }
 
@@ -253,12 +247,9 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
                 Date.now() + parseInt(fixture.id.slice(-4))
               );
             });
-            console.log('[SimulateWeek] Step 1 complete: Match previews generated');
 
             // Simulate each match
-            console.log('[SimulateWeek] Step 2: Starting match simulation');
-            matchResults = weekFixtures.map((fixture, index) => {
-              console.log(`[SimulateWeek] Simulating match ${index + 1}/${weekFixtures.length}: ${fixture.id}`);
+            matchResults = weekFixtures.map((fixture) => {
               const homeTeam =
                 fixture.homeTeamId === updatedPlayerTeam.id
                   ? updatedPlayerTeam
@@ -270,13 +261,9 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
 
               // Defensive check - ensure both teams exist
               if (!homeTeam) {
-                console.error(`Home team not found for fixture ${fixture.id}. Looking for ID: ${fixture.homeTeamId}`);
-                console.error('Available teams:', [updatedPlayerTeam.id, ...updatedAITeams.map(t => t.id)]);
                 throw new Error(`Home team not found: ${fixture.homeTeamId}`);
               }
               if (!awayTeam) {
-                console.error(`Away team not found for fixture ${fixture.id}. Looking for ID: ${fixture.awayTeamId}`);
-                console.error('Available teams:', [updatedPlayerTeam.id, ...updatedAITeams.map(t => t.id)]);
                 throw new Error(`Away team not found: ${fixture.awayTeamId}`);
               }
 
@@ -296,12 +283,9 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
                 fixtureId: fixture.id,
               };
             });
-            console.log('[SimulateWeek] Step 2 complete: Matches simulated');
 
             // Update player stats from match results
-            console.log('[SimulateWeek] Step 3: Updating player stats');
-            matchResults.forEach((result, index) => {
-              console.log(`[SimulateWeek] Updating stats ${index + 1}/${matchResults.length} for result ${result.fixtureId}`);
+            matchResults.forEach((result) => {
               if (result.homeTeamId === updatedPlayerTeam.id) {
                 updatedPlayerTeam = statsTracker.processTeamMatchStats(
                   updatedPlayerTeam,
@@ -361,12 +345,10 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
             });
 
             // Update league table
-            console.log('[SimulateWeek] Step 4: Updating league table');
             updatedLeagueTable = matchResults.reduce(
               (table, result) => tableManager.updateTable(table, result),
               gameState.leagueTable
             );
-            console.log('[SimulateWeek] Step 4 complete: League table updated');
 
             // Mark fixtures as played
             updatedFixtures = gameState.fixtures.map((fixture) => {
@@ -385,24 +367,14 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
             );
 
             if (playerTeamResults.length > 0) {
-              console.log('[SimulateWeek] Skipping news generation temporarily for debugging');
-              // try {
-              //   console.log('[SimulateWeek] Generating match news for results:', playerTeamResults);
-              //   console.log('[SimulateWeek] Player team name:', updatedPlayerTeam.name);
-              //   console.log('[SimulateWeek] League table:', updatedLeagueTable);
-              //   const postMatchNews = newsEngine.generateMatchNews(
-              //     playerTeamResults,
-              //     updatedPlayerTeam.name,
-              //     updatedLeagueTable,
-              //     currentWeek,
-              //     gameState.season.year
-              //   );
-              //   allNews = [...postMatchNews, ...allNews];
-              // } catch (error) {
-              //   console.error('[SimulateWeek] Error generating match news:', error);
-              //   console.error('[SimulateWeek] playerTeamResults:', playerTeamResults);
-              //   throw error;
-              // }
+              const postMatchNews = newsEngine.generateMatchNews(
+                playerTeamResults,
+                updatedPlayerTeam.name,
+                updatedLeagueTable,
+                currentWeek,
+                gameState.season.year
+              );
+              allNews = [...postMatchNews, ...allNews];
             }
 
             // Handle cup matches if any - TODO: Implement cup processing
@@ -413,9 +385,7 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
           }
 
           // Weekly finances
-          console.log('[SimulateWeek] gameState.finances BEFORE processWeeklyFinances:', gameState.finances);
           if (!gameState.finances) {
-            console.error('GameState is missing finances object!', gameState);
             throw new Error('GameState is missing finances - this should not happen. Try creating a new game.');
           }
 
@@ -437,7 +407,6 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
             matchDayIncome,
             currentWeek
           );
-          console.log('[SimulateWeek] financeResult:', financeResult);
 
           // Construct updated finances object from result
           const updatedFinances = {
@@ -448,7 +417,6 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
             totalExpenses: gameState.finances.totalExpenses + financeResult.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0),
             transactions: [...gameState.finances.transactions, ...financeResult.transactions],
           };
-          console.log('[SimulateWeek] updatedFinances:', updatedFinances);
 
           // AI contract renewals and transfers during transfer windows
           if (gameState.season.transferWindow === 'open') {
@@ -564,24 +532,18 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
           );
 
           // Update game state
-          console.log('[SimulateWeek] About to update gameState with finances:', updatedFinances);
-          useGameStore.getState().updateGameState((state) => {
-            console.log('[SimulateWeek] Current state.finances:', state.finances);
-            const updatedState = {
-              ...state,
-              season: updatedSeason,
-              playerTeam: updatedPlayerTeam,
-              aiTeams: updatedAITeams,
-              fixtures: updatedFixtures,
-              leagueTable: updatedLeagueTable,
-              matchHistory: updatedMatchHistory,
-              cupCompetition: updatedCupCompetition,
-              finances: updatedFinances,
-              newsFeed: allNews.slice(0, 100), // Limit news feed to 100 items
-            };
-            console.log('[SimulateWeek] Updated state.finances:', updatedState.finances);
-            return updatedState;
-          });
+          useGameStore.getState().updateGameState((state) => ({
+            ...state,
+            season: updatedSeason,
+            playerTeam: updatedPlayerTeam,
+            aiTeams: updatedAITeams,
+            fixtures: updatedFixtures,
+            leagueTable: updatedLeagueTable,
+            matchHistory: updatedMatchHistory,
+            cupCompetition: updatedCupCompetition,
+            finances: updatedFinances,
+            newsFeed: allNews.slice(0, 100), // Limit news feed to 100 items
+          }));
 
           // Auto-save after simulation
           await useSaveStore.getState().autoSave();
