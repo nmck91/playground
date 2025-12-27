@@ -471,6 +471,13 @@ export interface CupCompetition {
  */
 export type GameStateVersion = 1 | 2;
 
+/**
+ * GameState Interface (Current Version)
+ *
+ * This represents the current game state structure (V2).
+ * For type-safe version handling, use discriminated unions from game-state-versions.ts:
+ * - GameStateV1, GameStateV2, and the GameState union type
+ */
 export interface GameState {
   version: GameStateVersion; // Version for save migration tracking
   id: string;

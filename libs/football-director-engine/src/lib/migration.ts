@@ -2,11 +2,10 @@
  * Football Director Engine - Save Migration
  *
  * Handles migration of old save files to new formats when breaking changes occur.
- * Epic 1.5 - Story 1.5.2: Convert Optional Fields to Required
+ * Epic 1.5 - Story 1.5.3: Implement Discriminated Unions for Versioning
  */
 
 import type {
-  GameState,
   Player,
   Team,
   Tactics,
@@ -22,6 +21,19 @@ import type {
   PostMatchAnalysis,
   ManagerQuote,
 } from './types';
+
+import type {
+  GameState,
+  GameStateV1,
+  GameStateV2,
+} from './game-state-versions';
+
+import {
+  CURRENT_GAME_STATE_VERSION,
+  isGameStateV1,
+  isGameStateV2,
+  getGameStateVersion,
+} from './game-state-versions';
 
 /**
  * Default values for newly required fields
@@ -99,6 +111,23 @@ export function getDefaultFinances() {
     totalIncome: 0,
     totalExpenses: 0,
     transactions: [],
+  };
+}
+
+export function getDefaultClubRecords(season: number) {
+  return {
+    bestLeaguePosition: { position: 20, season },
+    mostPoints: { points: 0, season },
+    mostWins: { wins: 0, season },
+    mostGoalsScored: { goals: 0, season },
+    fewestGoalsConceded: { goals: 999, season },
+    bestGoalDifference: { difference: -999, season },
+    biggestWin: { opponent: 'N/A', score: '0-0', homeOrAway: 'home' as const, week: 1, season },
+    longestWinStreak: { streak: 0, season },
+    longestUnbeatenStreak: { streak: 0, season },
+    mostGoalsSingleSeason: { playerId: '', playerName: 'N/A', goals: 0, season },
+    mostAssistsSingleSeason: { playerId: '', playerName: 'N/A', assists: 0, season },
+    mostCleanSheetsSeason: { cleanSheets: 0, season },
   };
 }
 
@@ -219,9 +248,10 @@ export function migrateMatchResult(result: any): MatchResult {
 /**
  * Main migration function: v1 → v2
  *
- * Handles migration of old save files to v2 format with required fields
+ * Handles migration of old save files to v2 format with required fields.
+ * TypeScript enforces that input is V1 and output is V2.
  */
-export function migrateGameStateV1toV2(oldState: any): GameState {
+export function migrateGameStateV1toV2(oldState: GameStateV1): GameStateV2 {
   const currentYear = oldState.season?.year || 2025;
   const currentWeek = oldState.season?.currentWeek || 1;
 
@@ -256,20 +286,13 @@ export function migrateGameStateV1toV2(oldState: any): GameState {
     staffMarket: oldState.staffMarket || [],
     freeAgents: oldState.freeAgents || [],
     boardStatus: oldState.boardStatus || {
-      objectives: [],
-      minimumLeaguePosition: 10,
-      jobSecurity: 'stable' as const,
-      confidence: 75,
+      satisfaction: 75,
+      jobSecurity: 'safe' as const,
+      currentObjective: null,
+      objectiveHistory: [],
     },
     seasonRecords: oldState.seasonRecords || [],
-    clubRecords: oldState.clubRecords || {
-      topScorer: null,
-      mostAssists: null,
-      mostAppearances: null,
-      biggestWin: null,
-      biggestLoss: null,
-      recordedSince: currentYear,
-    },
+    clubRecords: oldState.clubRecords || getDefaultClubRecords(currentYear),
     achievements: oldState.achievements || [],
     seasonAwards: oldState.seasonAwards || [],
     newsFeed: oldState.newsFeed || [],
@@ -281,27 +304,35 @@ export function migrateGameStateV1toV2(oldState: any): GameState {
 
 /**
  * Detect save version and migrate if necessary
+ *
+ * Uses type guards to determine version and apply appropriate migrations.
+ * Returns GameStateV2 (current version) after migration.
  */
-export function migrateGameState(data: any): GameState {
-  // Check version field
-  const version = data.version || 1; // Default to v1 if no version field
-
-  if (version === 1) {
-    console.log('Migrating save file from v1 to v2...');
+export function migrateGameState(data: GameState): GameStateV2 {
+  // Use type guard to check version
+  if (isGameStateV1(data)) {
+    console.log(`Migrating save file from v1 to v${CURRENT_GAME_STATE_VERSION}...`);
     return migrateGameStateV1toV2(data);
   }
 
-  // Already at current version
-  return data as GameState;
+  // Already at current version (v2)
+  if (isGameStateV2(data)) {
+    return data;
+  }
+
+  // This should never happen with proper discriminated unions
+  throw new Error(`Unknown GameState version: ${getGameStateVersion(data)}`);
 }
 
 /**
  * Validate that a GameState has all required v2 fields
+ *
+ * Type guard that checks if a GameState is valid V2 format.
  */
-export function validateGameStateV2(state: GameState): boolean {
+export function validateGameStateV2(state: GameState): state is GameStateV2 {
   try {
-    // Check version
-    if (state.version !== 2) return false;
+    // Use type guard
+    if (!isGameStateV2(state)) return false;
 
     // Check player team has required fields
     if (!state.playerTeam.tactics) return false;

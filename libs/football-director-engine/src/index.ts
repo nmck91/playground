@@ -1,4 +1,5 @@
 export * from './lib/types';
+export * from './lib/game-state-versions'; // Discriminated unions for versioning (Epic 1.5.3)
 export * from './lib/migration'; // Save file migration utilities (Epic 1.5)
 export * from './lib/match-simulator';
 export * from './lib/match-commentary';
