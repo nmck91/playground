@@ -1,19 +1,15 @@
 import { cleanup } from '@testing-library/react';
-import { afterEach, vi } from 'vitest';
+import { afterEach, beforeEach } from 'vitest';
+import 'fake-indexeddb/auto';
 
 // Cleanup after each test
 afterEach(() => {
   cleanup();
 });
 
-// Mock localStorage
-const localStorageMock = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-  clear: vi.fn(),
-  length: 0,
-  key: vi.fn(),
-};
-
-global.localStorage = localStorageMock as any;
+// Clear localStorage before each test (jsdom provides localStorage)
+beforeEach(() => {
+  if (typeof localStorage !== 'undefined') {
+    localStorage.clear();
+  }
+});

@@ -280,12 +280,14 @@ describe('MatchStore', () => {
       act(() => {
         useGameStore.getState().setGameState({
           ...mockGameState,
-          teams: [], // No opponent
+          aiTeams: [], // No opponent
         } as GameState);
       });
 
       expect(() => {
-        result.current.simulateMatch(mockFixture);
+        act(() => {
+          result.current.simulateMatch(mockFixture);
+        });
       }).toThrow('Opponent team not found');
     });
   });
