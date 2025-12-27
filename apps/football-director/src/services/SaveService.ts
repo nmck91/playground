@@ -28,6 +28,8 @@ import {
   PlayerContract,
   migrateGameState,
   getDefaultPostMatchAnalysis,
+  validateGameState,
+  formatValidationErrors,
 } from '@playground/football-director-engine';
 import { HybridStorageService } from './storage';
 import { formatBytes } from './storage/compression';
@@ -320,6 +322,14 @@ export class SaveService {
    */
   static async saveToSlot(slotId: number, gameState: GameState, saveName?: string): Promise<void> {
     try {
+      // Epic 1.5.4: Validate GameState before saving
+      const validationResult = validateGameState(gameState);
+      if (!validationResult.success) {
+        const errors = formatValidationErrors(validationResult.errors);
+        console.error('[SaveService] Invalid GameState before save:', errors);
+        throw new Error(`Cannot save invalid GameState: ${errors}`);
+      }
+
       // Check for legacy saves and migrate if needed
       await this.migrateLegacySaves();
 
@@ -484,6 +494,15 @@ export class SaveService {
         ...fixture,
         matchType: (fixture.week >= 4 && fixture.week <= 6) ? 'friendly' as const : 'competitive' as const,
       }));
+    }
+
+    // Epic 1.5.4: Validate loaded and migrated GameState
+    const validationResult = validateGameState(gameState);
+    if (!validationResult.success) {
+      const errors = formatValidationErrors(validationResult.errors);
+      console.error('[SaveService] Invalid GameState after load/migration:', errors);
+      console.error('[SaveService] Corrupted save data detected in slot', slotId);
+      throw new Error(`Loaded save data is corrupted or invalid: ${errors}`);
     }
 
     return gameState;
