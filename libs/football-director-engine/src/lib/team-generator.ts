@@ -16,8 +16,33 @@ import {
 import { PlayerStatsTracker } from './player-stats-tracker';
 import { StaffManager } from './staff-manager';
 import { TacticsManager } from './tactics-manager';
+import { getDefaultPlayerContract, getDefaultPlayerMorale } from './migration';
 
-export class TeamGenerator {
+/**
+ * Team Generator Interface
+ *
+ * Defines the contract for generating players, teams, and leagues.
+ */
+export interface ITeamGenerator {
+  generatePlayer(
+    position: Player['position'],
+    skillRange: [number, number],
+    seed?: number
+  ): Player;
+
+  generateTeam(
+    name: string,
+    tier: 'elite' | 'strong' | 'mid' | 'weak',
+    seed?: number
+  ): Team;
+
+  generateLeague(seed?: number): Team[];
+}
+
+/**
+ * Team Generator Implementation
+ */
+export class TeamGenerator implements ITeamGenerator {
   private nameCounter = 0;
 
   /**
@@ -39,7 +64,7 @@ export class TeamGenerator {
     // Initialize player stats
     const statsTracker = new PlayerStatsTracker();
 
-    return {
+    const player: Player = {
       id: `player-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: this.generatePlayerName(seed),
       position,
@@ -48,7 +73,12 @@ export class TeamGenerator {
       wages,
       stats: statsTracker.initializePlayerStats(),
       history: [],
+      // Story 1.5.2: Now required fields
+      contract: getDefaultPlayerContract({ wages } as Player, 2024, 1),
+      morale: getDefaultPlayerMorale(),
     };
+
+    return player;
   }
 
   /**
@@ -127,6 +157,11 @@ export class TeamGenerator {
     const tacticsSeed = seed !== undefined ? seed + 2000 : undefined;
     const tactics = this.generateVariedTactics(players, tacticsSeed);
 
+    // Random philosophy for team (bias toward balanced)
+    const philosophyRandom = seed !== undefined ? this.seededRandom(seed + 3000) : Math.random();
+    const philosophy =
+      philosophyRandom < 0.25 ? 'defensive' : philosophyRandom < 0.75 ? 'balanced' : 'attacking';
+
     return {
       id: `team-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name,
@@ -134,6 +169,7 @@ export class TeamGenerator {
       players,
       staff: [manager], // Start with just a manager
       tactics,
+      philosophy, // Story 1.5.2: Now required field
     };
   }
 

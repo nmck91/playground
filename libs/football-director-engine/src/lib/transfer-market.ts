@@ -11,7 +11,38 @@ const PRE_SEASON_TRANSFER_END = 8;
 const WINTER_TRANSFER_START = 28;
 const WINTER_TRANSFER_END = 32;
 
-export class TransferMarket {
+/**
+ * Transfer Market Interface
+ *
+ * Defines the contract for managing player transfers.
+ */
+export interface ITransferMarket {
+  isTransferWindowOpen(currentWeek: number): boolean;
+  calculatePlayerValue(player: Player): number;
+  generateMarket(
+    aiTeams: Team[],
+    currentWeek: number,
+    listingsPerWeek?: number
+  ): TransferListing[];
+  buyPlayer(
+    listing: TransferListing,
+    buyerTeam: Team,
+    sellerTeam: Team,
+    currentListings: TransferListing[],
+    currentWeek: number
+  ): {
+    success: boolean;
+    message: string;
+    updatedBuyerTeam?: Team;
+    updatedSellerTeam?: Team;
+    updatedListings?: TransferListing[];
+  };
+}
+
+/**
+ * Transfer Market Implementation
+ */
+export class TransferMarket implements ITransferMarket {
   /**
    * Check if transfers are allowed in the current week
    */

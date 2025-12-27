@@ -21,11 +21,13 @@ import {
   PlayerStatsTracker,
   RecordsManager,
   AchievementManager,
-  NewsGenerator,
+  NewsEngine,
   StaffManager,
   Team,
   Player,
   PlayerContract,
+  migrateGameState,
+  getDefaultPostMatchAnalysis,
 } from '@playground/football-director-engine';
 import { HybridStorageService } from './storage';
 import { formatBytes } from './storage/compression';
@@ -108,13 +110,14 @@ export class SaveService {
     const achievements = achievementManager.getAllAchievements();
 
     // Initialize news feed with welcome message
-    const newsGenerator = new NewsGenerator();
-    const welcomeNews = newsGenerator.generateWelcomeNews(playerTeam.name, season.year);
+    const newsEngine = new NewsEngine();
+    const welcomeNews = newsEngine.generateWelcomeNews(playerTeam.name, season.year);
 
     // Generate cup competition
     const cupCompetition = CupManager.generateCupCompetition(allTeams, season.year, 'FA Cup');
 
     const gameState: GameState = {
+      version: 2, // Story 1.5.2: GameState versioning
       id: `game-${Date.now()}`,
       createdAt: new Date(),
       lastSaved: new Date(),
@@ -134,9 +137,15 @@ export class SaveService {
       achievements,
       seasonAwards: [],
       newsFeed: [welcomeNews],
+      matchPreviews: [], // Story 1.5.2: Now required field
       cupCompetition,
       cupHistory: [],
     };
+
+    // DEBUG: Verify finances is properly set
+    console.log('[CreateNewGame] finances object:', finances);
+    console.log('[CreateNewGame] gameState.finances:', gameState.finances);
+    console.log('[CreateNewGame] gameState.finances?.budget:', gameState.finances?.budget);
 
     return gameState;
   }
@@ -250,7 +259,7 @@ export class SaveService {
             careerCleanSheets: 0,
           },
           history: [], // Always empty for AI teams
-          morale: undefined, // Remove morale for AI players
+          morale: player.morale, // Story 1.5.2: morale is now required, keep the value
         })),
         staff: team.staff.map(s => ({
           id: s.id,
@@ -280,7 +289,8 @@ export class SaveService {
           ...match,
           events: [], // Remove detailed events
           playerRatings: [], // Remove player ratings
-          postMatchAnalysis: undefined, // Remove analysis
+          // Story 1.5.2: postMatchAnalysis is now required, use minimal default
+          postMatchAnalysis: getDefaultPostMatchAnalysis(match.homeTeam, match.awayTeam),
         };
       });
     };
@@ -293,10 +303,17 @@ export class SaveService {
       newsFeed: gameState.newsFeed.slice(-MAX_NEWS_FEED),
       // ENHANCED: Aggressive AI team optimization
       aiTeams: optimizeAITeams(gameState.aiTeams),
-      // Limit transactions history
-      finances: {
+      // Limit transactions history (guard against undefined finances)
+      finances: gameState.finances ? {
         ...gameState.finances,
-        transactions: gameState.finances.transactions.slice(-50), // Keep last 50 transactions
+        transactions: gameState.finances.transactions?.slice(-50) || [], // Keep last 50 transactions
+      } : {
+        budget: 5000000,
+        weeklyIncome: 0,
+        weeklyExpenses: 0,
+        totalIncome: 0,
+        totalExpenses: 0,
+        transactions: [],
       },
       // Remove old match previews (regenerate when needed)
       matchPreviews: [],
@@ -308,6 +325,9 @@ export class SaveService {
    */
   static async saveToSlot(slotId: number, gameState: GameState, saveName?: string): Promise<void> {
     try {
+      // DEBUG: Verify finances exists before saving
+      console.log('[SaveToSlot] Input gameState.finances:', gameState.finances);
+
       // Check for legacy saves and migrate if needed
       await this.migrateLegacySaves();
 
@@ -338,6 +358,9 @@ export class SaveService {
         ...gameState,
         lastSaved: now,
       });
+
+      // DEBUG: Verify finances exists after optimization
+      console.log('[SaveToSlot] Optimized gameState.finances:', optimizedState.finances);
 
       const slot: SaveSlot = {
         metadata,
@@ -372,8 +395,17 @@ export class SaveService {
       return null;
     }
 
-    // Apply migrations
-    const gameState = slot.gameState;
+    // DEBUG: Check finances before migration
+    console.log('[LoadFromSlot] Raw slot gameState.finances:', slot.gameState.finances);
+
+    // Story 1.5.2: Use new migration system for v1 → v2 migration
+    let gameState = migrateGameState(slot.gameState);
+
+    // DEBUG: Check finances after migration
+    console.log('[LoadFromSlot] After migration gameState.finances:', gameState.finances);
+
+    // Post-migration: Legacy migrations for features added before v2 system
+    // These handle migrations from old save format to the intermediate v1 format
 
     // Migration: Add boardStatus if it doesn't exist (for old saves)
     if (!gameState.boardStatus) {
@@ -469,6 +501,12 @@ export class SaveService {
         ...fixture,
         matchType: (fixture.week >= 4 && fixture.week <= 6) ? 'friendly' as const : 'competitive' as const,
       }));
+    }
+
+    // DEBUG: Final check before returning
+    console.log('[LoadFromSlot] Final gameState.finances before return:', gameState.finances);
+    if (!gameState.finances) {
+      console.error('[LoadFromSlot] ERROR: finances is missing from gameState!');
     }
 
     return gameState;

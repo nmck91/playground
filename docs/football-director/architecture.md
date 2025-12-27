@@ -1027,3 +1027,235 @@ Next.js 15, React 19, TypeScript, Tailwind, next-pwa, next-themes, Framer Motion
 **Last Updated**: 2025-12-24
 **For**: AI Agents and Developers
 **Project**: Football Director PWA Game
+
+---
+
+## Engine Module Reorganization (Epic 1.4)
+
+### Overview
+
+Epic 1.4 (completed 2025-12-27) reorganized the Football Director Engine to improve maintainability, testability, and documentation. The engine now has clearer module boundaries, comprehensive interfaces, and better separation of concerns.
+
+### Module Organization
+
+The 24 engine modules are organized into 5 logical categories:
+
+#### Core Simulation Modules (4)
+- **match-simulator** - Simulates individual matches with events, scoring, and statistics
+- **season-manager** - Orchestrates 52-week seasons with fixture scheduling
+- **league-table-manager** - Calculates league standings with tiebreakers
+- **cup-manager** - Manages knockout cup competitions
+
+#### Player Management Modules (7)
+- **player-stats-tracker** - Tracks player statistics across matches
+- **player-development** - Handles aging and skill progression
+- **injury-manager** - Manages injuries and recovery
+- **morale-manager** - Calculates player morale and happiness
+- **contract-manager** - Handles player contracts and renewals
+- **ai-contract-manager** - Automates AI team contract decisions
+- **youth-academy-manager** - Generates youth players for recruitment
+
+#### Match Content Modules (4)
+- **match-commentary** - Generates real-time match event commentary
+- **match-preview-generator** - Creates pre-match analysis and predictions
+- **post-match-generator** - Generates post-match analysis and interviews
+- **weather-generator** - Creates match weather conditions
+
+#### Financial & Administrative Modules (4)
+- **finance-engine** - Manages budgets, wages, and financial transactions
+- **transfer-market** - Handles player transfers and market generation
+- **board-manager** - Manages board objectives and job security
+- **staff-manager** - Handles staff hiring, firing, and bonuses
+
+#### Meta Game Modules (5)
+- **achievement-manager** - Tracks achievements and awards
+- **records-manager** - Maintains season and club records
+- **news-engine** - **CONSOLIDATED** Unified news generation for all events
+- **tactics-manager** - Manages formations, mentality, roles, and instructions
+- **team-generator** - Generates teams, players, and leagues
+
+### Key Changes
+
+#### Story 1.4.2: News Generation Consolidation
+
+**Before**: News generation logic scattered across multiple modules (transfer-market, injury-manager, match-simulator, etc.)
+
+**After**: Unified `NewsEngine` module with single API for all news types:
+- Match news (previews, reports, results)
+- Transfer news (signings, sales)
+- Player news (injuries, contracts)
+- Achievement news
+- Season news (start, end)
+- Weekly flavor news
+
+**Impact**: Simpler news management, template-based consistency, easier maintenance
+
+#### Story 1.4.3: Match Commentary Separation
+
+**Before**: Commentary and post-match news had unclear boundaries
+
+**After**: Clear module responsibilities:
+- **MatchCommentary**: Real-time event narration (during simulation)
+- **PostMatchGenerator**: Post-match analysis (after completion)
+- **NewsEngine**: News articles for feed (separate from commentary)
+
+**Impact**: Better separation of concerns, clearer interfaces
+
+#### Story 1.4.4: Module Interfaces & Dependency Injection
+
+**Before**: Modules were concrete classes without formal interfaces
+
+**After**: All 24 modules have TypeScript interfaces following `I<ClassName>` convention:
+- `IMatchSimulator`, `ISeasonManager`, `ITransferMarket`, etc.
+- Enables dependency injection for better testing
+- Clear contracts for all modules
+- Supports mock implementations
+
+**Impact**: Better testability, flexible composition, clearer API contracts
+
+#### Story 1.4.5: Documentation & Examples
+
+**Added**:
+- Comprehensive engine README (`libs/football-director-engine/README.md`)
+- Contribution guide (`libs/football-director-engine/CONTRIBUTING.md`)
+- Migration guide (`docs/architecture/engine-migration-guide.md`)
+- Usage examples:
+  - `examples/custom-match-simulation.ts` - Match simulation examples
+  - `examples/custom-transfer-logic.ts` - Transfer market examples
+  - `examples/testing-modules.ts` - Testing with DI and mocks
+
+**Impact**: Better onboarding, clearer patterns, easier contributions
+
+### Architecture Principles
+
+#### Single Responsibility
+Each module has ONE clear purpose:
+- MatchSimulator ONLY simulates matches
+- FinanceEngine ONLY handles finances
+- NewsEngine ONLY generates news
+
+#### Dependency Injection
+Modules accept dependencies via interfaces:
+```typescript
+class MatchSimulator implements IMatchSimulator {
+  constructor(
+    private statsTracker: IPlayerStatsTracker,
+    private injuryManager: IInjuryManager
+  ) {}
+}
+```
+
+#### No UI Dependencies
+Engine is pure business logic:
+- Zero React/UI imports
+- Headless operation
+- Multiple frontend support
+- Easy testing
+
+#### Deterministic Simulation
+Random events accept seeds for reproducibility:
+```typescript
+const teams = generator.generateLeague(12345); // Same seed = same teams
+```
+
+### Module Dependencies
+
+**No Circular Dependencies**: Dependency analysis confirmed zero circular dependencies
+
+**Dependency Hierarchy** (simplified):
+```
+useGameState (orchestration)
+    ├─ SeasonManager
+    ├─ MatchSimulator
+    │   ├─ PlayerStatsTracker
+    │   ├─ InjuryManager
+    │   ├─ TacticsManager
+    │   ├─ StaffManager
+    │   ├─ WeatherGenerator
+    │   └─ MatchCommentary
+    ├─ LeagueTableManager
+    ├─ TransferMarket
+    ├─ FinanceEngine
+    ├─ PlayerDevelopment
+    ├─ ContractManager
+    ├─ AIContractManager
+    ├─ MoraleManager
+    ├─ YouthAcademyManager
+    ├─ BoardManager
+    ├─ AchievementManager
+    ├─ RecordsManager
+    ├─ NewsEngine
+    ├─ MatchPreviewGenerator
+    └─ PostMatchGenerator
+```
+
+### Testing Infrastructure
+
+**Current Coverage**: 637 tests, >80% coverage
+
+**Test Patterns**:
+- Unit tests for all 24 modules
+- Deterministic tests using seeds
+- Mock dependencies via interfaces
+- Test data factories for consistency
+
+**Example Test with DI**:
+```typescript
+describe('MatchSimulator', () => {
+  let simulator: MatchSimulator;
+  let mockStatsTracker: IPlayerStatsTracker;
+
+  beforeEach(() => {
+    mockStatsTracker = {
+      updatePlayerStats: vi.fn(),
+      // ... other methods
+    };
+    simulator = new MatchSimulator(mockStatsTracker, ...);
+  });
+
+  it('should simulate match', () => {
+    const result = simulator.simulateMatch(...);
+    expect(mockStatsTracker.updatePlayerStats).toHaveBeenCalled();
+  });
+});
+```
+
+### Migration Notes
+
+**Backward Compatibility**: Epic 1.4 changes are mostly backward compatible
+
+**Required Actions**:
+1. Update news generation to use unified `NewsEngine`
+2. Consider adopting DI for better testing (optional)
+3. Review migration guide: `docs/architecture/engine-migration-guide.md`
+
+**No Required Actions**:
+- Interfaces are purely additive
+- Existing imports continue to work
+- Gradual adoption of new patterns possible
+
+### Future Improvements
+
+**Potential Enhancements**:
+- Full dependency injection container
+- Event-driven architecture for cross-module communication
+- Plugin system for custom modules
+- Async support for heavy simulations
+
+**Epic 1.4 Status**: ✅ Complete (2025-12-27)
+- 1.4.1: Module Analysis - Complete
+- 1.4.2: News Consolidation - Complete
+- 1.4.3: Commentary Separation - Complete
+- 1.4.4: Module Interfaces - Complete
+- 1.4.5: Documentation - Complete
+
+### Additional Documentation
+
+**For detailed information, see**:
+- Engine README: `libs/football-director-engine/README.md`
+- Contributing Guide: `libs/football-director-engine/CONTRIBUTING.md`
+- Migration Guide: `docs/architecture/engine-migration-guide.md`
+- Examples: `examples/` directory
+
+**Last Updated**: 2025-12-27 (Epic 1.4 Complete)
+

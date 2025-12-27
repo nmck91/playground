@@ -11,7 +11,28 @@ const COMPETITIVE_START = 8;
 const COMPETITIVE_WEEKS = 38;
 const COMPETITIVE_END = COMPETITIVE_START + COMPETITIVE_WEEKS - 1; // Week 45
 
-export class FinanceEngine {
+/**
+ * Finance Engine Interface
+ *
+ * Defines the contract for managing team finances.
+ */
+export interface IFinanceEngine {
+  calculateWeeklyWages(team: Team): number;
+  calculateWeeklyIncome(position: number, currentWeek: number): number;
+  calculateMatchDayIncome(isHome: boolean): number;
+  processWeeklyFinances(
+    budget: number,
+    team: Team,
+    position: number,
+    matchDayIncome: number,
+    weekNumber: number
+  ): { newBudget: number; transactions: FinancialRecord[] };
+}
+
+/**
+ * Finance Engine Implementation
+ */
+export class FinanceEngine implements IFinanceEngine {
   /**
    * Calculate total weekly wages for a team (players + staff)
    */

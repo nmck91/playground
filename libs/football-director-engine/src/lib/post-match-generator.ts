@@ -14,7 +14,29 @@ import {
   ManOfMatch,
 } from './types';
 
-export class PostMatchGenerator {
+/**
+ * Post-Match Generator Interface
+ *
+ * Defines the contract for generating post-match analysis content.
+ */
+export interface IPostMatchGenerator {
+  /**
+   * Generate complete post-match analysis including manager quotes, player interviews,
+   * turning points, and key statistics
+   */
+  generatePostMatchAnalysis(
+    result: MatchResult,
+    homeTeam: Team,
+    awayTeam: Team,
+    leagueTable: LeagueTable[],
+    seed?: number
+  ): PostMatchAnalysis;
+}
+
+/**
+ * Post-Match Generator Implementation
+ */
+export class PostMatchGenerator implements IPostMatchGenerator {
   /**
    * Generate complete post-match analysis
    */

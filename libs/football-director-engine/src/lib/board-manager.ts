@@ -5,7 +5,47 @@
 
 import { BoardObjective, BoardStatus, LeagueTable, Team } from './types';
 
-export class BoardManager {
+/**
+ * Board Manager Interface
+ *
+ * Defines the contract for managing board objectives, satisfaction, and job security.
+ */
+export interface IBoardManager {
+  generateObjective(team: Team, season: number, previousPosition?: number): BoardObjective;
+  initializeBoardStatus(team: Team, season: number): BoardStatus;
+  updateObjectiveStatus(
+    objective: BoardObjective,
+    currentPosition: number,
+    weeksRemaining: number
+  ): BoardObjective;
+  calculateSatisfaction(
+    currentSatisfaction: number,
+    objective: BoardObjective,
+    currentPosition: number,
+    weeksRemaining: number
+  ): number;
+  calculateJobSecurity(satisfaction: number): 'safe' | 'under-pressure' | 'critical';
+  updateBoardStatus(
+    boardStatus: BoardStatus,
+    leagueTable: LeagueTable[],
+    playerTeamId: string,
+    weeksRemaining: number
+  ): BoardStatus;
+  evaluateSeason(
+    boardStatus: BoardStatus,
+    finalPosition: number
+  ): {
+    objective: BoardObjective;
+    satisfied: boolean;
+    sacked: boolean;
+    message: string;
+  };
+}
+
+/**
+ * Board Manager Implementation
+ */
+export class BoardManager implements IBoardManager {
   /**
    * Generate a season objective based on team strength and previous performance
    */

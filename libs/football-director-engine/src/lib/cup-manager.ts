@@ -15,6 +15,22 @@ import type {
 } from './types';
 
 /**
+ * Cup Manager Interface
+ *
+ * Defines the contract for managing cup competitions.
+ * Note: The implementation uses static methods.
+ */
+export interface ICupManager {
+  generateCupCompetition(teams: Team[], season: number, cupName?: string): CupCompetition;
+  advanceTournament(cup: CupCompetition, currentWeek: number): CupCompetition;
+  isCupComplete(cup: CupCompetition): boolean;
+  getPrizeMoney(round: string, isWinner?: boolean): number;
+  hasCupFixturesThisWeek(cup: CupCompetition, currentWeek: number): boolean;
+  getCupFixturesForWeek(cup: CupCompetition, currentWeek: number): CupFixture[];
+  updateCupProgress(cup: CupCompetition): CupCompetition;
+}
+
+/**
  * Cup round names mapping
  */
 const ROUND_NAMES: Record<number, string> = {

@@ -6,6 +6,39 @@
 import { Team, Fixture, MatchResult, Match, SeasonPhase, TransferWindowStatus } from './types';
 import { MatchSimulator } from './match-simulator';
 
+/**
+ * Season Manager Interface
+ *
+ * Defines the contract for season management and fixture generation.
+ */
+export interface ISeasonManager {
+  // Fixture generation
+  generateFixtures(teams: Team[]): Fixture[];
+  generateFriendlyFixtures(teams: Team[]): Fixture[];
+  getFixturesForWeek(fixtures: Fixture[], week: number): Fixture[];
+
+  // Match simulation
+  simulateWeek(
+    fixtures: Fixture[],
+    teams: Team[],
+    week: number,
+    simulator: MatchSimulator,
+    seed?: number
+  ): { results: MatchResult[]; updatedFixtures: Fixture[] };
+
+  // Season status
+  isSeasonComplete(fixtures: Fixture[]): boolean;
+  getCurrentWeek(fixtures: Fixture[]): number;
+  getTotalWeeks(fixtures: Fixture[]): number;
+  getSeasonPhase(currentWeek: number): SeasonPhase;
+  getTransferWindowStatus(currentWeek: number): TransferWindowStatus;
+  hasMatchesThisWeek(currentWeek: number): boolean;
+
+  // Season constants
+  getFullSeasonWeeks(): number;
+  getCompetitiveWeeks(): number;
+}
+
 // Season constants
 const TOTAL_WEEKS = 52;
 const PRE_SEASON_WEEKS = 7; // Weeks 1-7
@@ -18,7 +51,10 @@ const PRE_SEASON_TRANSFER_END = 8;
 const WINTER_TRANSFER_START = 28;
 const WINTER_TRANSFER_END = 32;
 
-export class SeasonManager {
+/**
+ * Season Manager Implementation
+ */
+export class SeasonManager implements ISeasonManager {
   /**
    * Generate round-robin fixtures for a full season
    * Each team plays every other team twice (home and away)

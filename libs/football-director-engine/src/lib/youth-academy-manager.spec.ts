@@ -88,11 +88,14 @@ describe('YouthAcademyManager', () => {
       expect(names1).not.toEqual(names2);
     });
 
-    it('should generate players with no contract', () => {
+    it('should generate players with contracts (Story 1.5.2)', () => {
       const prospects = manager.generateYouthProspects(1);
 
       prospects.forEach((player) => {
-        expect(player.contract).toBeUndefined();
+        // Story 1.5.2: All players now have contracts (required field)
+        expect(player.contract).toBeDefined();
+        expect(player.contract.weeklyWage).toBeGreaterThan(0);
+        expect(player.contract.status).toBe('active');
       });
     });
 

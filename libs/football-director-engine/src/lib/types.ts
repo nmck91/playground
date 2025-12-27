@@ -68,10 +68,10 @@ export interface Player {
   wages: number;
   stats: PlayerStats;
   history: PlayerHistoryRecord[];
-  injury?: Injury; // Current injury status
-  suspendedUntil?: number; // Week number when suspension ends
-  contract?: PlayerContract; // Contract details (optional for migration)
-  morale?: number; // Player happiness (0-100, optional for migration)
+  injury?: Injury; // Current injury status (truly optional)
+  suspendedUntil?: number; // Week number when suspension ends (truly optional)
+  contract: PlayerContract; // Contract details (required in v2)
+  morale: number; // Player happiness 0-100 (required in v2)
 }
 
 export type StaffRole = 'manager' | 'coach' | 'scout';
@@ -125,9 +125,9 @@ export type ForwardRole = 'target-man' | 'poacher' | 'false-nine';
  * Player role assignments by position group
  */
 export interface PlayerRoles {
-  defenders?: DefenderRole;
-  midfielders?: MidfielderRole;
-  forwards?: ForwardRole;
+  defenders: DefenderRole; // Required in v2
+  midfielders: MidfielderRole; // Required in v2
+  forwards: ForwardRole; // Required in v2
 }
 
 /**
@@ -144,18 +144,17 @@ export interface TeamInstructions {
  * Set piece taker assignments (player IDs)
  */
 export interface SetPieceAssignments {
-  cornerTaker?: string;
-  freeKickTaker?: string;
-  penaltyTaker?: string;
+  cornerTaker: string; // Required in v2
+  freeKickTaker: string; // Required in v2
+  penaltyTaker: string; // Required in v2
 }
 
 export interface Tactics {
   formation: FormationType;
   mentality: Mentality;
-  // Advanced tactics (optional for backward compatibility)
-  roles?: PlayerRoles;
-  instructions?: TeamInstructions;
-  setPieces?: SetPieceAssignments;
+  roles: PlayerRoles; // Required in v2
+  instructions: TeamInstructions; // Required in v2
+  setPieces: SetPieceAssignments; // Required in v2
 }
 
 export interface Team {
@@ -164,8 +163,8 @@ export interface Team {
   players: Player[];
   staff: Staff[]; // Manager, coaches, scouts
   budget: number;
-  tactics?: Tactics; // Team's tactical setup
-  philosophy?: ClubPhilosophy; // Club's playing philosophy (set by director)
+  tactics: Tactics; // Team's tactical setup (required in v2)
+  philosophy: ClubPhilosophy; // Club's playing philosophy (required in v2)
 }
 
 export interface Match {
@@ -226,17 +225,17 @@ export interface MatchResult {
   homeTeam: string;
   awayTeam: string;
   result: 'home' | 'away' | 'draw';
-  homeGoalScorers?: string[]; // Player names who scored for home team
-  awayGoalScorers?: string[]; // Player names who scored for away team
-  events?: MatchEvent[]; // Key match events
-  attendance?: number;
-  // Match Day Atmosphere enhancements (optional for backward compatibility)
-  weather?: MatchWeather;
-  stats?: MatchStats;
-  playerRatings?: PlayerRating[];
-  manOfMatch?: ManOfMatch;
-  isDerby?: boolean;
-  postMatchAnalysis?: PostMatchAnalysis;
+  homeGoalScorers?: string[]; // Player names who scored for home team (truly optional - may be 0)
+  awayGoalScorers?: string[]; // Player names who scored for away team (truly optional - may be 0)
+  events?: MatchEvent[]; // Key match events (legacy matches may not have)
+  attendance?: number; // Legacy matches may not have
+  // Match Day Atmosphere enhancements (required in v2)
+  weather: MatchWeather; // Required in v2
+  stats: MatchStats; // Required in v2
+  playerRatings: PlayerRating[]; // Required in v2
+  manOfMatch: ManOfMatch | null; // Required in v2, null if draw with no standout player
+  isDerby: boolean; // Required in v2
+  postMatchAnalysis: PostMatchAnalysis; // Required in v2
 }
 
 // Match Day Atmosphere: Pre-Match Preview Types
@@ -465,7 +464,15 @@ export interface CupCompetition {
   completed: boolean;
 }
 
+/**
+ * GameState Version Number
+ * - v1: Original structure (implicit, no version field)
+ * - v2: Added version field, made migration artifacts required (Epic 1.5)
+ */
+export type GameStateVersion = 1 | 2;
+
 export interface GameState {
+  version: GameStateVersion; // Version for save migration tracking
   id: string;
   createdAt: Date;
   lastSaved: Date;
@@ -485,8 +492,8 @@ export interface GameState {
   achievements: Achievement[]; // Unlockable achievements
   seasonAwards: SeasonAward[]; // Season-by-season awards
   newsFeed: NewsArticle[]; // News articles (ordered by date DESC)
-  matchPreviews?: MatchPreview[]; // Pre-match previews for upcoming fixtures (optional for migration)
-  cupCompetition?: CupCompetition; // Current cup competition (optional for backward compatibility)
+  matchPreviews: MatchPreview[]; // Pre-match previews (required in v2, empty array if none)
+  cupCompetition?: CupCompetition; // Current cup competition (truly optional - may not be in cup)
   cupHistory: CupCompetition[]; // Past cup competitions
 }
 

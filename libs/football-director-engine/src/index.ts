@@ -1,4 +1,5 @@
 export * from './lib/types';
+export * from './lib/migration'; // Save file migration utilities (Epic 1.5)
 export * from './lib/match-simulator';
 export * from './lib/match-commentary';
 export * from './lib/league-table-manager';
@@ -13,6 +14,7 @@ export * from './lib/player-stats-tracker';
 export * from './lib/records-manager';
 export * from './lib/achievement-manager';
 export * from './lib/news-generator';
+export * from './lib/news-engine'; // New unified news engine (replaces news-generator)
 export * from './lib/staff-manager';
 export * from './lib/tactics-manager';
 export * from './lib/injury-manager';

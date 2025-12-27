@@ -11,8 +11,40 @@ import { TacticsManager } from './tactics-manager';
 import { InjuryManager } from './injury-manager';
 import { MoraleManager } from './morale-manager';
 import { WeatherGenerator } from './weather-generator';
+import { getDefaultPostMatchAnalysis, getDefaultMatchWeather, getDefaultMatchStats } from './migration';
 
-export class MatchSimulator {
+/**
+ * Match Simulator Interface
+ *
+ * Defines the contract for match simulation.
+ * Use this interface for dependency injection and testing.
+ */
+export interface IMatchSimulator {
+  /**
+   * Calculate effective team strength based on available players, tactics, morale, and manager bonus
+   */
+  calculateTeamStrength(team: Team, currentWeek: number): number;
+
+  /**
+   * Simulate a single match between two teams
+   */
+  simulateMatch(match: Match, currentWeek?: number, seed?: number): MatchResult;
+
+  /**
+   * Simulate an entire season (all matches between teams)
+   */
+  simulateSeason(teams: Team[], seed?: number): MatchResult[];
+
+  /**
+   * Simulate a knockout cup match with extra time and penalties if needed
+   */
+  simulateKnockoutMatch(match: Match, currentWeek?: number, seed?: number): CupResult;
+}
+
+/**
+ * Match Simulator Implementation
+ */
+export class MatchSimulator implements IMatchSimulator {
   private tacticsManager = new TacticsManager();
   private injuryManager = new InjuryManager();
   private moraleManager = new MoraleManager();
@@ -179,6 +211,8 @@ export class MatchSimulator {
       playerRatings,
       manOfMatch,
       isDerby,
+      // Story 1.5.2: postMatchAnalysis is now required
+      postMatchAnalysis: getDefaultPostMatchAnalysis(match.homeTeam.name, match.awayTeam.name),
     };
   }
 
@@ -676,6 +710,17 @@ export class MatchSimulator {
       homeTeam: match.homeTeam.name,
       awayTeam: match.awayTeam.name,
       result,
+      homeGoalScorers: [],
+      awayGoalScorers: [],
+      events: [],
+      attendance: 0,
+      // Story 1.5.2: Now required fields
+      weather: getDefaultMatchWeather(),
+      stats: getDefaultMatchStats(),
+      playerRatings: [],
+      manOfMatch: null,
+      isDerby: false,
+      postMatchAnalysis: getDefaultPostMatchAnalysis(match.homeTeam.name, match.awayTeam.name),
     };
 
     return {

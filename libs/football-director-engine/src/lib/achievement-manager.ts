@@ -13,7 +13,21 @@ import {
   SeasonRecords,
 } from './types';
 
-export class AchievementManager {
+/**
+ * Achievement Manager Interface
+ *
+ * Defines the contract for managing achievements and season awards.
+ */
+export interface IAchievementManager {
+  getAllAchievements(): Achievement[];
+  checkAchievements(gameState: GameState, achievements: Achievement[]): Achievement[];
+  awardSeasonPrizes(gameState: GameState): SeasonAward;
+}
+
+/**
+ * Achievement Manager Implementation
+ */
+export class AchievementManager implements IAchievementManager {
   /**
    * Get all available achievements in the game
    */

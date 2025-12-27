@@ -490,10 +490,14 @@ export default function SquadPage() {
           if (selectedPlayer && gameState) {
             const contract = {
               weeklyWage,
-              startYear: gameState.season.currentSeason,
+              startYear: gameState.season.year,
               startWeek: gameState.season.currentWeek,
-              expiryYear: gameState.season.currentSeason + years,
+              expiryYear: gameState.season.year + years,
               expiryWeek: 52,
+              // Story 1.5.2: Now required fields
+              yearsRemaining: years,
+              weeksRemaining: years * 52 - gameState.season.currentWeek + 52,
+              status: 'active' as const,
             };
             offerContract(selectedPlayer.id, contract);
           }

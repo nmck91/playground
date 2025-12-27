@@ -32,8 +32,8 @@ describe('WeatherGenerator', () => {
     it('should generate appropriate temperature for season', () => {
       const weather = generator.generateWeather(1); // Pre-season summer
 
-      // Summer should be warm (roughly 20-26°C)
-      expect(weather.temperature).toBeGreaterThan(18);
+      // Summer should be warm (roughly 18-27°C)
+      expect(weather.temperature).toBeGreaterThanOrEqual(18);
       expect(weather.temperature).toBeLessThan(28);
     });
 

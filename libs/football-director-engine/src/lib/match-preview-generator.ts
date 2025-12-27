@@ -17,7 +17,32 @@ import {
 import { WeatherGenerator } from './weather-generator';
 import { MatchCommentary } from './match-commentary';
 
-export class MatchPreviewGenerator {
+/**
+ * Match Preview Generator Interface
+ *
+ * Defines the contract for generating pre-match preview content.
+ */
+export interface IMatchPreviewGenerator {
+  /**
+   * Generate a comprehensive preview for an upcoming match including team news,
+   * head-to-head statistics, weather forecast, and manager quotes
+   */
+  generatePreview(
+    fixture: Fixture,
+    homeTeam: Team,
+    awayTeam: Team,
+    leagueTable: LeagueTable[],
+    allFixtures: Fixture[],
+    currentWeek: number,
+    currentYear: number,
+    seed?: number
+  ): MatchPreview;
+}
+
+/**
+ * Match Preview Generator Implementation
+ */
+export class MatchPreviewGenerator implements IMatchPreviewGenerator {
   private weatherGenerator = new WeatherGenerator();
   private commentaryGenerator = new MatchCommentary();
 

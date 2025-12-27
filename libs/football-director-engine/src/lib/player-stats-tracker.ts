@@ -13,7 +13,25 @@ import {
   SeasonTopPerformers,
 } from './types';
 
-export class PlayerStatsTracker {
+/**
+ * Player Stats Tracker Interface
+ *
+ * Defines the contract for tracking player statistics.
+ */
+export interface IPlayerStatsTracker {
+  initializePlayerStats(): PlayerStats;
+  updateStatsFromMatch(player: Player, events: MatchEvent[], team: 'home' | 'away'): Player;
+  processTeamMatchStats(team: Team, result: MatchResult, teamSide: 'home' | 'away'): Team;
+  archiveSeasonStats(player: Player, season: number, teamName: string): Player;
+  getTopPerformers(team: Team): SeasonTopPerformers;
+  resetSeasonStats(player: Player): Player;
+  archiveAndResetTeamStats(team: Team, season: number): Team;
+}
+
+/**
+ * Player Stats Tracker Implementation
+ */
+export class PlayerStatsTracker implements IPlayerStatsTracker {
   /**
    * Initialize stats for a new player
    */

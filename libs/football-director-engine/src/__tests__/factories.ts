@@ -94,7 +94,25 @@ export function createMockTeam(overrides: Partial<Team> = {}): Team {
     tactics: {
       formation: '4-4-2',
       mentality: 'balanced',
+      // Story 1.5.2: Now required fields
+      roles: {
+        defenders: 'full-back',
+        midfielders: 'box-to-box',
+        forwards: 'poacher',
+      },
+      instructions: {
+        tempo: 'balanced',
+        width: 'balanced',
+        pressing: 'medium',
+        passingStyle: 'mixed',
+      },
+      setPieces: {
+        cornerTaker: 'mid1',
+        freeKickTaker: 'mid2',
+        penaltyTaker: 'fwd1',
+      },
     },
+    philosophy: 'balanced', // Story 1.5.2: Now required field
   };
 
   return { ...defaults, ...overrides };

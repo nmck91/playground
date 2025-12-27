@@ -1,9 +1,9 @@
 /**
- * Football Director Engine - News Generator
- * Generates news articles for various game events
+ * Football Director Engine - News Engine
+ * Unified news article generation for all game events
  *
- * @deprecated Use NewsEngine instead. This module will be removed in a future version.
- * @see {@link NewsEngine} for the new unified news generation API
+ * Consolidates news generation logic into a single, maintainable module.
+ * Replaces the old news-generator.ts with enhanced functionality.
  */
 
 import {
@@ -16,13 +16,127 @@ import {
   Player,
   BoardStatus,
   Team,
+  Injury,
+  PlayerContract,
+  Achievement,
 } from './types';
 import { DevelopmentReport } from './player-development';
 
 /**
- * @deprecated Use NewsEngine instead
+ * News Engine Interface
+ *
+ * Defines the contract for news generation. Enables dependency injection
+ * and easier testing through mocking.
  */
-export class NewsGenerator {
+export interface INewsEngine {
+  // Match-related news
+  generateMatchNews(
+    results: MatchResult[],
+    playerTeamName: string,
+    leagueTable: LeagueTable[],
+    week: number,
+    season: number
+  ): NewsArticle[];
+
+  // Transfer news
+  generateTransferNews(
+    listing: TransferListing,
+    buyerTeamName: string,
+    week: number,
+    season: number,
+    isSale?: boolean
+  ): NewsArticle;
+
+  // Player milestone news
+  generateMilestoneNews(
+    player: Player,
+    teamName: string,
+    week: number,
+    season: number
+  ): NewsArticle[];
+
+  // Injury news (NEW)
+  generateInjuryNews(
+    player: Player,
+    injury: Injury,
+    teamName: string,
+    week: number,
+    season: number
+  ): NewsArticle;
+
+  // Contract news (NEW)
+  generateContractNews(
+    player: Player,
+    contract: PlayerContract,
+    teamName: string,
+    week: number,
+    season: number,
+    newsType: 'signing' | 'renewal' | 'expiring'
+  ): NewsArticle;
+
+  // Achievement news (NEW)
+  generateAchievementNews(
+    achievement: Achievement,
+    week: number,
+    season: number
+  ): NewsArticle;
+
+  // Board status news
+  generateBoardNews(
+    boardStatus: BoardStatus,
+    teamName: string,
+    position: number,
+    week: number,
+    season: number
+  ): NewsArticle | null;
+
+  // League standings news
+  generateStandingsNews(
+    oldTable: LeagueTable[],
+    newTable: LeagueTable[],
+    week: number,
+    season: number
+  ): NewsArticle[];
+
+  // Player development news
+  generateDevelopmentNews(
+    reports: DevelopmentReport[],
+    teamName: string,
+    week: number,
+    season: number
+  ): NewsArticle[];
+
+  // Youth academy news
+  generateYouthAcademyNews(
+    newPlayers: Player[],
+    teamName: string,
+    week: number,
+    season: number
+  ): NewsArticle;
+
+  // Season start/end news
+  generateWelcomeNews(teamName: string, season: number): NewsArticle;
+  generateSeasonEndNews(
+    finalPosition: number,
+    teamName: string,
+    season: number,
+    leagueTable: LeagueTable
+  ): NewsArticle;
+
+  // Background flavor news (NEW)
+  generateRandomNews(week: number, season: number): NewsArticle | null;
+
+  // Utility
+  pruneOldNews(newsFeed: NewsArticle[], currentSeason: number): NewsArticle[];
+}
+
+/**
+ * News Engine Implementation
+ *
+ * Generates news articles for all game events in a consistent format.
+ * Uses template-based content generation for maintainability.
+ */
+export class NewsEngine implements INewsEngine {
   /**
    * Generate news for match results
    */
@@ -181,6 +295,109 @@ export class NewsGenerator {
     }
 
     return news;
+  }
+
+  /**
+   * Generate news for player injuries (NEW)
+   */
+  generateInjuryNews(
+    player: Player,
+    injury: Injury,
+    teamName: string,
+    week: number,
+    season: number
+  ): NewsArticle {
+    const now = new Date();
+    const severity = injury.type === 'serious' ? 'major' : injury.type === 'moderate' ? 'concerning' : 'minor';
+    const importance: NewsImportance = injury.type === 'serious' ? 'high' : injury.type === 'moderate' ? 'medium' : 'low';
+
+    return {
+      id: `news-${Date.now()}-${Math.random()}`,
+      date: now,
+      week,
+      season,
+      type: 'general',
+      headline: `${player.name} Suffers ${severity.charAt(0).toUpperCase() + severity.slice(1)} Injury`,
+      body: `${teamName} have confirmed that ${player.name} has sustained ${injury.description}. The ${player.age}-year-old ${player.position} is expected to be sidelined for approximately ${injury.weeksRemaining} week${injury.weeksRemaining > 1 ? 's' : ''}.`,
+      teams: [teamName],
+      players: [player.name],
+      importance,
+      read: false,
+    };
+  }
+
+  /**
+   * Generate news for contract events (NEW)
+   */
+  generateContractNews(
+    player: Player,
+    contract: PlayerContract,
+    teamName: string,
+    week: number,
+    season: number,
+    newsType: 'signing' | 'renewal' | 'expiring'
+  ): NewsArticle {
+    const now = new Date();
+    let headline = '';
+    let body = '';
+    let importance: NewsImportance = 'medium';
+
+    switch (newsType) {
+      case 'signing':
+        headline = `${teamName} Secure ${player.name} on New Contract`;
+        body = `${teamName} have tied down ${player.name} to a new deal worth £${contract.weeklyWage.toLocaleString()} per week. The ${player.age}-year-old ${player.position} has committed until the end of the ${contract.expiryYear} season.`;
+        importance = contract.weeklyWage > 50000 ? 'high' : 'medium';
+        break;
+
+      case 'renewal':
+        headline = `${player.name} Extends Stay at ${teamName}`;
+        body = `${player.name} has signed a contract extension with ${teamName}. The ${player.position} will remain at the club until the end of the ${contract.expiryYear} season on wages of £${contract.weeklyWage.toLocaleString()} per week.`;
+        importance = 'medium';
+        break;
+
+      case 'expiring':
+        headline = `${player.name} Contract Situation Uncertain`;
+        body = `${player.name}'s contract at ${teamName} is set to expire soon. With just ${contract.weeksRemaining} week${contract.weeksRemaining > 1 ? 's' : ''} remaining, the ${player.age}-year-old ${player.position} could leave on a free transfer unless a new deal is agreed.`;
+        importance = 'high';
+        break;
+    }
+
+    return {
+      id: `news-${Date.now()}-${Math.random()}`,
+      date: now,
+      week,
+      season,
+      type: 'general',
+      headline,
+      body,
+      teams: [teamName],
+      players: [player.name],
+      importance,
+      read: false,
+    };
+  }
+
+  /**
+   * Generate news for unlocked achievements (NEW)
+   */
+  generateAchievementNews(
+    achievement: Achievement,
+    week: number,
+    season: number
+  ): NewsArticle {
+    const now = new Date();
+
+    return {
+      id: `news-${Date.now()}-${Math.random()}`,
+      date: now,
+      week,
+      season,
+      type: 'milestone',
+      headline: `Achievement Unlocked: ${achievement.name}`,
+      body: `Congratulations! ${achievement.description} This milestone demonstrates the progress being made at the club.`,
+      importance: 'medium',
+      read: false,
+    };
   }
 
   /**
@@ -349,7 +566,7 @@ export class NewsGenerator {
   }
 
   /**
-   * Generate welcome news
+   * Generate welcome news for new game
    */
   generateWelcomeNews(teamName: string, season: number): NewsArticle {
     const now = new Date();
@@ -413,6 +630,57 @@ export class NewsGenerator {
       body,
       teams: [teamName],
       importance,
+      read: false,
+    };
+  }
+
+  /**
+   * Generate random background news for flavor (NEW)
+   * Returns null if no news generated this week
+   */
+  generateRandomNews(week: number, season: number): NewsArticle | null {
+    const now = new Date();
+    const random = Math.random();
+
+    // Only generate random news 20% of the time
+    if (random > 0.2) {
+      return null;
+    }
+
+    const flavorNews = [
+      {
+        headline: 'Transfer Window Speculation Heating Up',
+        body: 'Rumors are swirling around several high-profile players as clubs prepare their transfer strategies. Expect plenty of movement in the coming weeks.',
+      },
+      {
+        headline: 'Weather Causes Fixture Concerns',
+        body: 'Unseasonable weather conditions have raised questions about upcoming fixtures. Groundskeepers across the league are working hard to ensure pitches remain playable.',
+      },
+      {
+        headline: 'Referees Under Spotlight',
+        body: 'Recent controversial decisions have put match officials under increased scrutiny. The refereeing body has promised to review key incidents.',
+      },
+      {
+        headline: 'Youth Development Focus Growing',
+        body: 'Clubs are increasingly investing in their youth academies as the pathway to first-team football becomes more valued across the league.',
+      },
+      {
+        headline: 'Fan Attendance Figures Encouraging',
+        body: 'Average attendances remain strong across the league, with several clubs reporting sold-out matches. The passion for the game continues to thrive.',
+      },
+    ];
+
+    const selectedNews = flavorNews[Math.floor(random * flavorNews.length)];
+
+    return {
+      id: `news-${Date.now()}-${Math.random()}`,
+      date: now,
+      week,
+      season,
+      type: 'general',
+      headline: selectedNews.headline,
+      body: selectedNews.body,
+      importance: 'low',
       read: false,
     };
   }

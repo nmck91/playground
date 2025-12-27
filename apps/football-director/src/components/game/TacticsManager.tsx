@@ -12,6 +12,7 @@ import {
   DefenderRole,
   MidfielderRole,
   ForwardRole,
+  getDefaultSetPieces,
 } from '@playground/football-director-engine';
 import { useState } from 'react';
 
@@ -48,7 +49,7 @@ export function TacticsManager({
     currentTactics?.instructions || tacticsEngine.getDefaultInstructions()
   );
   const [setPieces, setSetPieces] = useState<SetPieceAssignments>(
-    currentTactics?.setPieces || {}
+    currentTactics?.setPieces || getDefaultSetPieces(players)
   );
   const [showAdvanced, setShowAdvanced] = useState(false);
 

@@ -1,11 +1,62 @@
 /**
  * Football Director Engine - Match Commentary
- * Generates exciting match highlights and commentary
+ * Generates real-time match events and commentary during match simulation
+ *
+ * Responsibilities:
+ * - Select goal scorers and assist providers
+ * - Generate match events (goals, cards, shots, saves, blocks, etc.)
+ * - Generate attendance with contextual factors
+ * - Real-time commentary descriptions
+ *
+ * Non-Responsibilities (handled by other modules):
+ * - Post-match analysis (PostMatchGenerator)
+ * - News articles (NewsEngine)
+ * - Match previews (MatchPreviewGenerator)
  */
 
 import { Team, MatchEvent, Player } from './types';
 
-export class MatchCommentary {
+/**
+ * Match Commentary Interface
+ *
+ * Defines the contract for real-time match event generation.
+ * Use this interface for dependency injection and testing.
+ */
+export interface IMatchCommentary {
+  // Goal scorer selection
+  selectGoalScorers(team: Team, numberOfGoals: number, seed?: number): Player[];
+  selectAssistProvider(team: Team, scorer: Player, seed?: number): Player | null;
+
+  // Event generation
+  generateMatchEvents(
+    homeTeam: Team,
+    awayTeam: Team,
+    homeScore: number,
+    awayScore: number,
+    homeScorers: Player[],
+    awayScorers: Player[],
+    seed?: number
+  ): MatchEvent[];
+
+  // Attendance
+  generateAttendance(
+    homeTeam: Team,
+    seed?: number,
+    options?: {
+      isDerby?: boolean;
+      homePosition?: number;
+      awayPosition?: number;
+      weatherCondition?: string;
+    }
+  ): number;
+}
+
+/**
+ * Match Commentary Implementation
+ *
+ * Generates real-time match events during match simulation.
+ */
+export class MatchCommentary implements IMatchCommentary {
   /**
    * Select random goal scorers from a team based on position
    */
@@ -490,6 +541,10 @@ export class MatchCommentary {
 
   /**
    * Generate match summary commentary
+   *
+   * @deprecated Use PostMatchGenerator instead. This method generates post-match content
+   * which should be handled by PostMatchGenerator, not real-time commentary.
+   * Will be removed in a future version.
    */
   generateMatchSummary(
     homeTeam: string,

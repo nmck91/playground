@@ -12,7 +12,46 @@ import {
   Fixture,
 } from './types';
 
-export class RecordsManager {
+/**
+ * Records Manager Interface
+ *
+ * Defines the contract for tracking season and club records.
+ */
+export interface IRecordsManager {
+  calculateSeasonRecords(
+    season: number,
+    finalTable: LeagueTable,
+    matchHistory: MatchResult[],
+    fixtures: Fixture[],
+    playerTeam: Team,
+    teamId: string
+  ): SeasonRecords;
+
+  findBiggestResults(
+    matches: MatchResult[],
+    teamName: string
+  ): {
+    biggestWin?: SeasonRecords['biggestWin'];
+    biggestLoss?: SeasonRecords['biggestLoss'];
+  };
+
+  calculateStreaks(fixtures: Fixture[], teamId: string): {
+    longestWinStreak: number;
+    longestUnbeatenStreak: number;
+  };
+
+  initializeClubRecords(season: number): ClubRecords;
+
+  updateClubRecords(
+    currentRecords: ClubRecords,
+    seasonRecords: SeasonRecords
+  ): { records: ClubRecords; brokenRecords: string[] };
+}
+
+/**
+ * Records Manager Implementation
+ */
+export class RecordsManager implements IRecordsManager {
   /**
    * Calculate season records from completed season data
    */

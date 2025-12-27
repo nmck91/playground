@@ -301,7 +301,7 @@ export const usePlayerStore = create<PlayerStore>()(
         const player = get().getPlayerById(playerId);
         if (!player) return;
 
-        get().updatePlayer(playerId, { injury: null });
+        get().updatePlayer(playerId, { injury: undefined }); // Story 1.5.2: Use undefined, not null
 
         useUIStore.getState().addNotification({
           type: 'success',
@@ -320,7 +320,7 @@ export const usePlayerStore = create<PlayerStore>()(
 
           const weeksRemaining = p.injury.weeksRemaining - 1;
           if (weeksRemaining <= 0) {
-            return { ...p, injury: null };
+            return { ...p, injury: undefined }; // Story 1.5.2: Use undefined, not null
           }
 
           return {

@@ -6,7 +6,23 @@
 
 import { MatchWeather } from './types';
 
-export class WeatherGenerator {
+/**
+ * Weather Generator Interface
+ *
+ * Defines the contract for generating match weather conditions.
+ */
+export interface IWeatherGenerator {
+  /**
+   * Generate weather conditions for a match based on the week number (season)
+   * Weather varies by season: summer (sunny), autumn (mixed), winter (rainy/snowy), spring (improving)
+   */
+  generateWeather(week: number, seed?: number): MatchWeather;
+}
+
+/**
+ * Weather Generator Implementation
+ */
+export class WeatherGenerator implements IWeatherGenerator {
   /**
    * Generate weather for a match based on week number
    */

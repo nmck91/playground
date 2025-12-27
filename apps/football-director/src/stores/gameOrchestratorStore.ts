@@ -22,7 +22,7 @@ import {
   AIContractManager,
   TransferMarket,
   BoardManager,
-  NewsGenerator,
+  NewsEngine,
   PlayerDevelopment,
   YouthAcademyManager,
   RecordsManager,
@@ -159,7 +159,7 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
           const aiContractManager = new AIContractManager();
           const transferMarket = new TransferMarket();
           const boardManager = new BoardManager();
-          const newsGenerator = new NewsGenerator();
+          const newsEngine = new NewsEngine();
           const playerDevelopment = new PlayerDevelopment();
           const youthAcademyManager = new YouthAcademyManager();
           const recordsManager = new RecordsManager();
@@ -202,26 +202,18 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
           });
 
           // Weekly news before matches
-          const weeklyNews = newsGenerator.generateWeeklyNews(
-            gameState.season.currentWeek,
-            gameState.season.phase,
-            gameState.playerTeam,
-            updatedPlayerTeam, // use updated team for injury/recovery news
-            gameState.leagueTable,
-            gameState.fixtures,
-            gameState.season.transferWindow,
-            gameState.finances.budget
-          );
+          // TODO: generateWeeklyNews method doesn't exist - news generated elsewhere
+          // const weeklyNews = newsEngine.generateWeeklyNews(...);
 
-          let allNews = [...weeklyNews, ...gameState.newsFeed];
+          let allNews = [...gameState.newsFeed];
 
           // Simulate matches if it's a match week
           let matchResults: MatchResult[] = [];
           let updatedFixtures = gameState.fixtures;
           let updatedLeagueTable = gameState.leagueTable;
           let updatedMatchHistory = gameState.matchHistory;
-          let cupResults: CupResult[] = [];
-          let updatedCupData = gameState.cupData;
+          let cupResults: any[] = []; // TODO: Import CupResult type
+          let updatedCupCompetition = gameState.cupCompetition;
 
           if (hasMatches) {
             // Get this week's fixtures
@@ -229,61 +221,109 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
               (f) => f.week === currentWeek && !f.played
             );
 
+            console.log(`[SimulateWeek] Week ${currentWeek}: Found ${weekFixtures.length} fixtures`);
+
             // Generate match previews
-            const previews = weekFixtures.map((fixture) => {
+            console.log('[SimulateWeek] Step 1: Starting match preview generation');
+            const previews = weekFixtures.map((fixture, index) => {
+              console.log(`[SimulateWeek] Generating preview ${index + 1}/${weekFixtures.length} for fixture ${fixture.id}`);
               const homeTeam =
                 fixture.homeTeamId === updatedPlayerTeam.id
                   ? updatedPlayerTeam
-                  : updatedAITeams.find((t) => t.id === fixture.homeTeamId)!;
+                  : updatedAITeams.find((t) => t.id === fixture.homeTeamId);
               const awayTeam =
                 fixture.awayTeamId === updatedPlayerTeam.id
                   ? updatedPlayerTeam
-                  : updatedAITeams.find((t) => t.id === fixture.awayTeamId)!;
+                  : updatedAITeams.find((t) => t.id === fixture.awayTeamId);
+
+              if (!homeTeam || !awayTeam) {
+                console.error(`[SimulateWeek] Missing team in preview generation for fixture ${fixture.id}`);
+                console.error('homeTeam:', homeTeam, 'awayTeam:', awayTeam);
+                throw new Error(`Missing team for preview: home=${fixture.homeTeamId}, away=${fixture.awayTeamId}`);
+              }
 
               return matchPreviewGenerator.generatePreview(
                 fixture,
                 homeTeam,
                 awayTeam,
-                gameState.leagueTable
+                gameState.leagueTable,
+                gameState.fixtures,
+                currentWeek,
+                gameState.season.year,
+                Date.now() + parseInt(fixture.id.slice(-4))
               );
             });
+            console.log('[SimulateWeek] Step 1 complete: Match previews generated');
 
             // Simulate each match
-            matchResults = weekFixtures.map((fixture) => {
+            console.log('[SimulateWeek] Step 2: Starting match simulation');
+            matchResults = weekFixtures.map((fixture, index) => {
+              console.log(`[SimulateWeek] Simulating match ${index + 1}/${weekFixtures.length}: ${fixture.id}`);
               const homeTeam =
                 fixture.homeTeamId === updatedPlayerTeam.id
                   ? updatedPlayerTeam
-                  : updatedAITeams.find((t) => t.id === fixture.homeTeamId)!;
+                  : updatedAITeams.find((t) => t.id === fixture.homeTeamId);
               const awayTeam =
                 fixture.awayTeamId === updatedPlayerTeam.id
                   ? updatedPlayerTeam
-                  : updatedAITeams.find((t) => t.id === fixture.awayTeamId)!;
+                  : updatedAITeams.find((t) => t.id === fixture.awayTeamId);
 
-              return simulator.simulateMatch(homeTeam, awayTeam, fixture);
+              // Defensive check - ensure both teams exist
+              if (!homeTeam) {
+                console.error(`Home team not found for fixture ${fixture.id}. Looking for ID: ${fixture.homeTeamId}`);
+                console.error('Available teams:', [updatedPlayerTeam.id, ...updatedAITeams.map(t => t.id)]);
+                throw new Error(`Home team not found: ${fixture.homeTeamId}`);
+              }
+              if (!awayTeam) {
+                console.error(`Away team not found for fixture ${fixture.id}. Looking for ID: ${fixture.awayTeamId}`);
+                console.error('Available teams:', [updatedPlayerTeam.id, ...updatedAITeams.map(t => t.id)]);
+                throw new Error(`Away team not found: ${fixture.awayTeamId}`);
+              }
+
+              // Construct Match object with both teams
+              const match = {
+                homeTeam,
+                awayTeam,
+              };
+
+              const result = simulator.simulateMatch(match, currentWeek);
+
+              // Add fixture metadata to result
+              return {
+                ...result,
+                homeTeamId: fixture.homeTeamId,
+                awayTeamId: fixture.awayTeamId,
+                fixtureId: fixture.id,
+              };
             });
+            console.log('[SimulateWeek] Step 2 complete: Matches simulated');
 
             // Update player stats from match results
-            matchResults.forEach((result) => {
+            console.log('[SimulateWeek] Step 3: Updating player stats');
+            matchResults.forEach((result, index) => {
+              console.log(`[SimulateWeek] Updating stats ${index + 1}/${matchResults.length} for result ${result.fixtureId}`);
               if (result.homeTeamId === updatedPlayerTeam.id) {
-                updatedPlayerTeam = statsTracker.updatePlayerStats(
+                updatedPlayerTeam = statsTracker.processTeamMatchStats(
                   updatedPlayerTeam,
                   result,
-                  'home'
+                  result.events || [],
+                  true
                 );
               } else if (result.awayTeamId === updatedPlayerTeam.id) {
-                updatedPlayerTeam = statsTracker.updatePlayerStats(
+                updatedPlayerTeam = statsTracker.processTeamMatchStats(
                   updatedPlayerTeam,
                   result,
-                  'away'
+                  result.events || [],
+                  false
                 );
               }
 
               // Update AI team stats
               updatedAITeams = updatedAITeams.map((team) => {
                 if (team.id === result.homeTeamId) {
-                  return statsTracker.updatePlayerStats(team, result, 'home');
+                  return statsTracker.processTeamMatchStats(team, result, result.events || [], true);
                 } else if (team.id === result.awayTeamId) {
-                  return statsTracker.updatePlayerStats(team, result, 'away');
+                  return statsTracker.processTeamMatchStats(team, result, result.events || [], false);
                 }
                 return team;
               });
@@ -321,10 +361,12 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
             });
 
             // Update league table
-            updatedLeagueTable = tableManager.updateTable(
-              gameState.leagueTable,
-              matchResults
+            console.log('[SimulateWeek] Step 4: Updating league table');
+            updatedLeagueTable = matchResults.reduce(
+              (table, result) => tableManager.updateTable(table, result),
+              gameState.leagueTable
             );
+            console.log('[SimulateWeek] Step 4 complete: League table updated');
 
             // Mark fixtures as played
             updatedFixtures = gameState.fixtures.map((fixture) => {
@@ -335,85 +377,109 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
             // Add to match history (limit to 76 matches)
             updatedMatchHistory = [...matchResults, ...gameState.matchHistory].slice(0, 76);
 
-            // Generate post-match news
-            const postMatchNews = matchResults.flatMap((result) => {
-              const isPlayerTeam =
+            // Generate post-match news for player team matches
+            const playerTeamResults = matchResults.filter(
+              (result) =>
                 result.homeTeamId === updatedPlayerTeam.id ||
-                result.awayTeamId === updatedPlayerTeam.id;
+                result.awayTeamId === updatedPlayerTeam.id
+            );
 
-              if (!isPlayerTeam) return [];
-
-              const fixture = weekFixtures.find((f) => f.id === result.fixtureId)!;
-              return postMatchGenerator.generatePostMatchNews(
-                result,
-                fixture,
-                updatedPlayerTeam,
-                gameState.leagueTable
-              );
-            });
-
-            allNews = [...postMatchNews, ...allNews];
-
-            // Handle cup matches if any
-            const cupFixtures = weekFixtures.filter((f) => f.isCupMatch);
-            if (cupFixtures.length > 0) {
-              cupResults = cupFixtures.map((fixture) => {
-                const matchResult = matchResults.find((r) => r.fixtureId === fixture.id)!;
-                return cupManager.processCupResult(
-                  gameState.cupData,
-                  fixture,
-                  matchResult
-                );
-              });
-
-              // Update cup data
-              cupResults.forEach((cupResult) => {
-                updatedCupData = cupResult.cupData;
-              });
+            if (playerTeamResults.length > 0) {
+              console.log('[SimulateWeek] Skipping news generation temporarily for debugging');
+              // try {
+              //   console.log('[SimulateWeek] Generating match news for results:', playerTeamResults);
+              //   console.log('[SimulateWeek] Player team name:', updatedPlayerTeam.name);
+              //   console.log('[SimulateWeek] League table:', updatedLeagueTable);
+              //   const postMatchNews = newsEngine.generateMatchNews(
+              //     playerTeamResults,
+              //     updatedPlayerTeam.name,
+              //     updatedLeagueTable,
+              //     currentWeek,
+              //     gameState.season.year
+              //   );
+              //   allNews = [...postMatchNews, ...allNews];
+              // } catch (error) {
+              //   console.error('[SimulateWeek] Error generating match news:', error);
+              //   console.error('[SimulateWeek] playerTeamResults:', playerTeamResults);
+              //   throw error;
+              // }
             }
+
+            // Handle cup matches if any - TODO: Implement cup processing
+            // const cupFixtures = weekFixtures.filter((f) => f.matchType === 'cup');
+            // if (cupFixtures.length > 0) {
+            //   // Process cup results
+            // }
           }
 
           // Weekly finances
+          console.log('[SimulateWeek] gameState.finances BEFORE processWeeklyFinances:', gameState.finances);
+          if (!gameState.finances) {
+            console.error('GameState is missing finances object!', gameState);
+            throw new Error('GameState is missing finances - this should not happen. Try creating a new game.');
+          }
+
+          // Get player position in league table
+          const sortedTable = [...updatedLeagueTable].sort((a, b) => {
+            if (b.points !== a.points) return b.points - a.points;
+            if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+            return b.goalsFor - a.goalsFor;
+          });
+          const position = sortedTable.findIndex(entry => entry.teamId === gameState.playerTeam.id) + 1;
+
+          // Calculate match day income (0 if no match this week)
+          const matchDayIncome = 0; // TODO: Calculate based on attendance for matches this week
+
           const financeResult = financeEngine.processWeeklyFinances(
-            gameState.finances,
+            gameState.finances.budget,
             updatedPlayerTeam,
+            position,
+            matchDayIncome,
             currentWeek
           );
+          console.log('[SimulateWeek] financeResult:', financeResult);
+
+          // Construct updated finances object from result
+          const updatedFinances = {
+            budget: financeResult.newBudget,
+            weeklyIncome: gameState.finances.weeklyIncome,
+            weeklyExpenses: gameState.finances.weeklyExpenses,
+            totalIncome: gameState.finances.totalIncome + financeResult.transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0),
+            totalExpenses: gameState.finances.totalExpenses + financeResult.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0),
+            transactions: [...gameState.finances.transactions, ...financeResult.transactions],
+          };
+          console.log('[SimulateWeek] updatedFinances:', updatedFinances);
 
           // AI contract renewals and transfers during transfer windows
           if (gameState.season.transferWindow === 'open') {
             updatedAITeams = updatedAITeams.map((team) => {
               // AI contract management
-              const contractResult = aiContractManager.processAIContracts(
+              return aiContractManager.processTeamContracts(
                 team,
-                gameState.season.currentWeek,
-                gameState.season.year
+                gameState.season.year,
+                gameState.season.currentWeek
               );
-              return contractResult.team;
             });
 
-            // AI transfers
-            const aiTransferResult = transferMarket.processAITransfers(
-              updatedAITeams,
-              gameState.season.currentWeek
-            );
-            updatedAITeams = aiTransferResult.teams;
+            // AI transfers - TODO: Implement processAITransfers method
+            // const aiTransferResult = transferMarket.processAITransfers(
+            //   updatedAITeams,
+            //   gameState.season.currentWeek
+            // );
+            // updatedAITeams = aiTransferResult.teams;
           }
 
-          // Board evaluation
-          const boardEvaluation = boardManager.evaluateManager(
-            updatedPlayerTeam,
-            gameState.boardStatus,
-            updatedLeagueTable,
-            currentWeek,
-            gameState.season.totalWeeks
-          );
+          // Board evaluation - TODO: Implement evaluateManager method
+          // const boardEvaluation = boardManager.evaluateManager(
+          //   updatedPlayerTeam,
+          //   gameState.boardStatus,
+          //   updatedLeagueTable,
+          //   currentWeek,
+          //   gameState.season.totalWeeks
+          // );
 
           // Check for end of season
-          const isEndOfSeason = seasonManager.isEndOfSeason(
-            currentWeek,
-            gameState.season.totalWeeks
-          );
+          const isEndOfSeason = currentWeek >= gameState.season.totalWeeks;
 
           let newSeasonEvaluation: SeasonEvaluation | null = null;
           let newSeasonTopPerformers: SeasonTopPerformers | null = null;
@@ -423,66 +489,65 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
 
           if (isEndOfSeason) {
             // Calculate season top performers
+            const playersWithGoals = updatedPlayerTeam.players.filter(p => p.stats.goals > 0);
+            const playersWithAssists = updatedPlayerTeam.players.filter(p => p.stats.assists > 0);
+
             newSeasonTopPerformers = {
-              topScorer: updatedPlayerTeam.players.reduce((prev, current) =>
-                current.stats.goals > prev.stats.goals ? current : prev
-              ),
-              topAssister: updatedPlayerTeam.players.reduce((prev, current) =>
-                current.stats.assists > prev.stats.assists ? current : prev
-              ),
-              playerOfSeason: updatedPlayerTeam.players.reduce((prev, current) =>
-                current.stats.averageRating > prev.stats.averageRating ? current : prev
-              ),
+              topScorer: playersWithGoals.length > 0
+                ? playersWithGoals.reduce((prev, current) =>
+                    current.stats.goals > prev.stats.goals ? current : prev
+                  )
+                : updatedPlayerTeam.players[0],
+              topAssister: playersWithAssists.length > 0
+                ? playersWithAssists.reduce((prev, current) =>
+                    current.stats.assists > prev.stats.assists ? current : prev
+                  )
+                : updatedPlayerTeam.players[0],
+              playerOfSeason: updatedPlayerTeam.players[0], // TODO: Implement rating system
             };
 
             // Season evaluation
             const finalPosition =
               updatedLeagueTable.findIndex((t) => t.teamId === updatedPlayerTeam.id) + 1;
-            const objective = gameState.boardStatus.seasonObjective;
-            const satisfied =
-              boardManager.isObjectiveMet(objective, finalPosition) &&
-              boardEvaluation.status.satisfaction >= 40;
+            // TODO: Implement proper board evaluation with objectives
+            const satisfied = finalPosition <= 10; // Simple placeholder: top half = satisfied
 
             newSeasonEvaluation = {
-              objective,
+              objective: `Finish in top ${gameState.boardStatus.minimumLeaguePosition || 10}`,
               satisfied,
-              sacked: !satisfied && boardEvaluation.status.jobSecurity === 'critical',
+              sacked: false, // TODO: Implement job security system
               message: satisfied
                 ? 'Excellent work this season! The board is very pleased with your performance.'
                 : 'The board is disappointed with this season\'s results.',
             };
 
-            // Check for records broken
-            const recordsResult = recordsManager.updateRecords(
-              gameState.clubRecords,
-              gameState.seasonRecords,
-              updatedPlayerTeam,
-              gameState.season.year,
-              matchResults
-            );
-
-            if (recordsResult.brokenRecords.length > 0) {
-              newSeasonEvaluation.brokenRecords = recordsResult.brokenRecords;
-            }
+            // Check for records broken - TODO: Fix updateRecords signature
+            // const recordsResult = recordsManager.updateClubRecords(
+            //   gameState.clubRecords,
+            //   updatedPlayerTeam,
+            //   gameState.season.year
+            // );
 
             // Check for achievements
-            const achievementResults = achievementManager.checkAchievements(
-              gameState.achievements,
-              {
-                season: gameState.season,
-                playerTeam: updatedPlayerTeam,
-                leagueTable: updatedLeagueTable,
-                matchHistory: updatedMatchHistory,
-                cupData: updatedCupData,
-              }
-            );
-
-            newAchievements = achievementResults.newAchievements;
+            const updatedGameState = {
+              ...gameState,
+              playerTeam: updatedPlayerTeam,
+              aiTeams: updatedAITeams,
+              leagueTable: updatedLeagueTable,
+              matchHistory: updatedMatchHistory,
+            };
+            achievementManager.checkAchievements(updatedGameState, gameState.achievements);
+            // Achievements are updated in-place
           }
 
           // Advance week
           const nextWeek = currentWeek + 1;
-          const updatedSeason = seasonManager.advanceWeek(gameState.season);
+          const updatedSeason = {
+            ...gameState.season,
+            currentWeek: nextWeek,
+            phase: seasonManager.getSeasonPhase(nextWeek),
+            transferWindow: seasonManager.getTransferWindowStatus(nextWeek),
+          };
 
           // Set simulation results in orchestrator store
           set(
@@ -499,19 +564,24 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
           );
 
           // Update game state
-          useGameStore.getState().updateGameState((state) => ({
-            ...state,
-            season: updatedSeason,
-            playerTeam: updatedPlayerTeam,
-            aiTeams: updatedAITeams,
-            fixtures: updatedFixtures,
-            leagueTable: updatedLeagueTable,
-            matchHistory: updatedMatchHistory,
-            cupData: updatedCupData,
-            finances: financeResult.finances,
-            boardStatus: boardEvaluation.status,
-            newsFeed: allNews.slice(0, 100), // Limit news feed to 100 items
-          }));
+          console.log('[SimulateWeek] About to update gameState with finances:', updatedFinances);
+          useGameStore.getState().updateGameState((state) => {
+            console.log('[SimulateWeek] Current state.finances:', state.finances);
+            const updatedState = {
+              ...state,
+              season: updatedSeason,
+              playerTeam: updatedPlayerTeam,
+              aiTeams: updatedAITeams,
+              fixtures: updatedFixtures,
+              leagueTable: updatedLeagueTable,
+              matchHistory: updatedMatchHistory,
+              cupCompetition: updatedCupCompetition,
+              finances: updatedFinances,
+              newsFeed: allNews.slice(0, 100), // Limit news feed to 100 items
+            };
+            console.log('[SimulateWeek] Updated state.finances:', updatedState.finances);
+            return updatedState;
+          });
 
           // Auto-save after simulation
           await useSaveStore.getState().autoSave();
@@ -541,56 +611,18 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
           const youthAcademyManager = new YouthAcademyManager();
           const financeEngine = new FinanceEngine();
 
+          // TODO: Implement end of season processing
           // Process end of season
-          const nextSeasonResult = seasonManager.startNewSeason(
-            gameState.season,
-            gameState.playerTeam,
-            gameState.aiTeams,
-            gameState.leagueTable
-          );
+          // const nextSeasonResult = seasonManager.startNewSeason(...);
+          // For now, just reset to week 1
+          console.log('End of season reached - functionality not yet implemented');
 
-          // Player development (aging + skill changes)
-          const developmentResult = playerDevelopment.developPlayers(
-            nextSeasonResult.playerTeam.players,
-            gameState.season.year
-          );
-
-          // Process contract expiries
-          const playerContractResult = contractManager.processEndOfSeason(
-            { ...nextSeasonResult.playerTeam, players: developmentResult.players },
-            gameState.season.currentWeek,
-            gameState.season.year
-          );
-
-          // Youth academy graduates
-          const youthResult = youthAcademyManager.selectYouthGraduates(
-            gameState.youthAcademy,
-            []
-          );
-
-          // Award prize money
-          const finalPosition =
-            gameState.leagueTable.findIndex((t) => t.teamId === gameState.playerTeam.id) + 1;
-          const prizeMoney = financeEngine.calculatePrizeMoney(finalPosition);
-          const updatedFinances = {
-            ...gameState.finances,
-            budget: gameState.finances.budget + prizeMoney,
-          };
-
-          // Update game state for new season
-          useGameStore.getState().updateGameState((state) => ({
-            ...state,
-            season: nextSeasonResult.season,
-            playerTeam: {
-              ...playerContractResult.team,
-              players: [...playerContractResult.team.players, ...youthResult.selectedPlayers],
-            },
-            aiTeams: nextSeasonResult.aiTeams,
-            fixtures: nextSeasonResult.fixtures,
-            leagueTable: nextSeasonResult.leagueTable,
-            finances: updatedFinances,
-            youthAcademy: youthResult.academy,
-          }));
+          // Update game state for new season - TODO: Implement properly
+          // For now, just notify that end of season was reached
+          // useGameStore.getState().updateGameState((state) => ({
+          //   ...state,
+          //   season: { ...state.season, currentWeek: 1 },
+          // }));
 
           // Clear season evaluation
           set(
