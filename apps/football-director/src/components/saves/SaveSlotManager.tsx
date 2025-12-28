@@ -9,6 +9,7 @@ import { useState, useEffect } from 'react';
 import { SaveService } from '../../services/SaveService';
 import { SaveSlotCard } from './SaveSlotCard';
 import { SaveMetadata } from '@playground/football-director-engine';
+import { ThemeToggle } from '../ui/ThemeToggle';
 
 export interface SaveSlotManagerProps {
   onLoadSlot: (slotId: number) => void;
@@ -117,10 +118,13 @@ export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProp
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-dark-bg-primary">
       {/* Header */}
-      <header className="bg-teal-500 dark:bg-dark-teal-600 text-cream-100 dark:text-dark-text-primary shadow-lg">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <h1 className="text-4xl font-bold">⚽ Football Director</h1>
-          <p className="text-teal-100 dark:text-teal-200 mt-2">Save Management</p>
+      <header className="bg-white dark:bg-dark-bg-secondary border-b border-gray-200 dark:border-dark-border-primary">
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-dark-text-primary">⚽ Football Director</h1>
+            <ThemeToggle />
+          </div>
+          <p className="text-slate-600 dark:text-dark-text-secondary mt-2">Save Management</p>
         </div>
       </header>
 

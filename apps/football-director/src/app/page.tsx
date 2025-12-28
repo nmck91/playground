@@ -70,6 +70,13 @@ export default function Dashboard() {
     setMounted(true);
   }, []);
 
+  // Auto-load game if there's an active slot but no game loaded
+  useEffect(() => {
+    if (mounted && !gameState && !loading && currentSlot !== null) {
+      loadGame(currentSlot);
+    }
+  }, [mounted, gameState, loading, currentSlot, loadGame]);
+
   // Show highlights after simulation
   useEffect(() => {
     if (lastSimulationResults && lastSimulationResults.length > 0) {
