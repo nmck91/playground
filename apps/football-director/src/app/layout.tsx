@@ -4,6 +4,7 @@ import { BottomNav } from '../components/navigation/BottomNav';
 import { InstallPrompt } from '../components/pwa/InstallPrompt';
 import { OfflineIndicator } from '../components/pwa/OfflineIndicator';
 import { UpdateNotification } from '../components/pwa/UpdateNotification';
+import { WelcomeMessage } from '../components/pwa/WelcomeMessage';
 
 export const metadata = {
   title: 'Football Director',
@@ -45,6 +46,7 @@ export default function RootLayout({
           <InstallPrompt />
           <OfflineIndicator />
           <UpdateNotification />
+          <WelcomeMessage />
         </ThemeProvider>
       </body>
     </html>
