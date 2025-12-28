@@ -26,6 +26,7 @@ Complete documentation for the Football Director game application.
 - **[Tech Stack](tech-stack.md)** - Technology choices and versions
 - **[Coding Standards](coding-standards.md)** - Patterns, conventions, and best practices
 - **[Strict TypeScript Guide](strict-typescript-guide.md)** - TypeScript strict mode configuration and best practices (Epic 1.5.5)
+- **[Breaking Changes](BREAKING-CHANGES.md)** - Save file version history and migration guide (Epic 1.5.2)
 
 ## Quick Start
 
@@ -49,6 +50,13 @@ Complete documentation for the Football Director game application.
   - See: `strict-typescript-guide.md`
 - ✅ **Story 1.5.4**: Type guards and runtime validation with Zod
 - ✅ **Story 1.5.3**: Discriminated unions for GameState versioning
+- ✅ **Story 1.5.2**: Converted optional fields to required
+  - Player contract and morale now required
+  - Team tactics and philosophy now required
+  - GameState fields (matchPreviews, boardStatus, achievements) now required
+  - Auto-migration from v1 to v2 with sensible defaults
+  - 25+ migration tests added
+  - See: `BREAKING-CHANGES.md`
 
 ### December 2025 - Hook Refactoring
 - ✅ Refactored `useGameState` from 1,220 lines → 143 lines
