@@ -450,29 +450,29 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
           const isEndOfSeason = currentWeek >= gameState.season.totalWeeks;
 
           let newSeasonEvaluation: SeasonEvaluation | null = null;
-          let newSeasonTopPerformers: SeasonTopPerformers | null = null;
           const newDevelopmentReports: DevelopmentReport[] = [];
           const newYouthProspects: Player[] = [];
           let newAchievements: Achievement[] = [];
 
-          if (isEndOfSeason) {
-            // Calculate season top performers
-            const playersWithGoals = updatedPlayerTeam.players.filter(p => p.stats.goals > 0);
-            const playersWithAssists = updatedPlayerTeam.players.filter(p => p.stats.assists > 0);
+          // Calculate season top performers (updated every week, not just at end of season)
+          const playersWithGoals = updatedPlayerTeam.players.filter(p => p.stats.goals > 0);
+          const playersWithAssists = updatedPlayerTeam.players.filter(p => p.stats.assists > 0);
 
-            newSeasonTopPerformers = {
-              topScorer: playersWithGoals.length > 0
-                ? playersWithGoals.reduce((prev, current) =>
-                    current.stats.goals > prev.stats.goals ? current : prev
-                  )
-                : updatedPlayerTeam.players[0],
-              topAssister: playersWithAssists.length > 0
-                ? playersWithAssists.reduce((prev, current) =>
-                    current.stats.assists > prev.stats.assists ? current : prev
-                  )
-                : updatedPlayerTeam.players[0],
-              playerOfSeason: updatedPlayerTeam.players[0], // TODO: Implement rating system
-            };
+          const newSeasonTopPerformers: SeasonTopPerformers = {
+            topScorer: playersWithGoals.length > 0
+              ? playersWithGoals.reduce((prev, current) =>
+                  current.stats.goals > prev.stats.goals ? current : prev
+                )
+              : updatedPlayerTeam.players[0],
+            topAssister: playersWithAssists.length > 0
+              ? playersWithAssists.reduce((prev, current) =>
+                  current.stats.assists > prev.stats.assists ? current : prev
+                )
+              : updatedPlayerTeam.players[0],
+            playerOfSeason: updatedPlayerTeam.players[0], // TODO: Implement rating system
+          };
+
+          if (isEndOfSeason) {
 
             // Season evaluation
             const finalPosition =
@@ -504,8 +504,8 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
               leagueTable: updatedLeagueTable,
               matchHistory: updatedMatchHistory,
             };
-            achievementManager.checkAchievements(updatedGameState, gameState.achievements);
-            // Achievements are updated in-place
+            // Check for newly unlocked achievements
+            newAchievements = achievementManager.checkAchievements(updatedGameState, gameState.achievements);
           }
 
           // Advance week

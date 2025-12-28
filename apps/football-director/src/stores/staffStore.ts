@@ -104,6 +104,9 @@ export const useStaffStore = create<StaffStore>()(
         // Add staff to team
         const updatedStaff = [...gameState.playerTeam.staff, staff];
 
+        // Remove staff from market
+        const updatedStaffMarket = gameState.staffMarket.filter((s) => s.id !== staff.id);
+
         // Update GameStore
         useGameStore.getState().updateGameState((state) => ({
           ...state,
@@ -111,6 +114,7 @@ export const useStaffStore = create<StaffStore>()(
             ...state.playerTeam,
             staff: updatedStaff,
           },
+          staffMarket: updatedStaffMarket,
         }));
 
         // Deduct hiring fee (e.g., first year wages)
