@@ -25,7 +25,7 @@
 | **Styling** | Tailwind CSS | ^3.4.19 | Utility-first CSS with shared workspace preset |
 | **Theming** | next-themes | ^0.4.6 | Dark/light mode support |
 | **Animation** | Framer Motion | ^12.23.26 | Used for UI transitions and animations |
-| **PWA** | next-pwa | ^5.6.0 | Service worker, offline caching, installability |
+| **PWA** | Serwist (@serwist/next) | ^10.2.9 | Service worker, offline caching, installability |
 | **Build Tool** | Nx | ^22.3.2 | Monorepo build orchestration, caching |
 | **Package Manager** | npm | - | Workspace dependency management |
 | **Testing** | Jest | ^29.7.0 | Unit tests for game engine (some modules) |
@@ -57,7 +57,7 @@
    - Active slot tracking
    - Save metadata
 
-2. **Service Worker** (via next-pwa):
+2. **Service Worker** (via Serwist):
    - Offline caching
    - Resource pre-caching
    - Runtime caching strategies
@@ -83,7 +83,7 @@
 ### Build Pipeline
 1. TypeScript compilation
 2. Next.js build (App Router)
-3. PWA service worker generation (next-pwa)
+3. PWA service worker generation (Serwist)
 4. Static optimization
 5. Output to `.next/` directory
 

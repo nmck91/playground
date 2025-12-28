@@ -53,8 +53,10 @@ error.log
 .next
 out
 
-# PWA (auto-generated service workers)
+# PWA (auto-generated service workers by Serwist)
 **/public/sw.js
 **/public/workbox-*.js
 **/public/sw.js.map
 **/public/workbox-*.js.map
+**/public/serwist-*.js
+**/public/serwist-*.js.map
