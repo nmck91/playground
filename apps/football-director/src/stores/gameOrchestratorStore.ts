@@ -603,20 +603,39 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
             : gameState.seasonRecords;
 
           // 2. Process contract expirations
+          // Auto-renew expiring contracts to maintain minimum squad size
           const nextYear = gameState.season.year + 1;
 
-          // Remove expired contracts from player team
-          const activePlayerTeamPlayers = gameState.playerTeam.players.filter((player) => {
-            const contractEnds = player.contract.endYear;
-            return contractEnds >= nextYear;
+          // Auto-renew contracts for player team to ensure minimum 11 players
+          const renewedPlayerTeamPlayers = gameState.playerTeam.players.map((player) => {
+            if (player.contract.endYear < nextYear) {
+              // Contract expired - auto-renew for 1 year
+              return {
+                ...player,
+                contract: {
+                  ...player.contract,
+                  endYear: nextYear,
+                },
+              };
+            }
+            return player;
           });
 
-          // Process AI teams
+          // Auto-renew contracts for AI teams
           const updatedAITeams = gameState.aiTeams.map((team) => ({
             ...team,
-            players: team.players.filter((player) => {
-              const contractEnds = player.contract.endYear;
-              return contractEnds >= nextYear;
+            players: team.players.map((player) => {
+              if (player.contract.endYear < nextYear) {
+                // Contract expired - auto-renew for 1 year
+                return {
+                  ...player,
+                  contract: {
+                    ...player.contract,
+                    endYear: nextYear,
+                  },
+                };
+              }
+              return player;
             }),
           }));
 
@@ -637,7 +656,7 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
 
           const updatedPlayerTeam = {
             ...gameState.playerTeam,
-            players: resetPlayerStats(activePlayerTeamPlayers),
+            players: resetPlayerStats(renewedPlayerTeamPlayers),
           };
 
           const updatedAITeamsWithResetStats = updatedAITeams.map((team) => ({
