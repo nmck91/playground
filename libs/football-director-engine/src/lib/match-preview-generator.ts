@@ -11,8 +11,6 @@ import {
   HeadToHead,
   TeamNews,
   LeagueTable,
-  MatchResult,
-  MatchWeather,
 } from './types';
 import { WeatherGenerator } from './weather-generator';
 import { MatchCommentary } from './match-commentary';

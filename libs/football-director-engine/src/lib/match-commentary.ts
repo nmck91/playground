@@ -291,12 +291,12 @@ export class MatchCommentary implements IMatchCommentary {
   private generateDetailedMatchEvents(
     homeTeam: Team,
     awayTeam: Team,
-    homeScore: number,
-    awayScore: number,
+    _homeScore: number,
+    _awayScore: number,
     seed?: number
   ): MatchEvent[] {
     const detailedEvents: MatchEvent[] = [];
-    const totalGoals = homeScore + awayScore;
+    // const totalGoals = homeScore + awayScore; // Currently unused
 
     // Generate 2-4 big chances (missed opportunities)
     const bigChancesCount = 2 + Math.floor((seed !== undefined ? this.seededRandom(seed + 900) : Math.random()) * 3);
@@ -488,7 +488,7 @@ export class MatchCommentary implements IMatchCommentary {
   /**
    * Generate a realistic goal minute
    */
-  private generateGoalMinute(totalGoals: number, goalIndex: number, seed?: number): number {
+  private generateGoalMinute(_totalGoals: number, goalIndex: number, seed?: number): number {
     const random = seed !== undefined ? this.seededRandom(seed + goalIndex + 100) : Math.random();
     const minuteRandom = seed !== undefined ? this.seededRandom(seed + goalIndex + 200) : Math.random();
 
@@ -551,9 +551,9 @@ export class MatchCommentary implements IMatchCommentary {
     awayTeam: string,
     homeScore: number,
     awayScore: number,
-    events: MatchEvent[]
+    _events: MatchEvent[]
   ): string {
-    const goalEvents = events.filter((e) => e.type === 'goal');
+    // const goalEvents = events.filter((e) => e.type === 'goal'); // Currently unused
 
     if (homeScore === 0 && awayScore === 0) {
       return `A tense goalless draw between ${homeTeam} and ${awayTeam}. Both defenses stood firm.`;

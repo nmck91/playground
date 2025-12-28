@@ -171,7 +171,7 @@ export class BoardManager implements IBoardManager {
     currentSatisfaction: number,
     objective: BoardObjective,
     currentPosition: number,
-    weeksRemaining: number
+    _weeksRemaining: number
   ): number {
     let change = 0;
 

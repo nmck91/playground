@@ -5,7 +5,6 @@
 
 import {
   Achievement,
-  AchievementCategory,
   SeasonAward,
   GameState,
   LeagueTable,
@@ -667,7 +666,7 @@ export class AchievementManager implements IAchievementManager {
     return gameState.playerTeam.players.some(player => {
       // Check history for development from low skill to high skill
       if (player.history.length === 0) return false;
-      const firstSeason = player.history[0];
+      const _firstSeason = player.history[0]; // Reserved for future development tracking
       // Simplified: assume skill growth based on current skill
       return player.skill >= 18 && player.age < 25;
     });

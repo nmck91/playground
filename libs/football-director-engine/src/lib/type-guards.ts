@@ -16,21 +16,8 @@ import type {
   GameState,
   MatchResult,
   Season,
-  Fixture,
-  LeagueTable,
   TeamFinances,
-  FinancialRecord,
-  BoardStatus,
-  ClubRecords,
-  Achievement,
-  SeasonAward,
-  NewsArticle,
-  MatchPreview,
-  CupCompetition,
   Staff,
-  TransferListing,
-  FreeAgent,
-  SeasonRecords,
 } from './types';
 
 /**

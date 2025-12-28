@@ -25,6 +25,7 @@ Complete documentation for the Football Director game application.
 - **[Source Tree](source-tree.md)** - File structure and module organization
 - **[Tech Stack](tech-stack.md)** - Technology choices and versions
 - **[Coding Standards](coding-standards.md)** - Patterns, conventions, and best practices
+- **[Strict TypeScript Guide](strict-typescript-guide.md)** - TypeScript strict mode configuration and best practices (Epic 1.5.5)
 
 ## Quick Start
 
@@ -39,6 +40,15 @@ Complete documentation for the Football Director game application.
 3. Refer to `source-tree.md` when navigating code
 
 ## Key Updates
+
+### December 2025 - Epic 1.5: Type Safety Improvements
+- ✅ **Story 1.5.5**: Enabled strict TypeScript configuration
+  - All strict compiler options enabled
+  - 153 warnings reduced from 169 (1 critical error fixed)
+  - Comprehensive documentation for team guidelines
+  - See: `strict-typescript-guide.md`
+- ✅ **Story 1.5.4**: Type guards and runtime validation with Zod
+- ✅ **Story 1.5.3**: Discriminated unions for GameState versioning
 
 ### December 2025 - Hook Refactoring
 - ✅ Refactored `useGameState` from 1,220 lines → 143 lines

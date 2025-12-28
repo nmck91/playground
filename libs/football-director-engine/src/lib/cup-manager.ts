@@ -10,7 +10,6 @@ import type {
   CupCompetition,
   CupRound,
   CupFixture,
-  CupResult,
   PrizeMoney,
 } from './types';
 
@@ -90,7 +89,7 @@ export class CupManager {
 
     // Round 1: 10 teams (5 matches) - 10 teams get byes
     const round1Teams = shuffledTeams.slice(0, 10);
-    const byeTeams = shuffledTeams.slice(10);
+    const _byeTeams = shuffledTeams.slice(10); // Reserved for bye tracking feature
 
     const round1Fixtures = this.generateRoundFixtures(
       round1Teams,
