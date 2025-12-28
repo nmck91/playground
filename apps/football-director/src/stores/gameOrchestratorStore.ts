@@ -508,8 +508,9 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
             newAchievements = achievementManager.checkAchievements(updatedGameState, gameState.achievements);
           }
 
-          // Advance week
-          const nextWeek = currentWeek + 1;
+          // Advance week (but don't exceed totalWeeks to prevent validation errors)
+          // If we're at end of season, keep week at current value until user continues to next season
+          const nextWeek = isEndOfSeason ? currentWeek : currentWeek + 1;
           const updatedSeason = {
             ...gameState.season,
             currentWeek: nextWeek,
@@ -568,23 +569,130 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
         try {
           // Initialize managers
           const seasonManager = new SeasonManager();
-          const playerDevelopment = new PlayerDevelopment();
           const contractManager = new ContractManager();
-          const youthAcademyManager = new YouthAcademyManager();
-          const financeEngine = new FinanceEngine();
 
-          // TODO: Implement end of season processing
-          // Process end of season
-          // const nextSeasonResult = seasonManager.startNewSeason(...);
-          // For now, just reset to week 1
-          console.log('End of season reached - functionality not yet implemented');
+          // 1. Archive current season to season records
+          const currentPosition = gameState.leagueTable
+            .sort((a, b) => {
+              if (b.points !== a.points) return b.points - a.points;
+              if (b.goalDifference !== a.goalDifference) return b.goalDifference - a.goalDifference;
+              return b.goalsFor - a.goalsFor;
+            })
+            .findIndex((t) => t.teamId === gameState.playerTeam.id) + 1;
 
-          // Update game state for new season - TODO: Implement properly
-          // For now, just notify that end of season was reached
-          // useGameStore.getState().updateGameState((state) => ({
-          //   ...state,
-          //   season: { ...state.season, currentWeek: 1 },
-          // }));
+          const playerTableEntry = gameState.leagueTable.find(
+            (t) => t.teamId === gameState.playerTeam.id
+          );
+
+          const newSeasonRecord = playerTableEntry
+            ? {
+                season: gameState.season.year,
+                finalPosition: currentPosition,
+                points: playerTableEntry.points,
+                won: playerTableEntry.won,
+                drawn: playerTableEntry.drawn,
+                lost: playerTableEntry.lost,
+                goalsFor: playerTableEntry.goalsFor,
+                goalsAgainst: playerTableEntry.goalsAgainst,
+                goalDifference: playerTableEntry.goalDifference,
+              }
+            : undefined;
+
+          const updatedSeasonRecords = newSeasonRecord
+            ? [...gameState.seasonRecords, newSeasonRecord]
+            : gameState.seasonRecords;
+
+          // 2. Process contract expirations
+          const nextYear = gameState.season.year + 1;
+
+          // Remove expired contracts from player team
+          const activePlayerTeamPlayers = gameState.playerTeam.players.filter((player) => {
+            const contractEnds = player.contract.endYear;
+            return contractEnds >= nextYear;
+          });
+
+          // Process AI teams
+          const updatedAITeams = gameState.aiTeams.map((team) => ({
+            ...team,
+            players: team.players.filter((player) => {
+              const contractEnds = player.contract.endYear;
+              return contractEnds >= nextYear;
+            }),
+          }));
+
+          // 3. Reset player stats for new season
+          const resetPlayerStats = (players: typeof gameState.playerTeam.players) =>
+            players.map((player) => ({
+              ...player,
+              stats: {
+                matches: 0,
+                goals: 0,
+                assists: 0,
+                yellowCards: 0,
+                redCards: 0,
+                minutesPlayed: 0,
+                cleanSheets: 0,
+              },
+            }));
+
+          const updatedPlayerTeam = {
+            ...gameState.playerTeam,
+            players: resetPlayerStats(activePlayerTeamPlayers),
+          };
+
+          const updatedAITeamsWithResetStats = updatedAITeams.map((team) => ({
+            ...team,
+            players: resetPlayerStats(team.players),
+          }));
+
+          // 4. Reset league table
+          const allTeams = [updatedPlayerTeam, ...updatedAITeamsWithResetStats];
+          const resetLeagueTable = allTeams.map((team) => ({
+            teamId: team.id,
+            teamName: team.name,
+            played: 0,
+            won: 0,
+            drawn: 0,
+            lost: 0,
+            goalsFor: 0,
+            goalsAgainst: 0,
+            goalDifference: 0,
+            points: 0,
+            form: [] as ('W' | 'D' | 'L')[],
+          }));
+
+          // 5. Generate new fixtures
+          const newFixtures = [
+            ...seasonManager.generateFixtures(allTeams),
+            ...seasonManager.generateFriendlyFixtures(allTeams),
+          ];
+
+          // 6. Update season
+          const updatedSeason = {
+            ...gameState.season,
+            year: nextYear,
+            currentWeek: 1,
+            status: 'in-progress' as const,
+            phase: 'pre-season' as const,
+            transferWindow: 'open' as const,
+          };
+
+          // 7. Clear transient data
+          const updatedMatchHistory: typeof gameState.matchHistory = []; // Clear for new season
+          const updatedNewsFeed = gameState.newsFeed.slice(0, 20); // Keep only recent news
+
+          // Update game state
+          useGameStore.getState().updateGameState((state) => ({
+            ...state,
+            season: updatedSeason,
+            playerTeam: updatedPlayerTeam,
+            aiTeams: updatedAITeamsWithResetStats,
+            leagueTable: resetLeagueTable,
+            fixtures: newFixtures,
+            matchHistory: updatedMatchHistory,
+            seasonRecords: updatedSeasonRecords,
+            newsFeed: updatedNewsFeed,
+          }));
 
           // Clear season evaluation
           set(
@@ -592,10 +700,18 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
               seasonEvaluation: null,
               seasonTopPerformers: null,
               developmentReports: [],
+              lastSimulationResults: [],
             },
             false,
-            'orchestrator/clearSeasonEvaluation'
+            'orchestrator/continueToNextSeason'
           );
+
+          // Notify user
+          useUIStore.getState().addNotification({
+            type: 'success',
+            message: `Welcome to the ${nextYear}/${nextYear + 1} season!`,
+            duration: 5000,
+          });
 
           // Auto-save
           useSaveStore.getState().autoSave();
