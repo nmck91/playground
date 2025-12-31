@@ -15,8 +15,7 @@ export * from './lib/board-manager';
 export * from './lib/player-stats-tracker';
 export * from './lib/records-manager';
 export * from './lib/achievement-manager';
-export * from './lib/news-generator';
-export * from './lib/news-engine'; // New unified news engine (replaces news-generator)
+export * from './lib/news-engine'; // Unified news engine (Story 1.4.2)
 export * from './lib/staff-manager';
 export * from './lib/tactics-manager';
 export * from './lib/injury-manager';
