@@ -711,5 +711,655 @@ describe('PostMatchGenerator', () => {
       expect(analysis.homeManagerQuote.managerName).toBe('Manager');
       expect(analysis.awayManagerQuote.managerName).toBe('Manager');
     });
+
+    it('should identify late equalizer as turning point', () => {
+      const homeTeam = createMockTeam({
+        id: 'home',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const awayTeam = createMockTeam({
+        id: 'away',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const leagueTable: LeagueTable[] = [
+        {
+          teamId: 'home',
+          teamName: 'Home FC',
+          won: 10,
+          drawn: 6,
+          lost: 3,
+          goalsFor: 30,
+          goalsAgainst: 16,
+          points: 36,
+          goalDifference: 14,
+          played: 19,
+        },
+      ];
+
+      const result: MatchResult = {
+        homeTeam: 'Home FC',
+        awayTeam: 'Away FC',
+        homeScore: 2,
+        awayScore: 2,
+        result: 'draw',
+        events: [
+          {
+            minute: 85,
+            type: 'goal',
+            team: 'away',
+            playerName: 'Late Equalizer',
+            playerId: 'player-2',
+            description: 'Late goal',
+          },
+        ],
+      };
+
+      const analysis = generator.generatePostMatchAnalysis(
+        result,
+        homeTeam,
+        awayTeam,
+        leagueTable,
+        12345
+      );
+
+      expect(analysis.turningPoint).toContain('Late Equalizer');
+      expect(analysis.turningPoint).toContain('dramatic late equalizer');
+      expect(analysis.turningPoint).toContain('85');
+    });
+
+    it('should identify late winner as turning point', () => {
+      const homeTeam = createMockTeam({
+        id: 'home',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const awayTeam = createMockTeam({
+        id: 'away',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const leagueTable: LeagueTable[] = [
+        {
+          teamId: 'home',
+          teamName: 'Home FC',
+          won: 11,
+          drawn: 5,
+          lost: 3,
+          goalsFor: 32,
+          goalsAgainst: 15,
+          points: 38,
+          goalDifference: 17,
+          played: 19,
+        },
+      ];
+
+      const result: MatchResult = {
+        homeTeam: 'Home FC',
+        awayTeam: 'Away FC',
+        homeScore: 2,
+        awayScore: 1,
+        result: 'home',
+        events: [
+          {
+            minute: 88,
+            type: 'goal',
+            team: 'home',
+            playerName: 'Late Winner',
+            playerId: 'player-1',
+            description: 'Late goal',
+          },
+        ],
+      };
+
+      const analysis = generator.generatePostMatchAnalysis(
+        result,
+        homeTeam,
+        awayTeam,
+        leagueTable,
+        12345
+      );
+
+      expect(analysis.turningPoint).toContain('Late Winner');
+      expect(analysis.turningPoint).toContain('late strike');
+      expect(analysis.turningPoint).toContain('88');
+    });
+
+    it('should identify first goal in tight match as turning point', () => {
+      const homeTeam = createMockTeam({
+        id: 'home',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const awayTeam = createMockTeam({
+        id: 'away',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const leagueTable: LeagueTable[] = [
+        {
+          teamId: 'home',
+          teamName: 'Home FC',
+          won: 11,
+          drawn: 5,
+          lost: 3,
+          goalsFor: 31,
+          goalsAgainst: 15,
+          points: 38,
+          goalDifference: 16,
+          played: 19,
+        },
+      ];
+
+      const result: MatchResult = {
+        homeTeam: 'Home FC',
+        awayTeam: 'Away FC',
+        homeScore: 1,
+        awayScore: 0,
+        result: 'home',
+        events: [
+          {
+            minute: 55,
+            type: 'goal',
+            team: 'home',
+            playerName: 'Only Scorer',
+            playerId: 'player-1',
+            description: 'Only goal',
+          },
+        ],
+      };
+
+      const analysis = generator.generatePostMatchAnalysis(
+        result,
+        homeTeam,
+        awayTeam,
+        leagueTable,
+        12345
+      );
+
+      expect(analysis.turningPoint).toContain('Only Scorer');
+      expect(analysis.turningPoint).toContain('opening goal');
+      expect(analysis.turningPoint).toContain('tight encounter');
+    });
+
+    it('should return undefined turning point when no events', () => {
+      const homeTeam = createMockTeam({
+        id: 'home',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const awayTeam = createMockTeam({
+        id: 'away',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const leagueTable: LeagueTable[] = [
+        {
+          teamId: 'home',
+          teamName: 'Home FC',
+          won: 10,
+          drawn: 6,
+          lost: 3,
+          goalsFor: 30,
+          goalsAgainst: 16,
+          points: 36,
+          goalDifference: 14,
+          played: 19,
+        },
+      ];
+
+      const result: MatchResult = {
+        homeTeam: 'Home FC',
+        awayTeam: 'Away FC',
+        homeScore: 1,
+        awayScore: 1,
+        result: 'draw',
+        events: [],
+      };
+
+      const analysis = generator.generatePostMatchAnalysis(
+        result,
+        homeTeam,
+        awayTeam,
+        leagueTable,
+        12345
+      );
+
+      expect(analysis.turningPoint).toBeUndefined();
+    });
+
+    it('should highlight away team possession dominance', () => {
+      const homeTeam = createMockTeam({
+        id: 'home',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const awayTeam = createMockTeam({
+        id: 'away',
+        name: 'Away FC',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const leagueTable: LeagueTable[] = [
+        {
+          teamId: 'home',
+          teamName: 'Home FC',
+          won: 10,
+          drawn: 5,
+          lost: 4,
+          goalsFor: 28,
+          goalsAgainst: 18,
+          points: 35,
+          goalDifference: 10,
+          played: 19,
+        },
+      ];
+
+      const result: MatchResult = {
+        homeTeam: 'Home FC',
+        awayTeam: 'Away FC',
+        homeScore: 0,
+        awayScore: 2,
+        result: 'away',
+        stats: {
+          possession: { home: 30, away: 70 },
+          shots: { home: 8, away: 18 },
+          shotsOnTarget: { home: 3, away: 10 },
+          fouls: { home: 12, away: 10 },
+        },
+      };
+
+      const analysis = generator.generatePostMatchAnalysis(
+        result,
+        homeTeam,
+        awayTeam,
+        leagueTable,
+        12345
+      );
+
+      expect(analysis.keyStats.some((stat) => stat.includes('Away FC') && stat.includes('70%'))).toBe(true);
+    });
+
+    it('should highlight even possession split', () => {
+      const homeTeam = createMockTeam({
+        id: 'home',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const awayTeam = createMockTeam({
+        id: 'away',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const leagueTable: LeagueTable[] = [
+        {
+          teamId: 'home',
+          teamName: 'Home FC',
+          won: 10,
+          drawn: 6,
+          lost: 3,
+          goalsFor: 30,
+          goalsAgainst: 16,
+          points: 36,
+          goalDifference: 14,
+          played: 19,
+        },
+      ];
+
+      const result: MatchResult = {
+        homeTeam: 'Home FC',
+        awayTeam: 'Away FC',
+        homeScore: 1,
+        awayScore: 1,
+        result: 'draw',
+        stats: {
+          possession: { home: 51, away: 49 },
+          shots: { home: 12, away: 12 },
+          shotsOnTarget: { home: 6, away: 6 },
+          fouls: { home: 10, away: 10 },
+        },
+      };
+
+      const analysis = generator.generatePostMatchAnalysis(
+        result,
+        homeTeam,
+        awayTeam,
+        leagueTable,
+        12345
+      );
+
+      expect(analysis.keyStats.some((stat) => stat.includes('Evenly contested'))).toBe(true);
+    });
+
+    it('should highlight away team creating more chances', () => {
+      const homeTeam = createMockTeam({
+        id: 'home',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const awayTeam = createMockTeam({
+        id: 'away',
+        name: 'Away FC',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const leagueTable: LeagueTable[] = [
+        {
+          teamId: 'home',
+          teamName: 'Home FC',
+          won: 10,
+          drawn: 5,
+          lost: 4,
+          goalsFor: 28,
+          goalsAgainst: 20,
+          points: 35,
+          goalDifference: 8,
+          played: 19,
+        },
+      ];
+
+      const result: MatchResult = {
+        homeTeam: 'Home FC',
+        awayTeam: 'Away FC',
+        homeScore: 1,
+        awayScore: 3,
+        result: 'away',
+        stats: {
+          possession: { home: 45, away: 55 },
+          shots: { home: 8, away: 20 },
+          shotsOnTarget: { home: 4, away: 12 },
+          fouls: { home: 10, away: 12 },
+        },
+      };
+
+      const analysis = generator.generatePostMatchAnalysis(
+        result,
+        homeTeam,
+        awayTeam,
+        leagueTable,
+        12345
+      );
+
+      expect(analysis.keyStats.some((stat) => stat.includes('Away FC') && stat.includes('significantly more chances'))).toBe(true);
+    });
+
+    it('should highlight away team clinical finishing', () => {
+      const homeTeam = createMockTeam({
+        id: 'home',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const awayTeam = createMockTeam({
+        id: 'away',
+        name: 'Away FC',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const leagueTable: LeagueTable[] = [
+        {
+          teamId: 'home',
+          teamName: 'Home FC',
+          won: 10,
+          drawn: 5,
+          lost: 4,
+          goalsFor: 28,
+          goalsAgainst: 21,
+          points: 35,
+          goalDifference: 7,
+          played: 19,
+        },
+      ];
+
+      const result: MatchResult = {
+        homeTeam: 'Home FC',
+        awayTeam: 'Away FC',
+        homeScore: 0,
+        awayScore: 3,
+        result: 'away',
+        stats: {
+          possession: { home: 50, away: 50 },
+          shots: { home: 10, away: 10 },
+          shotsOnTarget: { home: 5, away: 4 },
+          fouls: { home: 10, away: 10 },
+        },
+      };
+
+      const analysis = generator.generatePostMatchAnalysis(
+        result,
+        homeTeam,
+        awayTeam,
+        leagueTable,
+        12345
+      );
+
+      // Away team scored 3 from 4 shots on target (75% conversion)
+      expect(analysis.keyStats.some((stat) => stat.includes('Away FC') && stat.includes('clinical'))).toBe(true);
+    });
+
+    it('should highlight feisty encounter with many fouls', () => {
+      const homeTeam = createMockTeam({
+        id: 'home',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const awayTeam = createMockTeam({
+        id: 'away',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const leagueTable: LeagueTable[] = [
+        {
+          teamId: 'home',
+          teamName: 'Home FC',
+          won: 10,
+          drawn: 6,
+          lost: 3,
+          goalsFor: 30,
+          goalsAgainst: 16,
+          points: 36,
+          goalDifference: 14,
+          played: 19,
+        },
+      ];
+
+      const result: MatchResult = {
+        homeTeam: 'Home FC',
+        awayTeam: 'Away FC',
+        homeScore: 2,
+        awayScore: 2,
+        result: 'draw',
+        stats: {
+          possession: { home: 50, away: 50 },
+          shots: { home: 12, away: 12 },
+          shotsOnTarget: { home: 6, away: 6 },
+          fouls: { home: 18, away: 15 },
+        },
+      };
+
+      const analysis = generator.generatePostMatchAnalysis(
+        result,
+        homeTeam,
+        awayTeam,
+        leagueTable,
+        12345
+      );
+
+      expect(analysis.keyStats.some((stat) => stat.includes('Feisty encounter'))).toBe(true);
+    });
+
+    it('should generate positive player interview for winning team', () => {
+      const homeTeam = createMockTeam({
+        id: 'home',
+        name: 'Home FC',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const awayTeam = createMockTeam({
+        id: 'away',
+        name: 'Away FC',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const leagueTable: LeagueTable[] = [
+        {
+          teamId: 'home',
+          teamName: 'Home FC',
+          won: 11,
+          drawn: 5,
+          lost: 3,
+          goalsFor: 32,
+          goalsAgainst: 15,
+          points: 38,
+          goalDifference: 17,
+          played: 19,
+        },
+      ];
+
+      const manOfMatch: ManOfMatch = {
+        playerId: 'player-1',
+        playerName: 'Winner Player',
+        team: 'home',
+        rating: 9.0,
+      };
+
+      const result: MatchResult = {
+        homeTeam: 'Home FC',
+        awayTeam: 'Away FC',
+        homeScore: 3,
+        awayScore: 1,
+        result: 'home',
+        manOfMatch,
+      };
+
+      const analysis = generator.generatePostMatchAnalysis(
+        result,
+        homeTeam,
+        awayTeam,
+        leagueTable,
+        12345
+      );
+
+      expect(analysis.playerInterview).toBeDefined();
+      expect(analysis.playerInterview?.playerName).toBe('Winner Player');
+      expect(analysis.playerInterview?.rating).toBe(9.0);
+      expect(analysis.playerInterview?.quote.length).toBeGreaterThan(0);
+    });
+
+    it('should generate neutral player interview for draw', () => {
+      const homeTeam = createMockTeam({
+        id: 'home',
+        name: 'Home FC',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const awayTeam = createMockTeam({
+        id: 'away',
+        name: 'Away FC',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const leagueTable: LeagueTable[] = [
+        {
+          teamId: 'home',
+          teamName: 'Home FC',
+          won: 10,
+          drawn: 6,
+          lost: 3,
+          goalsFor: 30,
+          goalsAgainst: 16,
+          points: 36,
+          goalDifference: 14,
+          played: 19,
+        },
+      ];
+
+      const manOfMatch: ManOfMatch = {
+        playerId: 'player-1',
+        playerName: 'Draw Player',
+        team: 'home',
+        rating: 8.5,
+      };
+
+      const result: MatchResult = {
+        homeTeam: 'Home FC',
+        awayTeam: 'Away FC',
+        homeScore: 2,
+        awayScore: 2,
+        result: 'draw',
+        manOfMatch,
+      };
+
+      const analysis = generator.generatePostMatchAnalysis(
+        result,
+        homeTeam,
+        awayTeam,
+        leagueTable,
+        12345
+      );
+
+      expect(analysis.playerInterview).toBeDefined();
+      expect(analysis.playerInterview?.playerName).toBe('Draw Player');
+      expect(analysis.playerInterview?.rating).toBe(8.5);
+      expect(analysis.playerInterview?.quote.length).toBeGreaterThan(0);
+    });
+
+    it('should generate negative player interview for losing team', () => {
+      const homeTeam = createMockTeam({
+        id: 'home',
+        name: 'Home FC',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const awayTeam = createMockTeam({
+        id: 'away',
+        name: 'Away FC',
+        staff: [createMockStaff({ role: 'manager' })],
+      });
+
+      const leagueTable: LeagueTable[] = [
+        {
+          teamId: 'home',
+          teamName: 'Home FC',
+          won: 10,
+          drawn: 5,
+          lost: 4,
+          goalsFor: 28,
+          goalsAgainst: 18,
+          points: 35,
+          goalDifference: 10,
+          played: 19,
+        },
+      ];
+
+      const manOfMatch: ManOfMatch = {
+        playerId: 'player-1',
+        playerName: 'Losing Player',
+        team: 'home',
+        rating: 7.5,
+      };
+
+      const result: MatchResult = {
+        homeTeam: 'Home FC',
+        awayTeam: 'Away FC',
+        homeScore: 1,
+        awayScore: 3,
+        result: 'away',
+        manOfMatch,
+      };
+
+      const analysis = generator.generatePostMatchAnalysis(
+        result,
+        homeTeam,
+        awayTeam,
+        leagueTable,
+        12345
+      );
+
+      expect(analysis.playerInterview).toBeDefined();
+      expect(analysis.playerInterview?.playerName).toBe('Losing Player');
+      expect(analysis.playerInterview?.rating).toBe(7.5);
+      expect(analysis.playerInterview?.quote.length).toBeGreaterThan(0);
+    });
   });
 });

@@ -775,15 +775,17 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
         ),
 
       selectYouthPlayers: (playerIds: string[]) => {
-        // Clear youth prospects
-        set({ youthProspects: [] }, false, 'orchestrator/selectYouthPlayers');
-
-        if (playerIds.length === 0) return;
+        if (playerIds.length === 0) {
+          // Just clear youth prospects if no players selected
+          set({ youthProspects: [] }, false, 'orchestrator/selectYouthPlayers');
+          return;
+        }
 
         // Add selected players to squad (handled by player store or game state update)
         const gameState = useGameStore.getState().gameState;
         if (!gameState) return;
 
+        // Get selected players BEFORE clearing the array
         const selectedPlayers = get().youthProspects.filter((p) =>
           playerIds.includes(p.id)
         );
@@ -795,6 +797,9 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
             players: [...state.playerTeam.players, ...selectedPlayers],
           },
         }));
+
+        // Clear youth prospects AFTER adding selected players to squad
+        set({ youthProspects: [] }, false, 'orchestrator/selectYouthPlayers/clear');
       },
 
       resetOrchestrator: () => set(initialState, false, 'orchestrator/reset'),
