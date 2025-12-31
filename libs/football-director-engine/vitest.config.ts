@@ -8,7 +8,7 @@ export default defineConfig({
     coverage: {
       enabled: false, // Enable manually with --coverage flag
       provider: 'v8',
-      reporter: ['text', 'html'],
+      reporter: ['text', 'html', 'json-summary', 'json'],
       reportsDirectory: '../../coverage/libs/football-director-engine',
       all: true,
       include: ['src/lib/**/*.ts'],

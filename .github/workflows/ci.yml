@@ -26,18 +26,14 @@ jobs:
       # Uncomment this line to enable task distribution
       # - run: npx nx start-ci-run --distribute-on="3 linux-medium-js" --stop-agents-after="e2e-ci"
 
-      # Cache node_modules
+      # Setup Node.js with caching
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          # Temporarily disable cache to force clean install
-          # cache: 'npm'
+          cache: 'npm'
 
       # Upgrade to npm 11.x to match local environment
       - run: npm install -g npm@11
-
-      # Clean npm cache before install
-      - run: npm cache clean --force
 
       - run: npm ci
       - run: npx playwright install --with-deps
@@ -49,15 +45,67 @@ jobs:
       # - run: npx nx-cloud record -- echo Hello World
 
       # Build all projects (required to pass)
-      - run: npx nx run-many -t build --exclude=football-director-spike,football-director-spike-e2e
+      - name: Build all projects
+        run: npx nx run-many -t build --exclude=football-director-spike,football-director-spike-e2e
 
-      # Lint all projects except spikes (informational only for now)
-      - run: npx nx run-many -t lint --exclude=football-director-spike,football-director-spike-e2e || true
+      # Lint all projects except spikes (required to pass)
+      - name: Lint all projects
+        run: npx nx run-many -t lint --exclude=football-director-spike,football-director-spike-e2e
 
-      # Test all projects (required to pass for engine, informational for app and others)
-      - run: npx nx test football-director-engine
-      - run: npx nx test football-director || true
-      - run: npx nx run-many -t test --exclude=football-director-spike,football-director-spike-e2e,football-director,football-director-engine || true
+      # Test football-director-engine with coverage (required to pass)
+      - name: Test football-director-engine
+        run: npx nx test football-director-engine --coverage --run
+
+      # Check engine coverage thresholds
+      - name: Check engine coverage thresholds
+        run: node .github/scripts/check-coverage.js "football-director-engine" "coverage/libs/football-director-engine"
+
+      # Test football-director app (required to pass)
+      - name: Test football-director app
+        run: npx nx test football-director --run
+
+      # Test all other projects (required to pass)
+      - name: Test all other projects
+        run: npx nx run-many -t test --exclude=football-director-spike,football-director-spike-e2e,football-director,football-director-engine --run
+
+      # Upload coverage reports
+      - name: Upload engine coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/libs/football-director-engine/coverage-final.json
+          flags: engine
+          name: football-director-engine
+          fail_ci_if_error: false
+        continue-on-error: true
+
+      - name: Upload app coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/apps/football-director/coverage-final.json
+          flags: app
+          name: football-director-app
+          fail_ci_if_error: false
+        continue-on-error: true
+
+      # Archive coverage reports as artifacts
+      - name: Archive coverage reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-reports
+          path: |
+            coverage/
+          retention-days: 30
+
+      # Archive test results
+      - name: Archive test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            **/test-results/
+          retention-days: 30
 
   merge-to-release:
     name: Merge to Release Branch
