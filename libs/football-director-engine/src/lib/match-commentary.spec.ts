@@ -257,41 +257,145 @@ describe('MatchCommentary', () => {
     });
   });
 
-  describe('generateMatchSummary', () => {
-    it('should generate summary for goalless draw', () => {
-      const summary = commentary.generateMatchSummary('Team A', 'Team B', 0, 0, []);
+  describe('generateFullTimeCommentary', () => {
+    it('should generate commentary for goalless draw', () => {
+      const commentary_text = commentary.generateFullTimeCommentary('Team A', 'Team B', 0, 0, [], 12345);
 
-      expect(summary).toContain('goalless draw');
-      expect(summary).toContain('Team A');
-      expect(summary).toContain('Team B');
+      expect(commentary_text.toLowerCase()).toMatch(/goalless|0-0/);
+      expect(commentary_text.toLowerCase()).toContain('draw');
     });
 
-    it('should generate summary for dominant home win', () => {
-      const summary = commentary.generateMatchSummary('Team A', 'Team B', 5, 1, []);
+    it('should generate commentary for dominant home win', () => {
+      const commentary_text = commentary.generateFullTimeCommentary('Team A', 'Team B', 5, 1, [], 12345);
 
-      expect(summary).toContain('Team A');
-      expect(summary).toContain('5-1');
+      expect(commentary_text).toContain('Team A');
+      expect(commentary_text).toContain('5');
     });
 
-    it('should generate summary for dominant away win', () => {
-      const summary = commentary.generateMatchSummary('Team A', 'Team B', 1, 5, []);
+    it('should generate commentary for dominant away win', () => {
+      const commentary_text = commentary.generateFullTimeCommentary('Team A', 'Team B', 1, 5, [], 12345);
 
-      expect(summary).toContain('Team B');
-      expect(summary).toContain('away');
+      expect(commentary_text).toContain('Team B');
+      expect(commentary_text.toLowerCase()).toContain('away');
     });
 
-    it('should generate summary for close home win', () => {
-      const summary = commentary.generateMatchSummary('Team A', 'Team B', 2, 1, []);
+    it('should generate commentary for close home win', () => {
+      const commentary_text = commentary.generateFullTimeCommentary('Team A', 'Team B', 2, 1, [], 12345);
 
-      expect(summary).toContain('Team A');
-      expect(summary).toContain('2-1');
+      expect(commentary_text).toContain('Team A');
     });
 
-    it('should generate summary for draw', () => {
-      const summary = commentary.generateMatchSummary('Team A', 'Team B', 2, 2, []);
+    it('should generate commentary for draw', () => {
+      const commentary_text = commentary.generateFullTimeCommentary('Team A', 'Team B', 2, 2, [], 12345);
 
-      expect(summary).toContain('2-2');
-      expect(summary).toContain('draw');
+      expect(commentary_text).toContain('2');
+      expect(commentary_text.toLowerCase()).toContain('draw');
+    });
+
+    it('should reference red cards when present', () => {
+      const events = [
+        { minute: 35, type: 'red-card' as const, team: 'home' as const, playerName: 'Player 1', playerId: '1', description: 'Sent off!' }
+      ];
+      const commentary_text = commentary.generateFullTimeCommentary('Team A', 'Team B', 0, 3, events, 12345);
+
+      // Should mention either "red card" or context about playing with fewer players
+      expect(commentary_text.toLowerCase()).toMatch(/red card|ten men/);
+    });
+
+    it('should mention penalties when present', () => {
+      const events = [
+        { minute: 25, type: 'penalty' as const, team: 'home' as const, playerName: 'Player 1', playerId: '1', description: 'Penalty goal!' }
+      ];
+      const commentary_text = commentary.generateFullTimeCommentary('Team A', 'Team B', 1, 0, events, 12345);
+
+      expect(commentary_text.toLowerCase()).toContain('penalty');
+    });
+  });
+
+  describe('generateHalfTimeCommentary', () => {
+    it('should generate commentary for goalless first half', () => {
+      const state = {
+        homeTeam: 'Team A',
+        awayTeam: 'Team B',
+        homeScore: 0,
+        awayScore: 0,
+        events: []
+      };
+      const commentary_text = commentary.generateHalfTimeCommentary(state, 12345);
+
+      expect(commentary_text.toLowerCase()).toMatch(/goalless|0-0/);
+      expect(commentary_text.toLowerCase()).toMatch(/break|half/);
+    });
+
+    it('should generate commentary for home team leading', () => {
+      const state = {
+        homeTeam: 'Team A',
+        awayTeam: 'Team B',
+        homeScore: 2,
+        awayScore: 0,
+        events: []
+      };
+      const commentary_text = commentary.generateHalfTimeCommentary(state, 12345);
+
+      expect(commentary_text).toContain('Team A');
+      expect(commentary_text).toContain('2');
+    });
+
+    it('should generate commentary for away team leading', () => {
+      const state = {
+        homeTeam: 'Team A',
+        awayTeam: 'Team B',
+        homeScore: 0,
+        awayScore: 2,
+        events: []
+      };
+      const commentary_text = commentary.generateHalfTimeCommentary(state, 12345);
+
+      expect(commentary_text).toContain('Team B');
+      expect(commentary_text).toContain('2');
+    });
+
+    it('should generate commentary for level scores with goals', () => {
+      const state = {
+        homeTeam: 'Team A',
+        awayTeam: 'Team B',
+        homeScore: 2,
+        awayScore: 2,
+        events: []
+      };
+      const commentary_text = commentary.generateHalfTimeCommentary(state, 12345);
+
+      expect(commentary_text).toContain('2');
+      expect(commentary_text.toLowerCase()).toMatch(/level|square|draw/);
+    });
+
+    it('should mention red cards in half-time analysis', () => {
+      const events = [
+        { minute: 25, type: 'red-card' as const, team: 'away' as const, playerName: 'Player 1', playerId: '1', description: 'Sent off!' }
+      ];
+      const state = {
+        homeTeam: 'Team A',
+        awayTeam: 'Team B',
+        homeScore: 0,
+        awayScore: 1,
+        events
+      };
+      const commentary_text = commentary.generateHalfTimeCommentary(state, 12345);
+
+      expect(commentary_text.toLowerCase()).toContain('red card');
+    });
+
+    it('should recognize dominant performances', () => {
+      const state = {
+        homeTeam: 'Team A',
+        awayTeam: 'Team B',
+        homeScore: 4,
+        awayScore: 0,
+        events: []
+      };
+      const commentary_text = commentary.generateHalfTimeCommentary(state, 12345);
+
+      expect(commentary_text.toLowerCase()).toMatch(/riot|dominant/);
     });
   });
 

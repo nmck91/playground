@@ -27,8 +27,7 @@ import {
   YouthAcademyManager,
   RecordsManager,
   AchievementManager,
-  MatchPreviewGenerator,
-  PostMatchGenerator,
+  MatchStoryGenerator,
   CupManager,
   type MatchResult,
   type DevelopmentReport,
@@ -164,8 +163,7 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
           const youthAcademyManager = new YouthAcademyManager();
           const recordsManager = new RecordsManager();
           const achievementManager = new AchievementManager();
-          const matchPreviewGenerator = new MatchPreviewGenerator();
-          const postMatchGenerator = new PostMatchGenerator();
+          const matchStoryGenerator = new MatchStoryGenerator();
           const cupManager = new CupManager();
 
           const currentWeek = gameState.season.currentWeek;
@@ -236,14 +234,13 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
                 throw new Error(`Missing team for preview: home=${fixture.homeTeamId}, away=${fixture.awayTeamId}`);
               }
 
-              return matchPreviewGenerator.generatePreview(
+              return matchStoryGenerator.generatePreview(
                 fixture,
                 homeTeam,
                 awayTeam,
                 gameState.leagueTable,
                 gameState.fixtures,
                 currentWeek,
-                gameState.season.year,
                 Date.now() + parseInt(fixture.id.slice(-4))
               );
             });

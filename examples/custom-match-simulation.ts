@@ -11,7 +11,7 @@ import {
   MatchSimulator,
   LeagueTableManager,
   MatchCommentary,
-  PostMatchGenerator,
+  MatchStoryGenerator,
   NewsEngine,
   type Team,
   type Season,
@@ -185,8 +185,8 @@ export function matchSimulationWithAnalysis() {
   table = tableManager.updateTable(table, result);
 
   // Generate post-match analysis
-  const postMatchGen = new PostMatchGenerator();
-  const analysis = postMatchGen.generatePostMatchAnalysis(
+  const storyGen = new MatchStoryGenerator();
+  const analysis = storyGen.generatePostMatchAnalysis(
     result,
     homeTeam,
     awayTeam,
@@ -200,23 +200,19 @@ export function matchSimulationWithAnalysis() {
   console.log(`${analysis.homeManagerQuote.manager}: "${analysis.homeManagerQuote.quote}"`);
   console.log(`${analysis.awayManagerQuote.manager}: "${analysis.awayManagerQuote.quote}"`);
 
-  if (analysis.playerInterviews && analysis.playerInterviews.length > 0) {
-    console.log('\nPlayer Interviews:');
-    analysis.playerInterviews.forEach(interview => {
-      console.log(`${interview.player}: "${interview.quote}"`);
-    });
+  if (analysis.playerInterview) {
+    console.log('\nPlayer Interview:');
+    console.log(`${analysis.playerInterview.playerName}: "${analysis.playerInterview.quote}"`);
   }
 
-  if (analysis.turningPoints && analysis.turningPoints.length > 0) {
-    console.log('\nTurning Points:');
-    analysis.turningPoints.forEach(point => {
-      console.log(`- ${point}`);
-    });
+  if (analysis.turningPoint) {
+    console.log('\nTurning Point:');
+    console.log(`- ${analysis.turningPoint}`);
   }
 
-  console.log('\nStatistical Highlights:');
-  analysis.statisticalHighlights.forEach(stat => {
-    console.log(`- ${stat}`);
+  console.log('\nKey Statistics:');
+  analysis.keyStats.forEach(stat => {
+    console.log(`- ${stat.label}: ${stat.value}`);
   });
 
   // Generate news article

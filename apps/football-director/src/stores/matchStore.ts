@@ -11,8 +11,7 @@ import { useTacticsStore } from './tacticsStore';
 import { useUIStore } from './uiStore';
 import {
   MatchSimulator,
-  MatchPreviewGenerator,
-  PostMatchGenerator,
+  MatchStoryGenerator,
   type MatchResult,
   type MatchPreview,
   type Fixture,
@@ -226,34 +225,24 @@ export const useMatchStore = create<MatchStore>()(
           throw new Error('No game state available');
         }
 
-        const previewGenerator = new MatchPreviewGenerator();
+        const storyGenerator = new MatchStoryGenerator();
 
-        const isPlayerHome = fixture.homeTeamId === gameState.playerTeam.id;
-        const playerTeam = gameState.playerTeam;
-        const opponentTeam = gameState.aiTeams.find(
-          (t) => t.id === (isPlayerHome ? fixture.awayTeamId : fixture.homeTeamId)
-        );
+        const homeTeam = gameState.aiTeams.find((t) => t.id === fixture.homeTeamId) || gameState.playerTeam;
+        const awayTeam = gameState.aiTeams.find((t) => t.id === fixture.awayTeamId) || gameState.playerTeam;
 
-        if (!opponentTeam) {
-          throw new Error('Opponent team not found');
+        if (!homeTeam || !awayTeam) {
+          throw new Error('Teams not found for preview generation');
         }
 
-        // TODO: MatchPreviewGenerator.generate not yet implemented in engine
-        const preview: MatchPreview = {
-          fixtureId: fixture.id,
-          homeTeam: isPlayerHome ? playerTeam.name : opponentTeam.name,
-          awayTeam: isPlayerHome ? opponentTeam.name : playerTeam.name,
-          week: fixture.week,
-          homePosition: 0,
-          awayPosition: 0,
-          headToHead: { homeWins: 0, awayWins: 0, draws: 0, lastFiveMeetings: [] },
-          homeTeamNews: { injuries: [], suspensions: [], keyPlayers: [], recentForm: [] },
-          awayTeamNews: { injuries: [], suspensions: [], keyPlayers: [], recentForm: [] },
-          expectedAttendance: 0,
-          weather: { condition: 'sunny', temperature: 20, description: 'Clear skies' },
-          isDerby: false,
-          matchImportance: 'medium',
-        };
+        // Use the MatchStoryGenerator to create the preview
+        const preview = storyGenerator.generatePreview(
+          fixture,
+          homeTeam,
+          awayTeam,
+          gameState.leagueTable,
+          gameState.fixtures,
+          gameState.season.currentWeek
+        );
 
         // Add to previews
         const updatedPreviews = [...get().matchPreviews, preview];

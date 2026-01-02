@@ -1,5 +1,14 @@
 export * from './lib/types';
-export * from './lib/game-state-versions'; // Discriminated unions for versioning (Epic 1.5.3)
+// Discriminated unions for versioning (Epic 1.5.3) - explicit exports to avoid GameState conflict
+export {
+  CURRENT_GAME_STATE_VERSION,
+  GameStateV1,
+  GameStateV2,
+  isGameStateV1,
+  isGameStateV2,
+  getGameStateVersion,
+  assertCurrentVersion
+} from './lib/game-state-versions';
 export * from './lib/type-guards'; // Runtime validation and type guards (Epic 1.5.4)
 export * from './lib/migration'; // Save file migration utilities (Epic 1.5)
 export * from './lib/match-simulator';
@@ -24,5 +33,4 @@ export * from './lib/ai-contract-manager';
 export * from './lib/youth-academy-manager';
 export * from './lib/morale-manager';
 export * from './lib/weather-generator';
-export * from './lib/match-preview-generator';
-export * from './lib/post-match-generator';
+export * from './lib/match-story-generator'; // Unified match story module (Story 1.4.3)

@@ -9,12 +9,24 @@
  * - Real-time commentary descriptions
  *
  * Non-Responsibilities (handled by other modules):
- * - Post-match analysis (PostMatchGenerator)
+ * - Pre-match previews and post-match analysis (MatchStoryGenerator)
  * - News articles (NewsEngine)
- * - Match previews (MatchPreviewGenerator)
  */
 
 import { Team, MatchEvent, Player } from './types';
+
+/**
+ * Half-time match state for commentary generation
+ */
+export interface HalfTimeState {
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number;
+  awayScore: number;
+  events: MatchEvent[];
+  homePosition?: number;
+  awayPosition?: number;
+}
 
 /**
  * Match Commentary Interface
@@ -37,6 +49,17 @@ export interface IMatchCommentary {
     awayScorers: Player[],
     seed?: number
   ): MatchEvent[];
+
+  // Match phase commentary
+  generateHalfTimeCommentary(state: HalfTimeState, seed?: number): string;
+  generateFullTimeCommentary(
+    homeTeam: string,
+    awayTeam: string,
+    homeScore: number,
+    awayScore: number,
+    events: MatchEvent[],
+    seed?: number
+  ): string;
 
   // Attendance
   generateAttendance(
@@ -540,42 +563,184 @@ export class MatchCommentary implements IMatchCommentary {
   }
 
   /**
-   * Generate match summary commentary
-   *
-   * @deprecated Use PostMatchGenerator instead. This method generates post-match content
-   * which should be handled by PostMatchGenerator, not real-time commentary.
-   * Will be removed in a future version.
+   * Generate half-time commentary with context-aware analysis
    */
-  generateMatchSummary(
+  generateHalfTimeCommentary(state: HalfTimeState, seed?: number): string {
+    const { homeTeam, awayTeam, homeScore, awayScore, events } = state;
+    const random = seed !== undefined ? this.seededRandom(seed + 2000) : Math.random();
+
+    // Check for red cards
+    const hasRedCard = events.some(e => e.type === 'red-card');
+
+    // Goalless draw at half-time
+    if (homeScore === 0 && awayScore === 0) {
+      const templates = [
+        `It's goalless at the break. Both teams are cancelling each other out in a tight first half.`,
+        `No goals yet as we reach half-time. Defenses on top in what's been a cagey affair so far.`,
+        `Half-time and it's 0-0. Neither side has been able to find the breakthrough in this tactical battle.`,
+        `The scoreboard remains blank at the interval. A tense first 45 minutes with few clear chances.`,
+      ];
+      return templates[Math.floor(random * templates.length)];
+    }
+
+    // Draw with goals
+    if (homeScore === awayScore && homeScore > 0) {
+      const templates = [
+        `We're all square at ${homeScore}-${homeScore} as the players head down the tunnel. An entertaining first half!`,
+        `Half-time: ${homeTeam} ${homeScore}, ${awayTeam} ${awayScore}. It's been end-to-end action with both teams trading blows.`,
+        `The teams are level at ${homeScore}-${homeScore} at the break. This one could go either way in the second half!`,
+        `${homeScore}-${homeScore} at half-time in what's been a pulsating contest. Everything to play for after the break.`,
+      ];
+      return templates[Math.floor(random * templates.length)];
+    }
+
+    // Home team leading
+    if (homeScore > awayScore) {
+      const margin = homeScore - awayScore;
+      if (margin >= 3) {
+        return `Half-time and ${homeTeam} are running riot! Leading ${homeScore}-${awayScore}, they've been utterly dominant.`;
+      } else if (margin === 2) {
+        const templates = [
+          `${homeTeam} lead ${homeScore}-${awayScore} at the break. They've controlled the first half and ${awayTeam} have a mountain to climb.`,
+          `Half-time: ${homeTeam} ${homeScore}, ${awayTeam} ${awayScore}. The home side have been impressive so far.`,
+        ];
+        return templates[Math.floor(random * templates.length)];
+      } else {
+        const templates = [
+          `${homeTeam} edge it ${homeScore}-${awayScore} at half-time, but ${awayTeam} are still very much in this.`,
+          `Narrow lead for ${homeTeam} as we reach the interval. ${homeScore}-${awayScore}, and it's all to play for.`,
+          `Half-time: ${homeTeam} ${homeScore}, ${awayTeam} ${awayScore}. A slender advantage for the home side.`,
+        ];
+        return templates[Math.floor(random * templates.length)];
+      }
+    }
+
+    // Away team leading
+    const margin = awayScore - homeScore;
+    if (margin >= 3) {
+      return `Remarkable first half from ${awayTeam}! They lead ${awayScore}-${homeScore} at the break, completely outplaying the home side.`;
+    } else if (margin === 2) {
+      const templates = [
+        `${awayTeam} are in control at the interval, leading ${awayScore}-${homeScore}. ${homeTeam} need a response in the second half.`,
+        `Half-time: ${homeTeam} ${homeScore}, ${awayTeam} ${awayScore}. The visitors have been the better team so far.`,
+      ];
+      return templates[Math.floor(random * templates.length)];
+    } else {
+      const redCardContext = hasRedCard ? ' The red card could prove crucial in the second half.' : '';
+      const templates = [
+        `${awayTeam} lead ${awayScore}-${homeScore} at half-time. A valuable away advantage, but ${homeTeam} can still get back into this.${redCardContext}`,
+        `Half-time: ${homeTeam} ${homeScore}, ${awayTeam} ${awayScore}. The away side have their noses in front.${redCardContext}`,
+      ];
+      return templates[Math.floor(random * templates.length)];
+    }
+  }
+
+  /**
+   * Generate full-time commentary with context-aware match summary
+   */
+  generateFullTimeCommentary(
     homeTeam: string,
     awayTeam: string,
     homeScore: number,
     awayScore: number,
-    _events: MatchEvent[]
+    events: MatchEvent[],
+    seed?: number
   ): string {
-    // const goalEvents = events.filter((e) => e.type === 'goal'); // Currently unused
+    const random = seed !== undefined ? this.seededRandom(seed + 3000) : Math.random();
 
+    // Count significant events
+    const totalGoals = homeScore + awayScore;
+    const hasRedCard = events.some(e => e.type === 'red-card');
+    const penaltyGoals = events.filter(e => e.type === 'penalty').length;
+
+    // Goalless draw
     if (homeScore === 0 && awayScore === 0) {
-      return `A tense goalless draw between ${homeTeam} and ${awayTeam}. Both defenses stood firm.`;
+      const templates = [
+        `A tense goalless draw between ${homeTeam} and ${awayTeam}. Both defenses stood firm.`,
+        `Full-time: 0-0. Neither side could find the breakthrough in a defensive battle.`,
+        `The points are shared in a goalless stalemate. Frustration for both teams.`,
+      ];
+      return templates[Math.floor(random * templates.length)];
     }
 
+    // Big home win
     if (homeScore > awayScore + 2) {
-      return `Dominant performance from ${homeTeam}! They ran riot with a convincing ${homeScore}-${awayScore} victory.`;
+      const redCardContext = hasRedCard ? ' The red card proved decisive.' : '';
+      const templates = [
+        `Dominant performance from ${homeTeam}! They ran riot with a convincing ${homeScore}-${awayScore} victory.${redCardContext}`,
+        `Full-time: ${homeTeam} ${homeScore}, ${awayTeam} ${awayScore}. A comprehensive win for the home side!${redCardContext}`,
+        `${homeTeam} were irresistible today, cruising to a ${homeScore}-${awayScore} triumph. ${awayTeam} were simply outclassed.`,
+      ];
+      return templates[Math.floor(random * templates.length)];
     }
 
+    // Big away win
     if (awayScore > homeScore + 2) {
-      return `${awayTeam} were unstoppable away from home, cruising to a ${awayScore}-${homeScore} win!`;
+      const redCardContext = hasRedCard ? ' Playing against ten men certainly helped.' : '';
+      const templates = [
+        `${awayTeam} were unstoppable away from home, cruising to a ${awayScore}-${homeScore} win!${redCardContext}`,
+        `Full-time: ${homeTeam} ${homeScore}, ${awayTeam} ${awayScore}. A stunning away performance!${redCardContext}`,
+        `Emphatic victory for ${awayTeam} who put ${homeScore} past ${homeTeam}. A result that will send shockwaves through the league.`,
+      ];
+      return templates[Math.floor(random * templates.length)];
     }
 
+    // High-scoring draw
+    if (homeScore === awayScore && totalGoals >= 4) {
+      const templates = [
+        `An entertaining ${homeScore}-${homeScore} draw! Both teams shared the points in a thrilling encounter.`,
+        `What a game! Full-time: ${homeTeam} ${homeScore}, ${awayTeam} ${awayScore}. The fans certainly got their money's worth!`,
+        `A pulsating ${homeScore}-${homeScore} thriller! Neither side deserved to lose this one.`,
+      ];
+      return templates[Math.floor(random * templates.length)];
+    }
+
+    // Low-scoring draw
     if (homeScore === awayScore) {
-      return `An entertaining ${homeScore}-${homeScore} draw! Both teams shared the points in a thrilling encounter.`;
+      const templates = [
+        `Full-time: ${homeScore}-${homeScore}. A fair result as both teams share the spoils.`,
+        `The points are shared in a ${homeScore}-${homeScore} draw. A hard-fought contest.`,
+      ];
+      return templates[Math.floor(random * templates.length)];
     }
 
-    if (homeScore > awayScore) {
-      return `${homeTeam} edge past ${awayTeam} ${homeScore}-${awayScore} in a closely fought contest.`;
-    } else {
-      return `${awayTeam} claim all three points with a ${awayScore}-${homeScore} away victory!`;
+    // Narrow home win
+    if (homeScore === awayScore + 1) {
+      const penaltyContext = penaltyGoals > 0 ? ' The penalty proved crucial.' : '';
+      const templates = [
+        `${homeTeam} edge past ${awayTeam} ${homeScore}-${awayScore} in a closely fought contest.${penaltyContext}`,
+        `Full-time: ${homeTeam} ${homeScore}, ${awayTeam} ${awayScore}. The home side claim a narrow victory.${penaltyContext}`,
+        `A tight match ends ${homeScore}-${awayScore} in favor of ${homeTeam}. ${awayTeam} pushed them all the way.`,
+      ];
+      return templates[Math.floor(random * templates.length)];
     }
+
+    // Narrow away win
+    if (awayScore === homeScore + 1) {
+      const penaltyContext = penaltyGoals > 0 ? ' The penalty made all the difference.' : '';
+      const templates = [
+        `${awayTeam} claim all three points with a ${awayScore}-${homeScore} away victory!${penaltyContext}`,
+        `Full-time: ${homeTeam} ${homeScore}, ${awayTeam} ${awayScore}. A valuable away win for the visitors.${penaltyContext}`,
+        `${awayTeam} edge it ${awayScore}-${homeScore} on the road. A hard-earned three points.`,
+      ];
+      return templates[Math.floor(random * templates.length)];
+    }
+
+    // Home win by 2
+    if (homeScore === awayScore + 2) {
+      const templates = [
+        `${homeTeam} secure a ${homeScore}-${awayScore} victory. A solid performance from the home side.`,
+        `Full-time: ${homeTeam} ${homeScore}, ${awayTeam} ${awayScore}. Comfortable win in the end for ${homeTeam}.`,
+      ];
+      return templates[Math.floor(random * templates.length)];
+    }
+
+    // Away win by 2
+    const templates = [
+      `${awayTeam} triumph ${awayScore}-${homeScore} away from home. An impressive performance.`,
+      `Full-time: ${homeTeam} ${homeScore}, ${awayTeam} ${awayScore}. The visitors were deserving winners.`,
+    ];
+    return templates[Math.floor(random * templates.length)];
   }
 
   /**
