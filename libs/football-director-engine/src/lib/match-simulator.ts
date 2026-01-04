@@ -12,34 +12,10 @@ import { InjuryManager } from './injury-manager';
 import { MoraleManager } from './morale-manager';
 import { WeatherGenerator } from './weather-generator';
 import { getDefaultPostMatchAnalysis, getDefaultMatchWeather, getDefaultMatchStats } from './migration';
+import { IMatchSimulator } from './interfaces/match-simulator.interface';
 
-/**
- * Match Simulator Interface
- *
- * Defines the contract for match simulation.
- * Use this interface for dependency injection and testing.
- */
-export interface IMatchSimulator {
-  /**
-   * Calculate effective team strength based on available players, tactics, morale, and manager bonus
-   */
-  calculateTeamStrength(team: Team, currentWeek: number): number;
-
-  /**
-   * Simulate a single match between two teams
-   */
-  simulateMatch(match: Match, currentWeek?: number, seed?: number): MatchResult;
-
-  /**
-   * Simulate an entire season (all matches between teams)
-   */
-  simulateSeason(teams: Team[], seed?: number): MatchResult[];
-
-  /**
-   * Simulate a knockout cup match with extra time and penalties if needed
-   */
-  simulateKnockoutMatch(match: Match, currentWeek?: number, seed?: number): CupResult;
-}
+// Re-export interface for convenience
+export { IMatchSimulator };
 
 /**
  * Match Simulator Implementation
@@ -305,7 +281,7 @@ export class MatchSimulator implements IMatchSimulator {
     seed?: number
   ): PlayerRating[] {
     const ratings: PlayerRating[] = [];
-    const random = seed !== undefined ? this.seededRandom(seed + 1000) : Math.random();
+    // const random = seed !== undefined ? this.seededRandom(seed + 1000) : Math.random(); // Reserved for future rating variance
 
     // Get available players from both teams
     const injuryManager = new InjuryManager();
@@ -399,8 +375,8 @@ export class MatchSimulator implements IMatchSimulator {
    */
   private selectManOfMatch(
     ratings: PlayerRating[],
-    homeScorers: Player[],
-    awayScorers: Player[]
+    _homeScorers: Player[],
+    _awayScorers: Player[]
   ): ManOfMatch {
     // Find highest rated player
     const topRated = ratings.reduce((prev, current) =>

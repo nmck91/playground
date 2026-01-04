@@ -11,17 +11,10 @@ import {
   Player,
   SeasonRecords,
 } from './types';
+import { IAchievementManager } from './interfaces/achievement-manager.interface';
 
-/**
- * Achievement Manager Interface
- *
- * Defines the contract for managing achievements and season awards.
- */
-export interface IAchievementManager {
-  getAllAchievements(): Achievement[];
-  checkAchievements(gameState: GameState, achievements: Achievement[]): Achievement[];
-  awardSeasonPrizes(gameState: GameState): SeasonAward;
-}
+// Re-export interface for convenience
+export { IAchievementManager };
 
 /**
  * Achievement Manager Implementation
@@ -666,7 +659,7 @@ export class AchievementManager implements IAchievementManager {
     return gameState.playerTeam.players.some(player => {
       // Check history for development from low skill to high skill
       if (player.history.length === 0) return false;
-      const _firstSeason = player.history[0]; // Reserved for future development tracking
+      // const _firstSeason = player.history[0]; // Reserved for future development tracking
       // Simplified: assume skill growth based on current skill
       return player.skill >= 18 && player.age < 25;
     });

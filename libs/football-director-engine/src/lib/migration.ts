@@ -16,10 +16,7 @@ import type {
   MatchResult,
   MatchWeather,
   MatchStats,
-  PlayerRating,
-  ManOfMatch,
   PostMatchAnalysis,
-  ManagerQuote,
 } from './types';
 
 import type {

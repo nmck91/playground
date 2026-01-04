@@ -13,20 +13,7 @@
  * - News articles (NewsEngine)
  */
 
-import { Team, MatchEvent, Player } from './types';
-
-/**
- * Half-time match state for commentary generation
- */
-export interface HalfTimeState {
-  homeTeam: string;
-  awayTeam: string;
-  homeScore: number;
-  awayScore: number;
-  events: MatchEvent[];
-  homePosition?: number;
-  awayPosition?: number;
-}
+import { Team, MatchEvent, Player, HalfTimeState } from './types';
 
 /**
  * Match Commentary Interface

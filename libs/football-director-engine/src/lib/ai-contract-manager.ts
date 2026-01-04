@@ -5,28 +5,10 @@
 
 import { Team, Player, FreeAgent } from './types';
 import { ContractManager } from './contract-manager';
+import { IAIContractManager } from './interfaces/ai-contract-manager.interface';
 
-/**
- * AI Contract Manager Interface
- *
- * Defines the contract for automated contract management for AI teams.
- */
-export interface IAIContractManager {
-  /**
-   * Process contract renewals for AI teams
-   */
-  processTeamContracts(team: Team, currentYear: number, currentWeek: number): Team;
-
-  /**
-   * Sign free agents for AI teams
-   */
-  signFreeAgents(
-    team: Team,
-    freeAgents: FreeAgent[],
-    currentYear: number,
-    currentWeek: number
-  ): { team: Team; signed: Player[] };
-}
+// Re-export interface for convenience
+export { IAIContractManager };
 
 /**
  * AI Contract Manager Implementation

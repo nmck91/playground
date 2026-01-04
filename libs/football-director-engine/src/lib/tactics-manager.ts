@@ -13,15 +13,9 @@ import {
   ForwardRole,
   TeamInstructions,
   PlayerRoles,
+  FormationRequirements,
 } from './types';
 import { getDefaultPlayerRoles, getDefaultTeamInstructions } from './migration';
-
-export interface FormationRequirements {
-  GK: number;
-  DEF: number;
-  MID: number;
-  FWD: number;
-}
 
 /**
  * Tactics Manager Interface

@@ -4,22 +4,10 @@
  */
 
 import { Player, Injury, Team, MatchEvent } from './types';
+import { IInjuryManager } from './interfaces/injury-manager.interface';
 
-/**
- * Injury Manager Interface
- *
- * Defines the contract for injury and suspension management.
- */
-export interface IInjuryManager {
-  generateInjury(currentWeek: number): Injury;
-  processMatchInjuries(team: Team, currentWeek: number): { team: Team; newInjuries: Player[] };
-  processSuspensions(team: Team, events: MatchEvent[], teamSide: 'home' | 'away', currentWeek: number): Team;
-  updateWeeklyInjuries(team: Team, currentWeek: number): { team: Team; recoveredPlayers: Player[] };
-  getInjuredPlayers(team: Team): Player[];
-  getSuspendedPlayers(team: Team, currentWeek: number): Player[];
-  getAvailablePlayers(team: Team, currentWeek: number): Player[];
-  isPlayerAvailable(player: Player, currentWeek: number): boolean;
-}
+// Re-export interface for convenience
+export { IInjuryManager };
 
 /**
  * Injury Manager Implementation

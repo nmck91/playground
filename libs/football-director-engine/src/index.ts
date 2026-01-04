@@ -11,6 +11,15 @@ export {
 } from './lib/game-state-versions';
 export * from './lib/type-guards'; // Runtime validation and type guards (Epic 1.5.4)
 export * from './lib/migration'; // Save file migration utilities (Epic 1.5)
+
+// Module Factories and DI System (Story 1.4.4)
+// Note: Interfaces are available via './lib/interfaces' for DI, but not exported here to avoid conflicts
+// Each module already re-exports its interface for convenience
+export * from './lib/factories';
+export * from './lib/module-registry';
+export * from './lib/module-keys';
+export * from './lib/setup-modules';
+
 export * from './lib/match-simulator';
 export * from './lib/match-commentary';
 export * from './lib/league-table-manager';

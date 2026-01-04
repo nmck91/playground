@@ -16,8 +16,6 @@ import type {
   GameState,
   MatchResult,
   Season,
-  TeamFinances,
-  Staff,
 } from './types';
 
 /**

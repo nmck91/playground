@@ -5,45 +5,15 @@
 
 import { Team, Fixture, MatchResult, Match, SeasonPhase, TransferWindowStatus } from './types';
 import { MatchSimulator } from './match-simulator';
+import { ISeasonManager } from './interfaces/season-manager.interface';
 
-/**
- * Season Manager Interface
- *
- * Defines the contract for season management and fixture generation.
- */
-export interface ISeasonManager {
-  // Fixture generation
-  generateFixtures(teams: Team[]): Fixture[];
-  generateFriendlyFixtures(teams: Team[]): Fixture[];
-  getFixturesForWeek(fixtures: Fixture[], week: number): Fixture[];
-
-  // Match simulation
-  simulateWeek(
-    fixtures: Fixture[],
-    teams: Team[],
-    week: number,
-    simulator: MatchSimulator,
-    seed?: number
-  ): { results: MatchResult[]; updatedFixtures: Fixture[] };
-
-  // Season status
-  isSeasonComplete(fixtures: Fixture[]): boolean;
-  getCurrentWeek(fixtures: Fixture[]): number;
-  getTotalWeeks(fixtures: Fixture[]): number;
-  getSeasonPhase(currentWeek: number): SeasonPhase;
-  getTransferWindowStatus(currentWeek: number): TransferWindowStatus;
-  hasMatchesThisWeek(currentWeek: number): boolean;
-
-  // Season constants
-  getFullSeasonWeeks(): number;
-  getCompetitiveWeeks(): number;
-}
+// Re-export interface for convenience
+export { ISeasonManager };
 
 // Season constants
 const TOTAL_WEEKS = 52;
 const PRE_SEASON_WEEKS = 7; // Weeks 1-7
 const COMPETITIVE_WEEKS = 38; // Weeks 8-45
-const OFF_SEASON_WEEKS = 7; // Weeks 46-52
 const COMPETITIVE_START = 8; // First week of competitive matches
 const FRIENDLY_WEEKS = [4, 5, 6]; // Pre-season friendly matches
 const PRE_SEASON_TRANSFER_START = 1;
@@ -67,7 +37,6 @@ export class SeasonManager implements ISeasonManager {
 
     const fixtures: Fixture[] = [];
     const totalTeams = teams.length;
-    const totalWeeks = (totalTeams - 1) * 2; // Each team plays each other twice
 
     let fixtureId = 0;
 

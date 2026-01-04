@@ -27,41 +27,10 @@ import {
 } from './types';
 import { WeatherGenerator } from './weather-generator';
 import { MatchCommentary } from './match-commentary';
+import { IMatchStoryGenerator } from './interfaces/match-story-generator.interface';
 
-/**
- * Match Story Generator Interface
- *
- * Defines the contract for generating match storytelling content.
- * Use this interface for dependency injection and testing.
- */
-export interface IMatchStoryGenerator {
-  /**
-   * Generate pre-match preview with team news, head-to-head stats,
-   * weather forecast, and manager quotes
-   */
-  generatePreview(
-    fixture: Fixture,
-    homeTeam: Team,
-    awayTeam: Team,
-    leagueTable: LeagueTable[],
-    allFixtures: Fixture[],
-    currentWeek: number,
-    currentYear: number,
-    seed?: number
-  ): MatchPreview;
-
-  /**
-   * Generate post-match analysis including manager quotes, player interviews,
-   * turning points, and key statistics
-   */
-  generatePostMatchAnalysis(
-    result: MatchResult,
-    homeTeam: Team,
-    awayTeam: Team,
-    leagueTable: LeagueTable[],
-    seed?: number
-  ): PostMatchAnalysis;
-}
+// Re-export interface for convenience
+export { IMatchStoryGenerator };
 
 /**
  * Match Story Generator Implementation
@@ -283,8 +252,8 @@ export class MatchStoryGenerator implements IMatchStoryGenerator {
   private calculateMatchImportance(
     homePosition: number,
     awayPosition: number,
-    homeForm: string[],
-    awayForm: string[],
+    _homeForm: string[],
+    _awayForm: string[],
     isDerby: boolean
   ): 'low' | 'medium' | 'high' {
     if (isDerby) return 'high';
@@ -309,10 +278,10 @@ export class MatchStoryGenerator implements IMatchStoryGenerator {
   private generatePreMatchManagerQuotes(
     homeTeam: string,
     awayTeam: string,
-    homePosition: number,
-    awayPosition: number,
-    homeForm: string[],
-    awayForm: string[],
+    _homePosition: number,
+    _awayPosition: number,
+    _homeForm: string[],
+    _awayForm: string[],
     seed?: number
   ): { home: string; away: string } {
     const random = seed !== undefined ? this.seededRandom(seed + 4000) : Math.random();
@@ -385,6 +354,8 @@ export class MatchStoryGenerator implements IMatchStoryGenerator {
         result.result,
         result.homeScore,
         result.awayScore,
+        result.homeTeam,
+        result.awayTeam,
         seed ? seed + 2 : undefined
       );
     }
@@ -393,7 +364,7 @@ export class MatchStoryGenerator implements IMatchStoryGenerator {
     const turningPoint = this.identifyTurningPoint(result, seed);
 
     // Compile key stats
-    const keyStats = this.compileKeyStats(result);
+    const keyStats = this.compileKeyStats(result).map(stat => `${stat.label}: ${stat.value}`);
 
     return {
       homeManagerQuote,
@@ -413,16 +384,16 @@ export class MatchStoryGenerator implements IMatchStoryGenerator {
     teamScore: number,
     opponentScore: number,
     opponentName: string,
-    position: number,
+    _position: number,
     seed?: number
   ): ManagerQuote {
     const random = seed !== undefined ? this.seededRandom(seed + 5000) : Math.random();
     let quote = '';
-    let sentiment: 'positive' | 'neutral' | 'negative' = 'neutral';
+    let sentiment: 'happy' | 'neutral' | 'frustrated' = 'neutral';
 
     // Win
     if ((resultForTeam === 'home' && teamScore > opponentScore) || (resultForTeam === 'away' && teamScore > opponentScore)) {
-      sentiment = 'positive';
+      sentiment = 'happy';
       const winQuotes = [
         `I'm delighted with the performance today. The players executed the game plan perfectly.`,
         `Three points is what matters. The lads showed great character and quality out there.`,
@@ -433,7 +404,7 @@ export class MatchStoryGenerator implements IMatchStoryGenerator {
     }
     // Loss
     else if ((resultForTeam === 'home' && teamScore < opponentScore) || (resultForTeam === 'away' && teamScore < opponentScore)) {
-      sentiment = 'negative';
+      sentiment = 'frustrated';
       const lossQuotes = [
         `Disappointing result. We didn't perform to our standards today.`,
         `We have to be honest, ${opponentName} were better than us today. We need to learn from this.`,
@@ -453,8 +424,13 @@ export class MatchStoryGenerator implements IMatchStoryGenerator {
       quote = drawQuotes[Math.floor(random * drawQuotes.length)];
     }
 
+    // Get manager name from staff
+    const manager = team.staff?.find(s => s.role === 'manager');
+    const managerName = manager?.name || 'Manager';
+
     return {
-      manager: team.manager || 'Manager',
+      managerName,
+      teamName: team.name,
       quote,
       sentiment,
     };
@@ -468,6 +444,8 @@ export class MatchStoryGenerator implements IMatchStoryGenerator {
     result: 'home' | 'away' | 'draw',
     homeScore: number,
     awayScore: number,
+    homeTeam: string,
+    awayTeam: string,
     seed?: number
   ): PlayerInterview {
     const random = seed !== undefined ? this.seededRandom(seed + 6000) : Math.random();
@@ -499,8 +477,12 @@ export class MatchStoryGenerator implements IMatchStoryGenerator {
       quote = lossQuotes[Math.floor(random * lossQuotes.length)];
     }
 
+    const teamName = player.team === 'home' ? homeTeam : awayTeam;
+
     return {
-      playerName: player.name,
+      playerId: player.playerId,
+      playerName: player.playerName,
+      teamName,
       rating: player.rating,
       quote,
     };
@@ -571,7 +553,7 @@ export class MatchStoryGenerator implements IMatchStoryGenerator {
     if (result.manOfMatch) {
       stats.push({
         label: 'Man of the Match',
-        value: `${result.manOfMatch.name} (${result.manOfMatch.rating.toFixed(1)})`,
+        value: `${result.manOfMatch.playerName} (${result.manOfMatch.rating.toFixed(1)})`,
       });
     }
 

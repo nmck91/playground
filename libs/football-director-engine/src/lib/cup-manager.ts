@@ -12,22 +12,10 @@ import type {
   CupFixture,
   PrizeMoney,
 } from './types';
+import { ICupManager } from './interfaces/cup-manager.interface';
 
-/**
- * Cup Manager Interface
- *
- * Defines the contract for managing cup competitions.
- * Note: The implementation uses static methods.
- */
-export interface ICupManager {
-  generateCupCompetition(teams: Team[], season: number, cupName?: string): CupCompetition;
-  advanceTournament(cup: CupCompetition, currentWeek: number): CupCompetition;
-  isCupComplete(cup: CupCompetition): boolean;
-  getPrizeMoney(round: string, isWinner?: boolean): number;
-  hasCupFixturesThisWeek(cup: CupCompetition, currentWeek: number): boolean;
-  getCupFixturesForWeek(cup: CupCompetition, currentWeek: number): CupFixture[];
-  updateCupProgress(cup: CupCompetition): CupCompetition;
-}
+// Re-export interface for convenience
+export { ICupManager };
 
 /**
  * Cup round names mapping
@@ -89,7 +77,7 @@ export class CupManager {
 
     // Round 1: 10 teams (5 matches) - 10 teams get byes
     const round1Teams = shuffledTeams.slice(0, 10);
-    const _byeTeams = shuffledTeams.slice(10); // Reserved for bye tracking feature
+    // const _byeTeams = shuffledTeams.slice(10); // Reserved for bye tracking feature
 
     const round1Fixtures = this.generateRoundFixtures(
       round1Teams,

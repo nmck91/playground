@@ -11,42 +11,10 @@ import {
   Team,
   Fixture,
 } from './types';
+import { IRecordsManager } from './interfaces/records-manager.interface';
 
-/**
- * Records Manager Interface
- *
- * Defines the contract for tracking season and club records.
- */
-export interface IRecordsManager {
-  calculateSeasonRecords(
-    season: number,
-    finalTable: LeagueTable,
-    matchHistory: MatchResult[],
-    fixtures: Fixture[],
-    playerTeam: Team,
-    teamId: string
-  ): SeasonRecords;
-
-  findBiggestResults(
-    matches: MatchResult[],
-    teamName: string
-  ): {
-    biggestWin?: SeasonRecords['biggestWin'];
-    biggestLoss?: SeasonRecords['biggestLoss'];
-  };
-
-  calculateStreaks(fixtures: Fixture[], teamId: string): {
-    longestWinStreak: number;
-    longestUnbeatenStreak: number;
-  };
-
-  initializeClubRecords(season: number): ClubRecords;
-
-  updateClubRecords(
-    currentRecords: ClubRecords,
-    seasonRecords: SeasonRecords
-  ): { records: ClubRecords; brokenRecords: string[] };
-}
+// Re-export interface for convenience
+export { IRecordsManager };
 
 /**
  * Records Manager Implementation
@@ -128,7 +96,7 @@ export class RecordsManager implements IRecordsManager {
   /**
    * Helper to get position from league table
    */
-  private getPositionFromTable(entry: LeagueTable): number {
+  private getPositionFromTable(_entry: LeagueTable): number {
     // This would need the full sorted table to determine position
     // For now, we'll assume it's calculated elsewhere
     return 1;

@@ -3,19 +3,8 @@
  * Handles player aging, skill progression, and career development
  */
 
-import { Player, Team } from './types';
+import { Player, Team, DevelopmentReport } from './types';
 import { StaffManager } from './staff-manager';
-
-export interface DevelopmentReport {
-  playerId: string;
-  playerName: string;
-  oldAge: number;
-  newAge: number;
-  oldSkill: number;
-  newSkill: number;
-  skillChange: number;
-  phase: 'developing' | 'peak' | 'declining' | 'veteran';
-}
 
 /**
  * Player Development Interface

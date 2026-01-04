@@ -679,3 +679,53 @@ export interface NewsArticle {
   importance: NewsImportance;
   read: boolean;
 }
+
+/**
+ * Player Development Types
+ */
+export interface DevelopmentReport {
+  playerId: string;
+  playerName: string;
+  oldAge: number;
+  newAge: number;
+  oldSkill: number;
+  newSkill: number;
+  skillChange: number;
+  phase: 'developing' | 'peak' | 'declining' | 'veteran';
+}
+
+/**
+ * Morale Types
+ */
+export type MoraleLevel = 'very-low' | 'low' | 'normal' | 'high';
+
+export interface MoraleInfo {
+  level: MoraleLevel;
+  value: number; // 0-100
+  emoji: string;
+  statModifier: number; // -10%, -5%, 0%, +5%
+  description: string;
+}
+
+/**
+ * Match Commentary Types
+ */
+export interface HalfTimeState {
+  homeTeam: string;
+  awayTeam: string;
+  homeScore: number;
+  awayScore: number;
+  events: MatchEvent[];
+  homePosition?: number;
+  awayPosition?: number;
+}
+
+/**
+ * Tactics Types
+ */
+export interface FormationRequirements {
+  GK: number;
+  DEF: number;
+  MID: number;
+  FWD: number;
+}

@@ -5,32 +5,10 @@
 
 import { Player, Team } from './types';
 import { TeamGenerator } from './team-generator';
+import { IYouthAcademyManager } from './interfaces/youth-academy-manager.interface';
 
-/**
- * Youth Academy Manager Interface
- *
- * Defines the contract for managing youth player generation.
- */
-export interface IYouthAcademyManager {
-  /**
-   * Generate 6 youth players as prospects (not yet added to team)
-   */
-  generateYouthProspects(currentYear: number, seed?: number): Player[];
-
-  /**
-   * Add selected youth players to team
-   */
-  addYouthPlayersToTeam(team: Team, selectedPlayers: Player[]): Team;
-
-  /**
-   * Generate 2-4 youth players for AI teams (automatic selection)
-   */
-  generateYouthPlayers(
-    team: Team,
-    currentYear: number,
-    seed?: number
-  ): { team: Team; newPlayers: Player[] };
-}
+// Re-export interface for convenience
+export { IYouthAcademyManager };
 
 /**
  * Youth Academy Manager Implementation
@@ -112,7 +90,7 @@ export class YouthAcademyManager implements IYouthAcademyManager {
    */
   private generateYouthPlayer(
     position: 'GK' | 'DEF' | 'MID' | 'FWD',
-    currentYear: number,
+    _currentYear: number,
     seed?: number
   ): Player {
     // Use TeamGenerator to create base player with youth skill range

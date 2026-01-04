@@ -15,36 +15,16 @@ import {
 } from './types';
 import { PlayerStatsTracker } from './player-stats-tracker';
 import { StaffManager } from './staff-manager';
-import { TacticsManager } from './tactics-manager';
 import { getDefaultPlayerContract, getDefaultPlayerMorale } from './migration';
+import { ITeamGenerator } from './interfaces/team-generator.interface';
 
-/**
- * Team Generator Interface
- *
- * Defines the contract for generating players, teams, and leagues.
- */
-export interface ITeamGenerator {
-  generatePlayer(
-    position: Player['position'],
-    skillRange: [number, number],
-    seed?: number
-  ): Player;
-
-  generateTeam(
-    name: string,
-    tier: 'elite' | 'strong' | 'mid' | 'weak',
-    seed?: number
-  ): Team;
-
-  generateLeague(seed?: number): Team[];
-}
+// Re-export interface for convenience
+export { ITeamGenerator };
 
 /**
  * Team Generator Implementation
  */
 export class TeamGenerator implements ITeamGenerator {
-  private nameCounter = 0;
-
   /**
    * Generate a single player with specified position and skill range
    */

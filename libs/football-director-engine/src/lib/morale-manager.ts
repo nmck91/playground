@@ -3,17 +3,7 @@
  * Manages player happiness and its effects on performance
  */
 
-import { Player, Team, LeagueTable } from './types';
-
-export type MoraleLevel = 'very-low' | 'low' | 'normal' | 'high';
-
-export interface MoraleInfo {
-  level: MoraleLevel;
-  value: number; // 0-100
-  emoji: string;
-  statModifier: number; // -10%, -5%, 0%, +5%
-  description: string;
-}
+import { Player, Team, LeagueTable, MoraleInfo } from './types';
 
 /**
  * Morale Manager Interface
@@ -71,7 +61,7 @@ export class MoraleManager implements IMoraleManager {
    */
   calculatePlayerMorale(
     player: Player,
-    team: Team,
+    _team: Team,
     leaguePosition: number,
     recentForm: number, // Last 5 matches points (0-15)
     currentWeek: number
@@ -241,7 +231,7 @@ export class MoraleManager implements IMoraleManager {
   /**
    * Check if player should request transfer (very low morale)
    */
-  shouldRequestTransfer(player: Player, morale: MoraleInfo): boolean {
+  shouldRequestTransfer(_player: Player, morale: MoraleInfo): boolean {
     return morale.level === 'very-low' && Math.random() < 0.3; // 30% chance
   }
 }
