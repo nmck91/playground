@@ -7,13 +7,18 @@
 
 import { ITeamGenerator } from '../interfaces/team-generator.interface';
 import { TeamGenerator } from '../team-generator';
+import { PlayerStatsTracker } from '../player-stats-tracker';
+import { StaffManager } from '../staff-manager';
 import { Team, Player } from '../types';
 
 /**
  * Create a production TeamGenerator instance
  */
 export function createTeamGenerator(): ITeamGenerator {
-  return new TeamGenerator();
+  return new TeamGenerator(
+    new PlayerStatsTracker(),
+    new StaffManager()
+  );
 }
 
 /**

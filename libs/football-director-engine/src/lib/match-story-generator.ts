@@ -25,6 +25,8 @@ import {
   PlayerInterview,
   ManOfMatch,
 } from './types';
+import { IWeatherGenerator } from './interfaces/weather-generator.interface';
+import { IMatchCommentary } from './interfaces/match-commentary.interface';
 import { WeatherGenerator } from './weather-generator';
 import { MatchCommentary } from './match-commentary';
 import { IMatchStoryGenerator } from './interfaces/match-story-generator.interface';
@@ -39,8 +41,17 @@ export { IMatchStoryGenerator };
  * both before (previews) and after (analysis).
  */
 export class MatchStoryGenerator implements IMatchStoryGenerator {
-  private weatherGenerator = new WeatherGenerator();
-  private commentaryGenerator = new MatchCommentary();
+  private weatherGenerator: IWeatherGenerator;
+  private commentaryGenerator: IMatchCommentary;
+
+  constructor(
+    weatherGenerator?: IWeatherGenerator,
+    commentaryGenerator?: IMatchCommentary
+  ) {
+    // Use provided dependencies or create defaults for backward compatibility
+    this.weatherGenerator = weatherGenerator ?? new WeatherGenerator();
+    this.commentaryGenerator = commentaryGenerator ?? new MatchCommentary();
+  }
 
   // ============================================
   // PRE-MATCH PREVIEW GENERATION

@@ -7,13 +7,18 @@
 
 import { IMatchStoryGenerator } from '../interfaces/match-story-generator.interface';
 import { MatchStoryGenerator } from '../match-story-generator';
+import { WeatherGenerator } from '../weather-generator';
+import { MatchCommentary } from '../match-commentary';
 import { MatchPreview, PostMatchAnalysis, Fixture, Team, LeagueTable, MatchResult } from '../types';
 
 /**
  * Create a production MatchStoryGenerator instance
  */
 export function createMatchStoryGenerator(): IMatchStoryGenerator {
-  return new MatchStoryGenerator();
+  return new MatchStoryGenerator(
+    new WeatherGenerator(),
+    new MatchCommentary()
+  );
 }
 
 /**

@@ -5,12 +5,18 @@
  */
 
 import { Team, Match, MatchResult, MatchStats, PlayerRating, ManOfMatch, Player, CupResult } from './types';
-import { MatchCommentary } from './match-commentary';
-import { StaffManager } from './staff-manager';
+import { ITacticsManager } from './interfaces/tactics-manager.interface';
+import { IInjuryManager } from './interfaces/injury-manager.interface';
+import { IMoraleManager } from './interfaces/morale-manager.interface';
+import { IStaffManager } from './interfaces/staff-manager.interface';
+import { IWeatherGenerator } from './interfaces/weather-generator.interface';
+import { IMatchCommentary } from './interfaces/match-commentary.interface';
 import { TacticsManager } from './tactics-manager';
 import { InjuryManager } from './injury-manager';
 import { MoraleManager } from './morale-manager';
+import { StaffManager } from './staff-manager';
 import { WeatherGenerator } from './weather-generator';
+import { MatchCommentary } from './match-commentary';
 import { getDefaultPostMatchAnalysis, getDefaultMatchWeather, getDefaultMatchStats } from './migration';
 import { IMatchSimulator } from './interfaces/match-simulator.interface';
 
@@ -21,9 +27,29 @@ export { IMatchSimulator };
  * Match Simulator Implementation
  */
 export class MatchSimulator implements IMatchSimulator {
-  private tacticsManager = new TacticsManager();
-  private injuryManager = new InjuryManager();
-  private moraleManager = new MoraleManager();
+  private tacticsManager: ITacticsManager;
+  private injuryManager: IInjuryManager;
+  private moraleManager: IMoraleManager;
+  private staffManager: IStaffManager;
+  private weatherGenerator: IWeatherGenerator;
+  private matchCommentary: IMatchCommentary;
+
+  constructor(
+    tacticsManager?: ITacticsManager,
+    injuryManager?: IInjuryManager,
+    moraleManager?: IMoraleManager,
+    staffManager?: IStaffManager,
+    weatherGenerator?: IWeatherGenerator,
+    matchCommentary?: IMatchCommentary
+  ) {
+    // Use provided dependencies or create defaults for backward compatibility
+    this.tacticsManager = tacticsManager ?? new TacticsManager();
+    this.injuryManager = injuryManager ?? new InjuryManager();
+    this.moraleManager = moraleManager ?? new MoraleManager();
+    this.staffManager = staffManager ?? new StaffManager();
+    this.weatherGenerator = weatherGenerator ?? new WeatherGenerator();
+    this.matchCommentary = matchCommentary ?? new MatchCommentary();
+  }
 
   /**
    * Calculate team strength based on player skills, manager bonus, morale, and available players
@@ -56,8 +82,7 @@ export class MatchSimulator implements IMatchSimulator {
     const baseStrength = totalSkill / availablePlayers.length;
 
     // Apply manager bonus (affects team performance)
-    const staffManager = new StaffManager();
-    const managerBonus = staffManager.getManagerBonus(team);
+    const managerBonus = this.staffManager.getManagerBonus(team);
 
     return baseStrength * managerBonus;
   }
@@ -108,14 +133,13 @@ export class MatchSimulator implements IMatchSimulator {
     }
 
     // Generate match commentary
-    const commentary = new MatchCommentary();
-    const homeScorerPlayers = commentary.selectGoalScorers(match.homeTeam, homeGoals, seed);
-    const awayScorerPlayers = commentary.selectGoalScorers(match.awayTeam, awayGoals, seed ? seed + 10 : undefined);
+    const homeScorerPlayers = this.matchCommentary.selectGoalScorers(match.homeTeam, homeGoals, seed);
+    const awayScorerPlayers = this.matchCommentary.selectGoalScorers(match.awayTeam, awayGoals, seed ? seed + 10 : undefined);
 
     // Detect derby before generating events
     const isDerby = this.isDerbyMatch(match.homeTeam.name, match.awayTeam.name);
 
-    const events = commentary.generateMatchEvents(
+    const events = this.matchCommentary.generateMatchEvents(
       match.homeTeam,
       match.awayTeam,
       homeGoals,
@@ -126,12 +150,11 @@ export class MatchSimulator implements IMatchSimulator {
     );
 
     // Generate weather (we'll need this for attendance)
-    const weatherGen = new WeatherGenerator();
-    const weather = weatherGen.generateWeather(currentWeek, seed);
+    const weather = this.weatherGenerator.generateWeather(currentWeek, seed);
 
     // Enhanced attendance with contextual factors
     // Note: We don't have league table here, so we'll pass undefined for positions
-    const attendance = commentary.generateAttendance(
+    const attendance = this.matchCommentary.generateAttendance(
       match.homeTeam,
       seed,
       {
@@ -284,27 +307,26 @@ export class MatchSimulator implements IMatchSimulator {
     // const random = seed !== undefined ? this.seededRandom(seed + 1000) : Math.random(); // Reserved for future rating variance
 
     // Get available players from both teams
-    const injuryManager = new InjuryManager();
-    const homeAvailable = injuryManager.getAvailablePlayers(match.homeTeam, 1);
-    const awayAvailable = injuryManager.getAvailablePlayers(match.awayTeam, 1);
+    const homeAvailable = this.injuryManager.getAvailablePlayers(match.homeTeam, 1);
+    const awayAvailable = this.injuryManager.getAvailablePlayers(match.awayTeam, 1);
 
     // Select 11 players from each team (best skilled available)
     const homePlayers = homeAvailable
-      .sort((a, b) => b.skill - a.skill)
+      .sort((a: Player, b: Player) => b.skill - a.skill)
       .slice(0, 11);
     const awayPlayers = awayAvailable
-      .sort((a, b) => b.skill - a.skill)
+      .sort((a: Player, b: Player) => b.skill - a.skill)
       .slice(0, 11);
 
     // Rate home team players
-    homePlayers.forEach((player, index) => {
+    homePlayers.forEach((player: Player, index: number) => {
       ratings.push(
         this.ratePlayer(player, 'home', homeScorerPlayers, homeScore, awayScore, seed ? seed + index : undefined)
       );
     });
 
     // Rate away team players
-    awayPlayers.forEach((player, index) => {
+    awayPlayers.forEach((player: Player, index: number) => {
       ratings.push(
         this.ratePlayer(player, 'away', awayScorerPlayers, awayScore, homeScore, seed ? seed + 100 + index : undefined)
       );
@@ -616,16 +638,15 @@ export class MatchSimulator implements IMatchSimulator {
    * Get penalty takers, prioritizing designated taker if set
    */
   private getPenaltyTakers(team: Team): Player[] {
-    const injuryManager = new InjuryManager();
-    const available = injuryManager.getAvailablePlayers(team, 1);
+    const available = this.injuryManager.getAvailablePlayers(team, 1);
 
     // Sort by skill
-    const sorted = available.sort((a, b) => b.skill - a.skill).slice(0, 11);
+    const sorted = available.sort((a: Player, b: Player) => b.skill - a.skill).slice(0, 11);
 
     // If there's a designated penalty taker, move them to first position
     const designatedTakerId = team.tactics?.setPieces?.penaltyTaker;
     if (designatedTakerId) {
-      const takerIndex = sorted.findIndex(p => p.id === designatedTakerId);
+      const takerIndex = sorted.findIndex((p: Player) => p.id === designatedTakerId);
       if (takerIndex > 0) {
         // Move designated taker to first position
         const taker = sorted.splice(takerIndex, 1)[0];

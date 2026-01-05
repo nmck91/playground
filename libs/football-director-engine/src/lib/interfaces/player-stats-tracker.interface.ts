@@ -8,8 +8,19 @@ import { Player, Team, PlayerStats, MatchEvent, MatchResult, SeasonTopPerformers
 
 export interface IPlayerStatsTracker {
   initializePlayerStats(): PlayerStats;
-  updateStatsFromMatch(player: Player, events: MatchEvent[], team: 'home' | 'away'): Player;
-  processTeamMatchStats(team: Team, result: MatchResult, teamSide: 'home' | 'away'): Team;
+  updateStatsFromMatch(
+    player: Player,
+    matchEvents: MatchEvent[],
+    matchResult: MatchResult,
+    teamName: string,
+    wasHomeTeam: boolean
+  ): Player;
+  processTeamMatchStats(
+    team: Team,
+    matchResult: MatchResult,
+    matchEvents: MatchEvent[],
+    wasHomeTeam: boolean
+  ): Team;
   archiveSeasonStats(player: Player, season: number, teamName: string): Player;
   getTopPerformers(team: Team): SeasonTopPerformers;
   resetSeasonStats(player: Player): Player;

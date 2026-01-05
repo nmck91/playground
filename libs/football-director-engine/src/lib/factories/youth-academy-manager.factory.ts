@@ -7,13 +7,21 @@
 
 import { IYouthAcademyManager } from '../interfaces/youth-academy-manager.interface';
 import { YouthAcademyManager } from '../youth-academy-manager';
+import { TeamGenerator } from '../team-generator';
+import { PlayerStatsTracker } from '../player-stats-tracker';
+import { StaffManager } from '../staff-manager';
 import { Player, Team } from '../types';
 
 /**
  * Create a production YouthAcademyManager instance
  */
 export function createYouthAcademyManager(): IYouthAcademyManager {
-  return new YouthAcademyManager();
+  return new YouthAcademyManager(
+    new TeamGenerator(
+      new PlayerStatsTracker(),
+      new StaffManager()
+    )
+  );
 }
 
 /**

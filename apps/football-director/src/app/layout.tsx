@@ -5,6 +5,10 @@ import { InstallPrompt } from '../components/pwa/InstallPrompt';
 import { OfflineIndicator } from '../components/pwa/OfflineIndicator';
 import { UpdateNotification } from '../components/pwa/UpdateNotification';
 import { WelcomeMessage } from '../components/pwa/WelcomeMessage';
+import { initializeEngine } from '@playground/football-director-engine';
+
+// Initialize engine modules on app startup
+initializeEngine();
 
 export const metadata = {
   title: 'Football Director',

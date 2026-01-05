@@ -4,6 +4,7 @@
  */
 
 import { Player, Team } from './types';
+import { ITeamGenerator } from './interfaces/team-generator.interface';
 import { TeamGenerator } from './team-generator';
 import { IYouthAcademyManager } from './interfaces/youth-academy-manager.interface';
 
@@ -14,7 +15,12 @@ export { IYouthAcademyManager };
  * Youth Academy Manager Implementation
  */
 export class YouthAcademyManager implements IYouthAcademyManager {
-  private teamGenerator = new TeamGenerator();
+  private teamGenerator: ITeamGenerator;
+
+  constructor(teamGenerator?: ITeamGenerator) {
+    // Use provided dependency or create default for backward compatibility
+    this.teamGenerator = teamGenerator ?? new TeamGenerator();
+  }
 
   /**
    * Generate 6 youth players as prospects (not yet added to team)

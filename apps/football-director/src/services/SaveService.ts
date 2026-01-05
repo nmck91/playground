@@ -12,17 +12,17 @@ import {
   GameState,
   SaveMetadata,
   SaveSlot,
-  TeamGenerator,
-  LeagueTableManager,
-  SeasonManager,
-  CupManager,
-  TransferMarket,
-  BoardManager,
-  PlayerStatsTracker,
-  RecordsManager,
-  AchievementManager,
-  NewsEngine,
-  StaffManager,
+  globalRegistry,
+  ModuleKeys,
+  type ITeamGenerator,
+  type ILeagueTableManager,
+  type ISeasonManager,
+  type ITransferMarket,
+  type IBoardManager,
+  type IRecordsManager,
+  type IAchievementManager,
+  type INewsEngine,
+  type IStaffManager,
   Team,
   Player,
   PlayerContract,
@@ -50,9 +50,9 @@ export class SaveService {
    * Create a new game with initial state
    */
   static createNewGame(): GameState {
-    const generator = new TeamGenerator();
-    const tableManager = new LeagueTableManager();
-    const seasonManager = new SeasonManager();
+    const generator = globalRegistry.get<ITeamGenerator>(ModuleKeys.TEAM_GENERATOR);
+    const tableManager = globalRegistry.get<ILeagueTableManager>(ModuleKeys.LEAGUE_TABLE_MANAGER);
+    const seasonManager = globalRegistry.get<ISeasonManager>(ModuleKeys.SEASON_MANAGER);
 
     // Generate league (20 teams)
     const allTeams = generator.generateLeague(Date.now());
@@ -92,27 +92,27 @@ export class SaveService {
     };
 
     // Generate initial transfer market
-    const transferMarket = new TransferMarket();
+    const transferMarket = globalRegistry.get<ITransferMarket>(ModuleKeys.TRANSFER_MARKET);
     const initialMarket = transferMarket.generateMarket(aiTeams, 1, 15);
 
     // Generate initial staff market
-    const staffManager = new StaffManager();
+    const staffManager = globalRegistry.get<IStaffManager>(ModuleKeys.STAFF_MANAGER);
     const initialStaffMarket = staffManager.generateStaffMarket(1, 15);
 
     // Initialize board status with objectives
-    const boardManager = new BoardManager();
+    const boardManager = globalRegistry.get<IBoardManager>(ModuleKeys.BOARD_MANAGER);
     const boardStatus = boardManager.initializeBoardStatus(playerTeam, season.year);
 
     // Initialize records
-    const recordsManager = new RecordsManager();
+    const recordsManager = globalRegistry.get<IRecordsManager>(ModuleKeys.RECORDS_MANAGER);
     const clubRecords = recordsManager.initializeClubRecords(season.year);
 
     // Initialize achievements
-    const achievementManager = new AchievementManager();
+    const achievementManager = globalRegistry.get<IAchievementManager>(ModuleKeys.ACHIEVEMENT_MANAGER);
     const achievements = achievementManager.getAllAchievements();
 
     // Initialize news feed with welcome message
-    const newsEngine = new NewsEngine();
+    const newsEngine = globalRegistry.get<INewsEngine>(ModuleKeys.NEWS_ENGINE);
     const welcomeNews = newsEngine.generateWelcomeNews(playerTeam.name, season.year);
 
     // Generate cup competition
@@ -402,7 +402,7 @@ export class SaveService {
 
     // Migration: Add boardStatus if it doesn't exist (for old saves)
     if (!gameState.boardStatus) {
-      const boardManager = new BoardManager();
+      const boardManager = globalRegistry.get<IBoardManager>(ModuleKeys.BOARD_MANAGER);
       gameState.boardStatus = boardManager.initializeBoardStatus(
         gameState.playerTeam,
         gameState.season.year
@@ -410,7 +410,7 @@ export class SaveService {
     }
 
     // Migration: Add player stats and history if they don't exist (for old saves)
-    const statsTracker = new PlayerStatsTracker();
+    const statsTracker = globalRegistry.get<IPlayerStatsTracker>(ModuleKeys.PLAYER_STATS_TRACKER);
     const migrateTeamStats = (team: Team): Team => {
       const migratedPlayers = team.players.map((player) => {
         if (!player.stats || !player.history) {
@@ -433,13 +433,13 @@ export class SaveService {
       gameState.seasonRecords = [];
     }
     if (!gameState.clubRecords) {
-      const recordsManager = new RecordsManager();
+      const recordsManager = globalRegistry.get<IRecordsManager>(ModuleKeys.RECORDS_MANAGER);
       gameState.clubRecords = recordsManager.initializeClubRecords(gameState.season.year);
     }
 
     // Migration: Add achievements and seasonAwards if they don't exist (for old saves)
     if (!gameState.achievements) {
-      const achievementManager = new AchievementManager();
+      const achievementManager = globalRegistry.get<IAchievementManager>(ModuleKeys.ACHIEVEMENT_MANAGER);
       gameState.achievements = achievementManager.getAllAchievements();
 
       // Retroactively unlock achievements based on current state
@@ -456,7 +456,7 @@ export class SaveService {
     }
 
     // Migration: Add staff to teams if it doesn't exist (for old saves)
-    const staffManager = new StaffManager();
+    const staffManager = globalRegistry.get<IStaffManager>(ModuleKeys.STAFF_MANAGER);
     const migrateTeamStaff = (team: Team): Team => {
       if (!team.staff) {
         // Generate a basic manager for each team
@@ -475,7 +475,7 @@ export class SaveService {
     }
 
     // Migration: Update season to 52-week system (for old saves)
-    const seasonManager = new SeasonManager();
+    const seasonManager = globalRegistry.get<ISeasonManager>(ModuleKeys.SEASON_MANAGER);
     if (!gameState.season.competitiveWeeks || !gameState.season.phase || !gameState.season.transferWindow || !gameState.season.preSeasonWeeks) {
       const currentWeek = gameState.season.currentWeek;
       gameState.season = {

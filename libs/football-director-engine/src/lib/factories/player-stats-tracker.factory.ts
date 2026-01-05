@@ -39,8 +39,8 @@ export function createMockPlayerStatsTracker(
 
   const mock: IPlayerStatsTracker = {
     initializePlayerStats: () => mockStats,
-    updateStatsFromMatch: (player: Player, _events: MatchEvent[], _team: 'home' | 'away') => player,
-    processTeamMatchStats: (team: Team, _result: MatchResult, _teamSide: 'home' | 'away') => team,
+    updateStatsFromMatch: (player: Player, _matchEvents: MatchEvent[], _matchResult: MatchResult, _teamName: string, _wasHomeTeam: boolean) => player,
+    processTeamMatchStats: (team: Team, _matchResult: MatchResult, _matchEvents: MatchEvent[], _wasHomeTeam: boolean) => team,
     archiveSeasonStats: (player: Player, _season: number, _teamName: string) => player,
     getTopPerformers: (_team: Team): SeasonTopPerformers => ({
       topScorer: null,

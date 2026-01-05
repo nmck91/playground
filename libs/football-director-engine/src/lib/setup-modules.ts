@@ -94,10 +94,33 @@ export function registerCoreModules(registry: ModuleRegistry = globalRegistry): 
   registry.register(ModuleKeys.LEAGUE_TABLE_MANAGER, createLeagueTableManager);
 }
 
+// Track if engine has been initialized
+let engineInitialized = false;
+
 /**
- * Example: Initialize the global registry with all modules
+ * Initialize the global registry with all modules
  * Call this at application startup
+ * This function is idempotent - safe to call multiple times
  */
 export function initializeEngine(): void {
+  if (engineInitialized) {
+    return; // Already initialized, skip
+  }
+
   registerAllModules(globalRegistry);
+  engineInitialized = true;
+}
+
+/**
+ * Check if the engine has been initialized
+ */
+export function isEngineInitialized(): boolean {
+  return engineInitialized;
+}
+
+/**
+ * Force re-initialization (useful for testing)
+ */
+export function resetEngine(): void {
+  engineInitialized = false;
 }

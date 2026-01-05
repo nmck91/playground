@@ -13,6 +13,8 @@ import {
   MidfielderRole,
   ForwardRole,
 } from './types';
+import { IPlayerStatsTracker } from './interfaces/player-stats-tracker.interface';
+import { IStaffManager } from './interfaces/staff-manager.interface';
 import { PlayerStatsTracker } from './player-stats-tracker';
 import { StaffManager } from './staff-manager';
 import { getDefaultPlayerContract, getDefaultPlayerMorale } from './migration';
@@ -25,6 +27,17 @@ export { ITeamGenerator };
  * Team Generator Implementation
  */
 export class TeamGenerator implements ITeamGenerator {
+  private statsTracker: IPlayerStatsTracker;
+  private staffManager: IStaffManager;
+
+  constructor(
+    statsTracker?: IPlayerStatsTracker,
+    staffManager?: IStaffManager
+  ) {
+    // Use provided dependencies or create defaults for backward compatibility
+    this.statsTracker = statsTracker ?? new PlayerStatsTracker();
+    this.staffManager = staffManager ?? new StaffManager();
+  }
   /**
    * Generate a single player with specified position and skill range
    */
@@ -42,8 +55,6 @@ export class TeamGenerator implements ITeamGenerator {
     const wages = Math.floor(baseWage * (0.8 + random * 0.4)); // Add variance
 
     // Initialize player stats
-    const statsTracker = new PlayerStatsTracker();
-
     const player: Player = {
       id: `player-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       name: this.generatePlayerName(seed),
@@ -51,7 +62,7 @@ export class TeamGenerator implements ITeamGenerator {
       skill: Math.min(20, Math.max(1, skill)), // Clamp to 1-20
       age,
       wages,
-      stats: statsTracker.initializePlayerStats(),
+      stats: this.statsTracker.initializePlayerStats(),
       history: [],
       // Story 1.5.2: Now required fields
       contract: getDefaultPlayerContract({ wages } as Player, 2024, 1),
@@ -129,9 +140,8 @@ export class TeamGenerator implements ITeamGenerator {
     });
 
     // Generate initial staff (1 manager per team)
-    const staffManager = new StaffManager();
     const managerSeed = seed !== undefined ? seed + 1000 : undefined;
-    const manager = staffManager.generateStaff('manager', managerSeed);
+    const manager = this.staffManager.generateStaff('manager', managerSeed);
 
     // Generate varied tactics for AI teams
     const tacticsSeed = seed !== undefined ? seed + 2000 : undefined;

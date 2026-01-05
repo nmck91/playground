@@ -10,8 +10,10 @@ import { usePlayerStore } from './playerStore';
 import { useTacticsStore } from './tacticsStore';
 import { useUIStore } from './uiStore';
 import {
-  MatchSimulator,
-  MatchStoryGenerator,
+  globalRegistry,
+  ModuleKeys,
+  type IMatchSimulator,
+  type IMatchStoryGenerator,
   type MatchResult,
   type MatchPreview,
   type Fixture,
@@ -129,7 +131,7 @@ export const useMatchStore = create<MatchStore>()(
         }
 
         // Initialize match simulator
-        const simulator = new MatchSimulator();
+        const simulator = globalRegistry.get<IMatchSimulator>(ModuleKeys.MATCH_SIMULATOR);
 
         // Determine if player team is home or away
         const isPlayerHome = fixture.homeTeamId === gameState.playerTeam.id;
@@ -225,7 +227,7 @@ export const useMatchStore = create<MatchStore>()(
           throw new Error('No game state available');
         }
 
-        const storyGenerator = new MatchStoryGenerator();
+        const storyGenerator = globalRegistry.get<IMatchStoryGenerator>(ModuleKeys.MATCH_STORY_GENERATOR);
 
         const homeTeam = gameState.aiTeams.find((t) => t.id === fixture.homeTeamId) || gameState.playerTeam;
         const awayTeam = gameState.aiTeams.find((t) => t.id === fixture.awayTeamId) || gameState.playerTeam;

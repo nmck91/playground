@@ -96,7 +96,11 @@ export class ModuleRegistry {
     const entry = this.modules.get(key) as ModuleEntry<T> | undefined;
 
     if (!entry) {
-      throw new Error(`Module '${key}' is not registered`);
+      throw new Error(
+        `Module '${key}' is not registered. ` +
+        `Make sure initializeEngine() is called at application startup. ` +
+        `Available modules: ${Array.from(this.modules.keys()).join(', ')}`
+      );
     }
 
     // Return existing instance if singleton

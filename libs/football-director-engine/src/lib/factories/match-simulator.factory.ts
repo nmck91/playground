@@ -7,13 +7,26 @@
 
 import { IMatchSimulator } from '../interfaces/match-simulator.interface';
 import { MatchSimulator } from '../match-simulator';
+import { TacticsManager } from '../tactics-manager';
+import { InjuryManager } from '../injury-manager';
+import { MoraleManager } from '../morale-manager';
+import { StaffManager } from '../staff-manager';
+import { WeatherGenerator } from '../weather-generator';
+import { MatchCommentary } from '../match-commentary';
 import { Team, Match, MatchResult, CupResult } from '../types';
 
 /**
  * Create a production MatchSimulator instance
  */
 export function createMatchSimulator(): IMatchSimulator {
-  return new MatchSimulator();
+  return new MatchSimulator(
+    new TacticsManager(),
+    new InjuryManager(),
+    new MoraleManager(),
+    new StaffManager(),
+    new WeatherGenerator(),
+    new MatchCommentary()
+  );
 }
 
 /**

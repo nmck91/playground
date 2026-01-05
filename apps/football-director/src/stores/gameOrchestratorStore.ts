@@ -11,24 +11,26 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import {
-  MatchSimulator,
-  LeagueTableManager,
-  FinanceEngine,
-  SeasonManager,
-  PlayerStatsTracker,
-  InjuryManager,
-  ContractManager,
-  MoraleManager,
-  AIContractManager,
-  TransferMarket,
-  BoardManager,
-  NewsEngine,
-  PlayerDevelopment,
-  YouthAcademyManager,
-  RecordsManager,
-  AchievementManager,
-  MatchStoryGenerator,
-  CupManager,
+  globalRegistry,
+  ModuleKeys,
+  type IMatchSimulator,
+  type ILeagueTableManager,
+  type IFinanceEngine,
+  type ISeasonManager,
+  type IPlayerStatsTracker,
+  type IInjuryManager,
+  type IContractManager,
+  type IMoraleManager,
+  type IAIContractManager,
+  type ITransferMarket,
+  type IBoardManager,
+  type INewsEngine,
+  type IPlayerDevelopment,
+  type IYouthAcademyManager,
+  type IRecordsManager,
+  type IAchievementManager,
+  type IMatchStoryGenerator,
+  type ICupManager,
   type MatchResult,
   type DevelopmentReport,
   type Player,
@@ -146,25 +148,25 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
         useUIStore.getState().setSimulating(true);
 
         try {
-          // Initialize engine managers
-          const simulator = new MatchSimulator();
-          const tableManager = new LeagueTableManager();
-          const financeEngine = new FinanceEngine();
-          const seasonManager = new SeasonManager();
-          const statsTracker = new PlayerStatsTracker();
-          const injuryManager = new InjuryManager();
-          const contractManager = new ContractManager();
-          const moraleManager = new MoraleManager();
-          const aiContractManager = new AIContractManager();
-          const transferMarket = new TransferMarket();
-          const boardManager = new BoardManager();
-          const newsEngine = new NewsEngine();
-          const playerDevelopment = new PlayerDevelopment();
-          const youthAcademyManager = new YouthAcademyManager();
-          const recordsManager = new RecordsManager();
-          const achievementManager = new AchievementManager();
-          const matchStoryGenerator = new MatchStoryGenerator();
-          const cupManager = new CupManager();
+          // Get engine managers from registry (singletons)
+          const simulator = globalRegistry.get<IMatchSimulator>(ModuleKeys.MATCH_SIMULATOR);
+          const tableManager = globalRegistry.get<ILeagueTableManager>(ModuleKeys.LEAGUE_TABLE_MANAGER);
+          const financeEngine = globalRegistry.get<IFinanceEngine>(ModuleKeys.FINANCE_ENGINE);
+          const seasonManager = globalRegistry.get<ISeasonManager>(ModuleKeys.SEASON_MANAGER);
+          const statsTracker = globalRegistry.get<IPlayerStatsTracker>(ModuleKeys.PLAYER_STATS_TRACKER);
+          const injuryManager = globalRegistry.get<IInjuryManager>(ModuleKeys.INJURY_MANAGER);
+          const contractManager = globalRegistry.get<IContractManager>(ModuleKeys.CONTRACT_MANAGER);
+          const moraleManager = globalRegistry.get<IMoraleManager>(ModuleKeys.MORALE_MANAGER);
+          const aiContractManager = globalRegistry.get<IAIContractManager>(ModuleKeys.AI_CONTRACT_MANAGER);
+          const transferMarket = globalRegistry.get<ITransferMarket>(ModuleKeys.TRANSFER_MARKET);
+          const boardManager = globalRegistry.get<IBoardManager>(ModuleKeys.BOARD_MANAGER);
+          const newsEngine = globalRegistry.get<INewsEngine>(ModuleKeys.NEWS_ENGINE);
+          const playerDevelopment = globalRegistry.get<IPlayerDevelopment>(ModuleKeys.PLAYER_DEVELOPMENT);
+          const youthAcademyManager = globalRegistry.get<IYouthAcademyManager>(ModuleKeys.YOUTH_ACADEMY_MANAGER);
+          const recordsManager = globalRegistry.get<IRecordsManager>(ModuleKeys.RECORDS_MANAGER);
+          const achievementManager = globalRegistry.get<IAchievementManager>(ModuleKeys.ACHIEVEMENT_MANAGER);
+          const matchStoryGenerator = globalRegistry.get<IMatchStoryGenerator>(ModuleKeys.MATCH_STORY_GENERATOR);
+          const cupManager = globalRegistry.get<ICupManager>(ModuleKeys.CUP_MANAGER);
 
           const currentWeek = gameState.season.currentWeek;
           const hasMatches = seasonManager.hasMatchesThisWeek(currentWeek);
