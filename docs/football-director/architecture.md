@@ -1116,15 +1116,37 @@ The 24 engine modules are organized into 5 logical categories:
 #### Story 1.4.5: Documentation & Examples
 
 **Added**:
-- Comprehensive engine README (`libs/football-director-engine/README.md`)
-- Contribution guide (`libs/football-director-engine/CONTRIBUTING.md`)
-- Migration guide (`docs/architecture/engine-migration-guide.md`)
-- Usage examples:
-  - `examples/custom-match-simulation.ts` - Match simulation examples
-  - `examples/custom-transfer-logic.ts` - Transfer market examples
-  - `examples/testing-modules.ts` - Testing with DI and mocks
+- Comprehensive engine README (`libs/football-director-engine/src/lib/README.md`)
+  - Overview of all 24+ modules with purpose, responsibilities, and public APIs
+  - Dependency graph showing module layers
+  - Usage examples for each module
+  - Testing patterns and best practices
+  - Troubleshooting guide
+- Engine Migration Guide (`docs/football-director/engine-migration-guide.md`)
+  - Detailed migration steps from old to new architecture
+  - Breaking changes documentation
+  - Module-by-module migration examples
+  - Common migration errors and fixes
+  - Performance improvements documentation
+- Module Interfaces Documentation (`libs/football-director-engine/src/lib/interfaces/README.md`)
+  - DI patterns and usage
+  - Testing with mocks
+  - Factory function patterns
+- Contribution guide (`docs/football-director/engine-contribution-guide.md`)
+  - How to add new modules
+  - Code review checklist
+  - Testing requirements
+- Usage examples (`examples/` directory):
+  - `custom-match-simulation.ts` - Match simulation patterns
+  - `custom-transfer-logic.ts` - Transfer market integration
+  - `testing-modules.ts` - DI and mock testing examples
 
-**Impact**: Better onboarding, clearer patterns, easier contributions
+**Impact**:
+- Better developer onboarding with comprehensive documentation
+- Clear migration path for existing code
+- Consistent patterns through examples
+- Easier maintenance and contributions
+- AI agents can understand modules from documentation alone
 
 ### Architecture Principles
 

@@ -44,7 +44,7 @@ interface SaveStoreActions {
   // Save/Load operations
   loadGame: (slot?: number) => Promise<void>;
   saveGame: () => Promise<void>;
-  newGame: (saveName: string) => Promise<void>;
+  newGame: (saveName?: string, selectedTeamIndex?: number) => Promise<void>;
   deleteSave: (slot: number) => Promise<void>;
 
   // Import/Export
@@ -243,13 +243,13 @@ export const useSaveStore = create<SaveStore>()(
       },
 
       // Create new game
-      newGame: async (saveName) => {
+      newGame: async (saveName, selectedTeamIndex = 0) => {
         set({ isLoading: true, loadError: null }, false, 'saveStore/newGameStart');
         useUIStore.getState().setLoading(true);
 
         try {
           // Create new game via SaveService
-          const { gameState, slotId } = await SaveService.createNewSave(saveName);
+          const { gameState, slotId } = await SaveService.createNewSave(saveName, selectedTeamIndex);
 
           // Update GameStore
           useGameStore.getState().setGameState(gameState);

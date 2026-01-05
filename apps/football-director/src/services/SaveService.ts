@@ -49,7 +49,7 @@ export class SaveService {
   /**
    * Create a new game with initial state
    */
-  static createNewGame(): GameState {
+  static createNewGame(selectedTeamIndex: number = 0): GameState {
     const generator = globalRegistry.get<ITeamGenerator>(ModuleKeys.TEAM_GENERATOR);
     const tableManager = globalRegistry.get<ILeagueTableManager>(ModuleKeys.LEAGUE_TABLE_MANAGER);
     const seasonManager = globalRegistry.get<ISeasonManager>(ModuleKeys.SEASON_MANAGER);
@@ -57,9 +57,9 @@ export class SaveService {
     // Generate league (20 teams)
     const allTeams = generator.generateLeague(Date.now());
 
-    // Player team is the first team
-    const playerTeam = allTeams[0];
-    const aiTeams = allTeams.slice(1);
+    // Player team is selected by index
+    const playerTeam = allTeams[selectedTeamIndex];
+    const aiTeams = allTeams.filter((_, index) => index !== selectedTeamIndex);
 
     // Generate fixtures (competitive + friendlies)
     const competitiveFixtures = seasonManager.generateFixtures(allTeams);
@@ -555,7 +555,7 @@ export class SaveService {
   /**
    * Create a new save in the first available slot (1-3)
    */
-  static async createNewSave(saveName?: string): Promise<{ slotId: number; gameState: GameState }> {
+  static async createNewSave(saveName?: string, selectedTeamIndex: number = 0): Promise<{ slotId: number; gameState: GameState }> {
     const saves = await this.getAllSaves();
 
     // Find first available slot (1-3)
@@ -574,7 +574,7 @@ export class SaveService {
       throw new Error('All save slots are full. Please delete a save first.');
     }
 
-    const gameState = this.createNewGame();
+    const gameState = this.createNewGame(selectedTeamIndex);
     await this.saveToSlot(slotId, gameState, saveName);
     await this.setActiveSlot(slotId);
 

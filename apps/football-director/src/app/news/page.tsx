@@ -2,7 +2,7 @@
 
 import { useGameStore, useSaveStore } from '../../stores';
 import Link from 'next/link';
-import { NewsArticle, NewsArticleType, NewsImportance } from '@playground/football-director-engine';
+import { NewsArticleType, NewsImportance } from '@playground/football-director-engine';
 import { ThemeToggle } from '../../components/ui/ThemeToggle';
 
 export default function NewsPage() {

@@ -8,12 +8,13 @@
 import { useState, useEffect } from 'react';
 import { SaveService } from '../../services/SaveService';
 import { SaveSlotCard } from './SaveSlotCard';
+import { TeamSelectionModal } from './TeamSelectionModal';
 import { SaveMetadata } from '@playground/football-director-engine';
 import { ThemeToggle } from '../ui/ThemeToggle';
 
 export interface SaveSlotManagerProps {
   onLoadSlot: (slotId: number) => void;
-  onCreateNew: (saveName?: string) => void;
+  onCreateNew: (saveName?: string, teamIndex?: number) => void;
 }
 
 export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProps) {
@@ -23,6 +24,7 @@ export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProp
   const [importText, setImportText] = useState('');
   const [importError, setImportError] = useState<string | null>(null);
   const [showNewGameDialog, setShowNewGameDialog] = useState(false);
+  const [showTeamSelection, setShowTeamSelection] = useState(false);
   const [newGameName, setNewGameName] = useState('');
 
   useEffect(() => {
@@ -103,10 +105,16 @@ export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProp
   };
 
   const handleNewGame = () => {
+    // Close name dialog and show team selection
+    setShowNewGameDialog(false);
+    setShowTeamSelection(true);
+  };
+
+  const handleTeamSelected = (teamIndex: number, saveName?: string) => {
     try {
-      const name = newGameName.trim() || undefined;
-      onCreateNew(name);
-      setShowNewGameDialog(false);
+      const name = saveName || newGameName.trim() || undefined;
+      onCreateNew(name, teamIndex);
+      setShowTeamSelection(false);
       setNewGameName('');
     } catch (error) {
       alert(error instanceof Error ? error.message : 'Failed to create new game');
@@ -289,6 +297,17 @@ export function SaveSlotManager({ onLoadSlot, onCreateNew }: SaveSlotManagerProp
           </div>
         </div>
       )}
+
+      {/* Team Selection Modal */}
+      <TeamSelectionModal
+        isOpen={showTeamSelection}
+        onClose={() => {
+          setShowTeamSelection(false);
+          setNewGameName('');
+        }}
+        onSelectTeam={handleTeamSelected}
+        saveName={newGameName}
+      />
     </div>
   );
 }

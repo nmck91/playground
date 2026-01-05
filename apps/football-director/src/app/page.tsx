@@ -7,7 +7,6 @@ import {
   useGameStore,
   useSaveStore,
   useGameOrchestratorStore,
-  useUIStore,
 } from '../stores';
 import { MatchHighlights } from '../components/game/MatchHighlights';
 import { DevelopmentReport } from '../components/game/DevelopmentReport';
@@ -209,20 +208,21 @@ export default function Dashboard() {
     }
   };
 
-  const getObjectiveStatusColor = (status: string) => {
-    switch (status) {
-      case 'on-track':
-        return 'text-green-600';
-      case 'at-risk':
-        return 'text-orange-600';
-      case 'failed':
-        return 'text-red-600';
-      case 'achieved':
-        return 'text-blue-600';
-      default:
-        return 'text-slate-600';
-    }
-  };
+  // Unused helper function - kept for future use
+  // const getObjectiveStatusColor = (status: string) => {
+  //   switch (status) {
+  //     case 'on-track':
+  //       return 'text-green-600';
+  //     case 'at-risk':
+  //       return 'text-orange-600';
+  //     case 'failed':
+  //       return 'text-red-600';
+  //     case 'achieved':
+  //       return 'text-blue-600';
+  //     default:
+  //       return 'text-slate-600';
+  //   }
+  // };
 
   const handlePlayerClick = (player: Player) => {
     setSelectedPlayer(player);
