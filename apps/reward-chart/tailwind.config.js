@@ -13,13 +13,20 @@ module.exports = {
 
   theme: {
     extend: {
-      // App-specific theme extensions go here
-      // All shared tokens (colors, fonts, shadows, etc.) come from the preset
-      // Only add app-specific customizations here if needed
+      // Dadai brand colors
+      colors: {
+        'dadai-navy': '#29388f',
+        'dadai-cyan': '#18b6ff',
+        'dadai-turquoise': '#31e1cc',
+        'dadai-navy-light': '#3a4fa8',
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+      },
     },
   },
 
   plugins: [
-    // App-specific plugins go here
+    require('@tailwindcss/typography'),
   ],
 };
