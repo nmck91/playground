@@ -1,0 +1,90 @@
+{
+  "name": "dadai-dev",
+  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "prefix": "app",
+  "sourceRoot": "dadai-dev/src",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@angular/build:application",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/dadai-dev",
+        "browser": "dadai-dev/src/main.ts",
+        "polyfills": ["zone.js"],
+        "tsConfig": "dadai-dev/tsconfig.app.json",
+        "assets": [
+          {
+            "glob": "**/*",
+            "input": "dadai-dev/public"
+          }
+        ],
+        "styles": ["dadai-dev/src/styles.css"]
+      },
+      "configurations": {
+        "production": {
+          "budgets": [
+            {
+              "type": "initial",
+              "maximumWarning": "500kb",
+              "maximumError": "1mb"
+            },
+            {
+              "type": "anyComponentStyle",
+              "maximumWarning": "4kb",
+              "maximumError": "8kb"
+            }
+          ],
+          "outputHashing": "all"
+        },
+        "development": {
+          "optimization": false,
+          "extractLicenses": false,
+          "sourceMap": true
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "serve": {
+      "continuous": true,
+      "executor": "@angular/build:dev-server",
+      "configurations": {
+        "production": {
+          "buildTarget": "dadai-dev:build:production"
+        },
+        "development": {
+          "buildTarget": "dadai-dev:build:development"
+        }
+      },
+      "defaultConfiguration": "development"
+    },
+    "extract-i18n": {
+      "executor": "@angular/build:extract-i18n",
+      "options": {
+        "buildTarget": "dadai-dev:build"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "dadai-dev/jest.config.ts",
+        "tsConfig": "dadai-dev/tsconfig.spec.json"
+      }
+    },
+    "serve-static": {
+      "continuous": true,
+      "executor": "@nx/web:file-server",
+      "options": {
+        "buildTarget": "dadai-dev:build",
+        "port": 4200,
+        "staticFilePath": "dist/dadai-dev/browser",
+        "spa": true
+      }
+    }
+  }
+}
