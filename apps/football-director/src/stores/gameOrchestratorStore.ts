@@ -217,7 +217,7 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
           // let cupResults: any[] = []; // Reserved for cup simulation
           let updatedCupCompetition = gameState.cupCompetition;
           let updatedLeagueCupCompetition = gameState.leagueCupCompetition;
-          let cupPrizeTransactions: typeof gameState.finances.transactions = [];
+          const cupPrizeTransactions: typeof gameState.finances.transactions = [];
 
           if (hasMatches) {
             // Get this week's fixtures

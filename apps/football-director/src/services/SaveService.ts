@@ -51,7 +51,7 @@ export class SaveService {
   /**
    * Create a new game with initial state
    */
-  static createNewGame(selectedTeamIndex: number = 0): GameState {
+  static createNewGame(selectedTeamIndex = 0): GameState {
     const generator = globalRegistry.get<ITeamGenerator>(ModuleKeys.TEAM_GENERATOR);
     const tableManager = globalRegistry.get<ILeagueTableManager>(ModuleKeys.LEAGUE_TABLE_MANAGER);
     const seasonManager = globalRegistry.get<ISeasonManager>(ModuleKeys.SEASON_MANAGER);
@@ -399,7 +399,7 @@ export class SaveService {
     }
 
     // Story 1.5.2: Use new migration system for v1 → v2 migration
-    let gameState = migrateGameState(slot.gameState);
+    const gameState = migrateGameState(slot.gameState);
 
     // Post-migration: Legacy migrations for features added before v2 system
     // These handle migrations from old save format to the intermediate v1 format
@@ -559,7 +559,7 @@ export class SaveService {
   /**
    * Create a new save in the first available slot (1-3)
    */
-  static async createNewSave(saveName?: string, selectedTeamIndex: number = 0): Promise<{ slotId: number; gameState: GameState }> {
+  static async createNewSave(saveName?: string, selectedTeamIndex = 0): Promise<{ slotId: number; gameState: GameState }> {
     const saves = await this.getAllSaves();
 
     // Find first available slot (1-3)
