@@ -8,7 +8,7 @@ import { MatchSimulator } from './match-simulator';
 import { ISeasonManager } from './interfaces/season-manager.interface';
 
 // Re-export interface for convenience
-export { ISeasonManager };
+export type { ISeasonManager };
 
 // Season constants
 const TOTAL_WEEKS = 52;
@@ -16,6 +16,7 @@ const PRE_SEASON_WEEKS = 7; // Weeks 1-7
 const COMPETITIVE_WEEKS = 38; // Weeks 8-45
 const COMPETITIVE_START = 8; // First week of competitive matches
 const FRIENDLY_WEEKS = [4, 5, 6]; // Pre-season friendly matches
+const CUP_WEEKS = [13, 19, 26, 33, 40, 47]; // Weeks reserved for cup matches (NO league fixtures)
 const PRE_SEASON_TRANSFER_START = 1;
 const PRE_SEASON_TRANSFER_END = 8;
 const WINTER_TRANSFER_START = 28;
@@ -28,7 +29,7 @@ export class SeasonManager implements ISeasonManager {
   /**
    * Generate round-robin fixtures for a full season
    * Each team plays every other team twice (home and away)
-   * Competitive matches start at week 8
+   * Competitive matches start at week 8, with gaps for cup weeks
    */
   generateFixtures(teams: Team[]): Fixture[] {
     if (teams.length < 2) {
@@ -37,39 +38,41 @@ export class SeasonManager implements ISeasonManager {
 
     const fixtures: Fixture[] = [];
     const totalTeams = teams.length;
-
     let fixtureId = 0;
 
-    // First half of season (each team plays each other once)
-    // Start at week 8 (COMPETITIVE_START)
-    for (let week = 1; week <= totalTeams - 1; week++) {
+    // Generate 38 rounds of fixtures (19 first half + 19 second half)
+    let currentWeek = COMPETITIVE_START; // Start at week 8
+    const totalRounds = (totalTeams - 1) * 2; // 38 rounds for 20 teams
+
+    for (let round = 1; round <= totalRounds; round++) {
+      // Skip cup weeks
+      while (CUP_WEEKS.includes(currentWeek)) {
+        currentWeek++;
+      }
+
+      // Determine if this is first or second half
+      const isFirstHalf = round <= totalTeams - 1;
+      const baseRound = isFirstHalf ? round : round - (totalTeams - 1);
+
       for (let i = 0; i < totalTeams / 2; i++) {
-        const homeIndex = (week + i - 1) % totalTeams;
-        const awayIndex = (totalTeams - 1 - i + week - 1) % totalTeams;
+        const homeIndex = (baseRound + i - 1) % totalTeams;
+        const awayIndex = (totalTeams - 1 - i + baseRound - 1) % totalTeams;
+
+        // Swap home/away for second half
+        const actualHomeIndex = isFirstHalf ? homeIndex : awayIndex;
+        const actualAwayIndex = isFirstHalf ? awayIndex : homeIndex;
 
         fixtures.push({
           id: `fixture-${fixtureId++}`,
-          week: week + COMPETITIVE_START - 1, // Offset to start at week 8
-          homeTeamId: teams[homeIndex].id,
-          awayTeamId: teams[awayIndex].id,
+          week: currentWeek,
+          homeTeamId: teams[actualHomeIndex].id,
+          awayTeamId: teams[actualAwayIndex].id,
           played: false,
           matchType: 'competitive',
         });
       }
-    }
 
-    // Second half of season (reverse fixtures - swap home/away)
-    const firstHalfCount = fixtures.length;
-    for (let i = 0; i < firstHalfCount; i++) {
-      const originalFixture = fixtures[i];
-      fixtures.push({
-        id: `fixture-${fixtureId++}`,
-        week: originalFixture.week + totalTeams - 1,
-        homeTeamId: originalFixture.awayTeamId,
-        awayTeamId: originalFixture.homeTeamId,
-        played: false,
-        matchType: 'competitive',
-      });
+      currentWeek++;
     }
 
     return fixtures;
@@ -222,11 +225,16 @@ export class SeasonManager implements ISeasonManager {
   /**
    * Check if matches should be simulated this week
    * Returns true for friendly weeks (4-6) and competitive weeks (8-45)
+   * Excludes cup weeks (13, 19, 26, 33, 40, 47) which have cup matches instead
    */
   hasMatchesThisWeek(currentWeek: number): boolean {
     // Friendly matches during pre-season
     if (FRIENDLY_WEEKS.includes(currentWeek)) {
       return true;
+    }
+    // Cup weeks have cup matches, not league matches
+    if (CUP_WEEKS.includes(currentWeek)) {
+      return false;
     }
     // Competitive matches
     const competitiveEnd = COMPETITIVE_START + COMPETITIVE_WEEKS - 1;

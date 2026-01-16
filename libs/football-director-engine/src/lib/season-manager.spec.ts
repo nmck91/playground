@@ -121,9 +121,10 @@ describe('SeasonManager', () => {
       const fixtures = manager.generateFixtures(testTeams);
 
       // 4 teams = (4-1)*2 = 6 weeks, starting from week 8
+      // Week 13 is a cup week, so fixtures skip to week 14
       const weeks = new Set(fixtures.map((f) => f.week));
       expect(weeks.size).toBe(6);
-      expect(Math.max(...weeks)).toBe(13); // weeks 8-13
+      expect(Math.max(...weeks)).toBe(14); // weeks 8-12, then 14 (skipping cup week 13)
       expect(Math.min(...weeks)).toBe(8); // starts at week 8
     });
 
@@ -191,8 +192,8 @@ describe('SeasonManager', () => {
     it('should return all fixtures for valid weeks', () => {
       let totalFixtures = 0;
 
-      // Weeks 8-13 for 4 teams (6 weeks total)
-      for (let week = 8; week <= 13; week++) {
+      // Weeks 8-14 for 4 teams (6 weeks total, skipping cup week 13)
+      for (let week = 8; week <= 14; week++) {
         const weekFixtures = manager.getFixturesForWeek(fixtures, week);
         totalFixtures += weekFixtures.length;
       }
@@ -292,8 +293,8 @@ describe('SeasonManager', () => {
     it('should return true when all matches played', () => {
       let updatedFixtures = fixtures;
 
-      // Simulate all 6 weeks (weeks 8-13 for 4 teams)
-      for (let week = 8; week <= 13; week++) {
+      // Simulate all 6 weeks (weeks 8-12, 14 for 4 teams, skipping cup week 13)
+      for (let week = 8; week <= 14; week++) {
         const result = manager.simulateWeek(updatedFixtures, testTeams, week, simulator);
         updatedFixtures = result.updatedFixtures;
       }
@@ -330,8 +331,8 @@ describe('SeasonManager', () => {
     it('should return 8 for completed season', () => {
       let updatedFixtures = fixtures;
 
-      // Simulate all 6 weeks (weeks 8-13 for 4 teams)
-      for (let week = 8; week <= 13; week++) {
+      // Simulate all 6 weeks (weeks 8-12, 14 for 4 teams, skipping cup week 13)
+      for (let week = 8; week <= 14; week++) {
         updatedFixtures = manager.simulateWeek(updatedFixtures, testTeams, week, simulator)
           .updatedFixtures;
       }
@@ -343,8 +344,8 @@ describe('SeasonManager', () => {
   describe('getTotalWeeks', () => {
     it('should return correct total weeks for 4 teams', () => {
       const fixtures = manager.generateFixtures(testTeams);
-      // 4 teams = 6 rounds, starting at week 8, so weeks 8-13
-      expect(manager.getTotalWeeks(fixtures)).toBe(13);
+      // 4 teams = 6 rounds, starting at week 8, weeks 8-12, then 14 (skipping cup week 13)
+      expect(manager.getTotalWeeks(fixtures)).toBe(14);
     });
 
     it('should return correct total weeks for 20 teams', () => {
@@ -357,8 +358,8 @@ describe('SeasonManager', () => {
       }));
 
       const fixtures = manager.generateFixtures(largeLeague);
-      // 20 teams = 38 rounds, starting at week 8, so weeks 8-45
-      expect(manager.getTotalWeeks(fixtures)).toBe(45);
+      // 20 teams = 38 rounds, starting at week 8, ends at week 51 (skipping 6 cup weeks)
+      expect(manager.getTotalWeeks(fixtures)).toBe(51);
     });
 
     it('should return 0 for empty fixtures', () => {
