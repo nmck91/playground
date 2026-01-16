@@ -42,9 +42,6 @@ const FA_CUP_SCHEDULE: Record<number, number> = {
   6: 44, // Final - Week 44 (near end of season)
 };
 
-// Cup weeks - these weeks will have NO league fixtures
-const CUP_WEEKS = [13, 19, 26, 33, 40, 47];
-
 const LEAGUE_CUP_SCHEDULE: Record<number, number> = {
   1: 13, // Round 1 - Week 13
   2: 19, // Round 2 - Week 19
