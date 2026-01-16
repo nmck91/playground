@@ -1,8 +1,8 @@
 export default {
   displayName: 'dadai-dev',
-  preset: '../jest.preset.js',
+  preset: '../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../coverage/dadai-dev',
+  coverageDirectory: '../../coverage/dadai-dev',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

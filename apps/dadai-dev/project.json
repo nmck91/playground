@@ -1,9 +1,9 @@
 {
   "name": "dadai-dev",
-  "$schema": "../node_modules/nx/schemas/project-schema.json",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "prefix": "app",
-  "sourceRoot": "dadai-dev/src",
+  "sourceRoot": "apps/dadai-dev/src",
   "tags": [],
   "targets": {
     "build": {
@@ -11,16 +11,16 @@
       "outputs": ["{options.outputPath}"],
       "options": {
         "outputPath": "dist/dadai-dev",
-        "browser": "dadai-dev/src/main.ts",
+        "browser": "apps/dadai-dev/src/main.ts",
         "polyfills": ["zone.js"],
-        "tsConfig": "dadai-dev/tsconfig.app.json",
+        "tsConfig": "apps/dadai-dev/tsconfig.app.json",
         "assets": [
           {
             "glob": "**/*",
-            "input": "dadai-dev/public"
+            "input": "apps/dadai-dev/public"
           }
         ],
-        "styles": ["dadai-dev/src/styles.css"]
+        "styles": ["apps/dadai-dev/src/styles.css"]
       },
       "configurations": {
         "production": {
@@ -72,8 +72,8 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "dadai-dev/jest.config.ts",
-        "tsConfig": "dadai-dev/tsconfig.spec.json"
+        "jestConfig": "apps/dadai-dev/jest.config.ts",
+        "tsConfig": "apps/dadai-dev/tsconfig.spec.json"
       }
     },
     "serve-static": {
