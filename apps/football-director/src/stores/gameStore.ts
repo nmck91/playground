@@ -80,7 +80,7 @@ const initialState: GameStoreState = {
  */
 export const useGameStore = create<GameStore>()(
   devtools(
-    (set, get) => ({
+    (set, _get) => ({
       // State
       ...initialState,
 

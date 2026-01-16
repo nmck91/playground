@@ -44,7 +44,7 @@ export function createMockCupManager(
 
   const mock: ICupManager = {
     generateCupCompetition: (_teams: Team[], _season: number, _cupName?: string) => mockCup,
-    advanceTournament: (_cup: CupCompetition, _currentWeek: number) => mockCup,
+    advanceTournament: (_cup: CupCompetition, _teams: Team[]) => mockCup,
     isCupComplete: (_cup: CupCompetition) => false,
     getPrizeMoney: (_round: string, _isWinner?: boolean) => 100000,
     hasCupFixturesThisWeek: (_cup: CupCompetition, _currentWeek: number) => false,

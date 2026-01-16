@@ -7,8 +7,7 @@
 
 import { useState, useEffect } from 'react';
 import type { Team } from '@playground/football-director-engine';
-import { globalRegistry } from '@playground/football-director-engine';
-import * as ModuleKeys from '@playground/football-director-engine';
+import { globalRegistry, ModuleKeys, initializeEngine } from '@playground/football-director-engine';
 
 export interface TeamSelectionModalProps {
   isOpen: boolean;
@@ -31,7 +30,10 @@ export function TeamSelectionModal({ isOpen, onClose, onSelectTeam, saveName }: 
   const generateTeams = () => {
     setLoading(true);
     try {
-      const generator = globalRegistry.get<any>(ModuleKeys.TeamGenerator);
+      // Ensure engine is initialized on client side
+      initializeEngine();
+
+      const generator = globalRegistry.get<any>(ModuleKeys.TEAM_GENERATOR);
       const generatedTeams = generator.generateLeague(Date.now());
       setTeams(generatedTeams);
       setLoading(false);
@@ -42,15 +44,15 @@ export function TeamSelectionModal({ isOpen, onClose, onSelectTeam, saveName }: 
   };
 
   const calculateSquadRating = (team: Team): number => {
-    if (!team.squad || team.squad.length === 0) return 0;
-    const avgRating = team.squad.reduce((sum, player) => sum + player.rating, 0) / team.squad.length;
+    if (!team.players || team.players.length === 0) return 0;
+    const avgRating = team.players.reduce((sum, player) => sum + player.skill, 0) / team.players.length;
     return Math.round(avgRating);
   };
 
   const getDifficultyLevel = (rating: number): { label: string; color: string } => {
-    if (rating >= 80) return { label: 'Easy', color: 'text-green-600 dark:text-green-400' };
-    if (rating >= 70) return { label: 'Medium', color: 'text-yellow-600 dark:text-yellow-400' };
-    if (rating >= 60) return { label: 'Hard', color: 'text-orange-600 dark:text-orange-400' };
+    if (rating >= 15) return { label: 'Easy', color: 'text-green-600 dark:text-green-400' };
+    if (rating >= 11) return { label: 'Medium', color: 'text-yellow-600 dark:text-yellow-400' };
+    if (rating >= 8) return { label: 'Hard', color: 'text-orange-600 dark:text-orange-400' };
     return { label: 'Very Hard', color: 'text-red-600 dark:text-red-400' };
   };
 
@@ -132,7 +134,7 @@ export function TeamSelectionModal({ isOpen, onClose, onSelectTeam, saveName }: 
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-slate-600 dark:text-dark-text-secondary">Squad Size</span>
                         <span className="font-semibold text-slate-900 dark:text-dark-text-primary">
-                          {team.squad.length}
+                          {team.players.length}
                         </span>
                       </div>
 

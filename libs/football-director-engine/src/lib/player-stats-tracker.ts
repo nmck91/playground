@@ -15,7 +15,7 @@ import {
 import { IPlayerStatsTracker } from './interfaces/player-stats-tracker.interface';
 
 // Re-export interface for convenience
-export { IPlayerStatsTracker };
+export type { IPlayerStatsTracker };
 
 /**
  * Player Stats Tracker Implementation

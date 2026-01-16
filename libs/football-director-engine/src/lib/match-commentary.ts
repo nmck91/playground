@@ -17,7 +17,7 @@ import { Team, MatchEvent, Player, HalfTimeState } from './types';
 import { IMatchCommentary } from './interfaces/match-commentary.interface';
 
 // Re-export interface for convenience
-export { IMatchCommentary };
+export type { IMatchCommentary };
 
 /**
  * Match Commentary Implementation

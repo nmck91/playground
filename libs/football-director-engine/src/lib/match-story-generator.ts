@@ -32,7 +32,7 @@ import { MatchCommentary } from './match-commentary';
 import { IMatchStoryGenerator } from './interfaces/match-story-generator.interface';
 
 // Re-export interface for convenience
-export { IMatchStoryGenerator };
+export type { IMatchStoryGenerator };
 
 /**
  * Match Story Generator Implementation

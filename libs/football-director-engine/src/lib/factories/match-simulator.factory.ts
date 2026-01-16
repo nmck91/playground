@@ -42,6 +42,7 @@ export function createMockMatchSimulator(
     homeTeam: 'Home Team',
     awayTeam: 'Away Team',
     result: 'draw',
+    matchType: 'competitive',
     homeGoalScorers: [],
     awayGoalScorers: [],
     events: [],

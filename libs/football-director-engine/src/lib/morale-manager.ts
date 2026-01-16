@@ -7,7 +7,7 @@ import { Player, Team, LeagueTable, MoraleInfo } from './types';
 import { IMoraleManager } from './interfaces/morale-manager.interface';
 
 // Re-export interface for convenience
-export { IMoraleManager };
+export type { IMoraleManager };
 
 /**
  * Morale Manager Implementation

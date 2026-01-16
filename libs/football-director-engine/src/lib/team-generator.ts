@@ -21,7 +21,7 @@ import { getDefaultPlayerContract, getDefaultPlayerMorale } from './migration';
 import { ITeamGenerator } from './interfaces/team-generator.interface';
 
 // Re-export interface for convenience
-export { ITeamGenerator };
+export type { ITeamGenerator };
 
 /**
  * Team Generator Implementation

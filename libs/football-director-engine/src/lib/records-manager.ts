@@ -14,7 +14,7 @@ import {
 import { IRecordsManager } from './interfaces/records-manager.interface';
 
 // Re-export interface for convenience
-export { IRecordsManager };
+export type { IRecordsManager };
 
 /**
  * Records Manager Implementation

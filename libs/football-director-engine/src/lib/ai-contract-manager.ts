@@ -8,7 +8,7 @@ import { ContractManager } from './contract-manager';
 import { IAIContractManager } from './interfaces/ai-contract-manager.interface';
 
 // Re-export interface for convenience
-export { IAIContractManager };
+export type { IAIContractManager };
 
 /**
  * AI Contract Manager Implementation

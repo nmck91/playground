@@ -8,7 +8,6 @@ import { devtools } from 'zustand/middleware';
 import { useGameStore } from './gameStore';
 import { usePlayerStore } from './playerStore';
 import { useTacticsStore } from './tacticsStore';
-import { useUIStore } from './uiStore';
 import {
   globalRegistry,
   ModuleKeys,
@@ -17,8 +16,6 @@ import {
   type MatchResult,
   type MatchPreview,
   type Fixture,
-  type MatchEvent,
-  type Match,
 } from '@playground/football-director-engine';
 
 // TODO: PlayerMatchStats not yet implemented in engine
@@ -243,7 +240,8 @@ export const useMatchStore = create<MatchStore>()(
           awayTeam,
           gameState.leagueTable,
           gameState.fixtures,
-          gameState.season.currentWeek
+          gameState.season.currentWeek,
+          gameState.season.year
         );
 
         // Add to previews
@@ -282,7 +280,7 @@ export const useMatchStore = create<MatchStore>()(
       },
 
       // Get player match stats
-      getPlayerMatchStats: (playerId) => {
+      getPlayerMatchStats: (_playerId) => {
         const results = get().lastSimulationResults;
         const latestResult = results[results.length - 1];
         if (!latestResult) return null;

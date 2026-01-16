@@ -15,6 +15,8 @@ import {
   Achievement,
   BoardStatus,
   DevelopmentReport,
+  CupResult,
+  CupCompetition,
 } from '../types';
 
 export interface INewsEngine {
@@ -23,6 +25,15 @@ export interface INewsEngine {
     results: MatchResult[],
     playerTeamName: string,
     leagueTable: LeagueTable[],
+    week: number,
+    season: number
+  ): NewsArticle[];
+
+  // Cup match news
+  generateCupMatchNews(
+    results: CupResult[],
+    playerTeamName: string,
+    cupCompetition: CupCompetition,
     week: number,
     season: number
   ): NewsArticle[];

@@ -2,13 +2,12 @@ export * from './lib/types';
 // Discriminated unions for versioning (Epic 1.5.3) - explicit exports to avoid GameState conflict
 export {
   CURRENT_GAME_STATE_VERSION,
-  GameStateV1,
-  GameStateV2,
   isGameStateV1,
   isGameStateV2,
   getGameStateVersion,
   assertCurrentVersion
 } from './lib/game-state-versions';
+export type { GameStateV1, GameStateV2 } from './lib/game-state-versions';
 export * from './lib/type-guards'; // Runtime validation and type guards (Epic 1.5.4)
 export * from './lib/migration'; // Save file migration utilities (Epic 1.5)
 

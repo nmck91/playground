@@ -10,11 +10,12 @@ import {
   LeagueTable,
   Player,
   SeasonRecords,
+  CupCompetition,
 } from './types';
 import { IAchievementManager } from './interfaces/achievement-manager.interface';
 
 // Re-export interface for convenience
-export { IAchievementManager };
+export type { IAchievementManager };
 
 /**
  * Achievement Manager Implementation
@@ -227,6 +228,48 @@ export class AchievementManager implements IAchievementManager {
         unlocked: false,
       },
 
+      // CUP ACHIEVEMENTS
+      {
+        id: 'cup-winner',
+        name: 'Cup Winner',
+        description: 'Win any cup competition',
+        category: 'cup',
+        icon: '🏆',
+        unlocked: false,
+      },
+      {
+        id: 'double-winner',
+        name: 'The Double',
+        description: 'Win the league and a cup in the same season',
+        category: 'cup',
+        icon: '🏆🏆',
+        unlocked: false,
+      },
+      {
+        id: 'treble-winner',
+        name: 'The Treble',
+        description: 'Win the league and both cups in the same season',
+        category: 'cup',
+        icon: '🏆🏆🏆',
+        unlocked: false,
+      },
+      {
+        id: 'cup-streak',
+        name: 'Cup Specialist',
+        description: 'Win the same cup 3 years in a row',
+        category: 'cup',
+        icon: '🔥',
+        unlocked: false,
+      },
+      {
+        id: 'penalty-master',
+        name: 'Penalty Shootout Master',
+        description: 'Win a cup match on penalties',
+        category: 'cup',
+        icon: '🎯',
+        unlocked: false,
+      },
+
       // SPECIAL ACHIEVEMENTS
       {
         id: 'perfect-season',
@@ -425,6 +468,33 @@ export class AchievementManager implements IAchievementManager {
           shouldUnlock = avgAge < 25 && position === 1 && gameState.season.status === 'completed';
           break;
         }
+
+        // CUP ACHIEVEMENTS
+        case 'cup-winner':
+          shouldUnlock = this.hasWonCup(gameState);
+          break;
+
+        case 'double-winner': {
+          const position = this.getCurrentPosition(gameState);
+          const wonCup = this.hasWonCup(gameState);
+          shouldUnlock = position === 1 && wonCup && gameState.season.status === 'completed';
+          break;
+        }
+
+        case 'treble-winner': {
+          const position = this.getCurrentPosition(gameState);
+          const cupWins = this.countCupWinsThisSeason(gameState);
+          shouldUnlock = position === 1 && cupWins >= 2 && gameState.season.status === 'completed';
+          break;
+        }
+
+        case 'cup-streak':
+          shouldUnlock = this.hasConsecutiveCupWins(gameState.cupHistory, 3);
+          break;
+
+        case 'penalty-master':
+          shouldUnlock = this.hasWonCupOnPenalties(gameState);
+          break;
 
         // SPECIAL ACHIEVEMENTS
         case 'perfect-season': {
@@ -776,5 +846,90 @@ export class AchievementManager implements IAchievementManager {
     } else {
       return `Consistent performer with ${player.stats.appearances} appearances`;
     }
+  }
+
+  /**
+   * Cup Achievement Helpers
+   */
+  private hasWonCup(gameState: GameState): boolean {
+    // Check if player won FA Cup
+    if (gameState.cupCompetition?.completed && gameState.cupCompetition.winner) {
+      if (gameState.cupCompetition.winner.teamName === gameState.playerTeam.name) {
+        return true;
+      }
+    }
+
+    // Check if player won League Cup
+    if (gameState.leagueCupCompetition?.completed && gameState.leagueCupCompetition.winner) {
+      if (gameState.leagueCupCompetition.winner.teamName === gameState.playerTeam.name) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private countCupWinsThisSeason(gameState: GameState): number {
+    let wins = 0;
+
+    // Check FA Cup
+    if (gameState.cupCompetition?.completed && gameState.cupCompetition.winner) {
+      if (gameState.cupCompetition.winner.teamName === gameState.playerTeam.name) {
+        wins++;
+      }
+    }
+
+    // Check League Cup
+    if (gameState.leagueCupCompetition?.completed && gameState.leagueCupCompetition.winner) {
+      if (gameState.leagueCupCompetition.winner.teamName === gameState.playerTeam.name) {
+        wins++;
+      }
+    }
+
+    return wins;
+  }
+
+  private hasConsecutiveCupWins(cupHistory: CupCompetition[], count: number): boolean {
+    if (!cupHistory || cupHistory.length < count) return false;
+
+    // Get the most recent cups of the same name (FA Cup, etc.)
+    // For now, simplified check - assumes all cups in history are the same competition
+    // This is a placeholder - proper implementation would filter by cup name and check winner
+
+    // Check if enough cups have been played
+    // This will be properly implemented when we have multiple seasons of cup history
+    return false; // Placeholder - will be properly implemented with multi-season support
+  }
+
+  private hasWonCupOnPenalties(gameState: GameState): boolean {
+    // Check FA Cup
+    if (gameState.cupCompetition) {
+      for (const round of gameState.cupCompetition.rounds) {
+        for (const fixture of round.fixtures) {
+          if (fixture.played && fixture.result) {
+            const cupResult = fixture.result;
+            if (cupResult.wentToPenalties && cupResult.winnerId === gameState.playerTeam.id) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    // Check League Cup
+    if (gameState.leagueCupCompetition) {
+      for (const round of gameState.leagueCupCompetition.rounds) {
+        for (const fixture of round.fixtures) {
+          if (fixture.played && fixture.result) {
+            const cupResult = fixture.result;
+            if (cupResult.wentToPenalties && cupResult.winnerId === gameState.playerTeam.id) {
+              return true;
+            }
+          }
+        }
+      }
+    }
+
+    return false;
   }
 }

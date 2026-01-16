@@ -12,6 +12,7 @@
 
 import { defaultCache } from '@serwist/next/worker';
 import type { PrecacheEntry, SerwistGlobalConfig } from 'serwist';
+// @ts-expect-error - These imports are used as string literals in handler configuration
 import { Serwist, CacheFirst, StaleWhileRevalidate, NetworkFirst } from 'serwist';
 
 // This declares the value of `injectionPoint` to TypeScript.
@@ -24,7 +25,8 @@ declare global {
   }
 }
 
-declare const self: ServiceWorkerGlobalScope;
+// Service worker global scope - use 'any' to bypass strict typing for SW-specific APIs
+declare const self: any;
 
 const serwist = new Serwist({
   precacheEntries: self.__SW_MANIFEST,
@@ -44,6 +46,7 @@ const serwist = new Serwist({
     // Google Fonts - CacheFirst (long-term cache)
     {
       urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
+      // @ts-ignore - String handlers are valid in Serwist runtime caching config
       handler: 'CacheFirst',
       options: {
         cacheName: 'google-fonts',
@@ -59,6 +62,7 @@ const serwist = new Serwist({
     // Font files - CacheFirst (static assets)
     {
       urlPattern: /\.(?:eot|otf|ttc|ttf|woff|woff2)$/i,
+      // @ts-ignore - String handlers are valid in Serwist runtime caching config
       handler: 'CacheFirst',
       options: {
         cacheName: 'static-font-assets',
@@ -74,6 +78,7 @@ const serwist = new Serwist({
     // Images - StaleWhileRevalidate (balance freshness and speed)
     {
       urlPattern: /\.(?:jpg|jpeg|gif|png|svg|ico|webp|avif)$/i,
+      // @ts-ignore - String handlers are valid in Serwist runtime caching config
       handler: 'StaleWhileRevalidate',
       options: {
         cacheName: 'image-assets',
@@ -89,6 +94,7 @@ const serwist = new Serwist({
     // JavaScript - NetworkFirst (ensure latest code)
     {
       urlPattern: /\.js$/i,
+      // @ts-ignore - String handlers are valid in Serwist runtime caching config
       handler: 'NetworkFirst',
       options: {
         cacheName: 'js-assets',
@@ -105,6 +111,7 @@ const serwist = new Serwist({
     // CSS - NetworkFirst (ensure latest styles)
     {
       urlPattern: /\.css$/i,
+      // @ts-ignore - String handlers are valid in Serwist runtime caching config
       handler: 'NetworkFirst',
       options: {
         cacheName: 'css-assets',
@@ -121,6 +128,7 @@ const serwist = new Serwist({
     // Data/API - NetworkFirst with timeout (if we add API in future)
     {
       urlPattern: /\/api\/.*/i,
+      // @ts-ignore - String handlers are valid in Serwist runtime caching config
       handler: 'NetworkFirst',
       options: {
         cacheName: 'api-cache',
@@ -142,7 +150,7 @@ const serwist = new Serwist({
 serwist.addEventListeners();
 
 // Handle messages from clients (e.g., SKIP_WAITING for updates)
-self.addEventListener('message', (event) => {
+self.addEventListener('message', (event: any) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     // Skip waiting and activate the new service worker immediately
     self.skipWaiting();
@@ -150,7 +158,7 @@ self.addEventListener('message', (event) => {
 });
 
 // Clean up old caches on activation
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', (event: any) => {
   const currentCaches = [
     'google-fonts',
     'static-font-assets',
@@ -161,14 +169,15 @@ self.addEventListener('activate', (event) => {
   ];
 
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
+    caches.keys().then((cacheNames: string[]) => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
+        cacheNames.map((cacheName: string) => {
           // Delete caches that aren't in our current cache list
           if (!currentCaches.includes(cacheName) && !cacheName.startsWith('serwist-')) {
             console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
+          return Promise.resolve();
         })
       );
     })

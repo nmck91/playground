@@ -5,7 +5,7 @@
  * Use this interface for dependency injection and testing.
  */
 
-import { Team, Match, MatchResult, CupResult } from '../types';
+import { Team, Match, MatchResult, CupResult, MatchType } from '../types';
 
 export interface IMatchSimulator {
   /**
@@ -15,8 +15,9 @@ export interface IMatchSimulator {
 
   /**
    * Simulate a single match between two teams
+   * @param matchType - 'friendly' or 'competitive' - determines if stats count toward league
    */
-  simulateMatch(match: Match, currentWeek?: number, seed?: number): MatchResult;
+  simulateMatch(match: Match, currentWeek?: number, seed?: number, matchType?: MatchType): MatchResult;
 
   /**
    * Simulate an entire season (all matches between teams)

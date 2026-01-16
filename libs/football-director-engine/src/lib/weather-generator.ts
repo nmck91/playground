@@ -8,7 +8,7 @@ import { MatchWeather } from './types';
 import { IWeatherGenerator } from './interfaces/weather-generator.interface';
 
 // Re-export interface for convenience
-export { IWeatherGenerator };
+export type { IWeatherGenerator };
 
 /**
  * Weather Generator Implementation

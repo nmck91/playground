@@ -9,7 +9,7 @@ import { TeamGenerator } from './team-generator';
 import { IYouthAcademyManager } from './interfaces/youth-academy-manager.interface';
 
 // Re-export interface for convenience
-export { IYouthAcademyManager };
+export type { IYouthAcademyManager };
 
 /**
  * Youth Academy Manager Implementation

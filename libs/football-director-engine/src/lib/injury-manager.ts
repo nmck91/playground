@@ -7,7 +7,7 @@ import { Player, Injury, Team, MatchEvent } from './types';
 import { IInjuryManager } from './interfaces/injury-manager.interface';
 
 // Re-export interface for convenience
-export { IInjuryManager };
+export type { IInjuryManager };
 
 /**
  * Injury Manager Implementation

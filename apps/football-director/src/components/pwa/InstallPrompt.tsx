@@ -80,6 +80,7 @@ export function InstallPrompt() {
     } else {
       // For iOS - check engagement and show manual instructions
       checkEngagementAndShow();
+      return undefined;
     }
   }, []);
 

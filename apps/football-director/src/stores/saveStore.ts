@@ -11,7 +11,6 @@ import { devtools } from 'zustand/middleware';
 import { SaveService, type SaveMetadata } from '../services/SaveService';
 import { useGameStore } from './gameStore';
 import { useUIStore } from './uiStore';
-import type { GameState } from '@playground/football-director-engine';
 
 /**
  * Sync Status Type

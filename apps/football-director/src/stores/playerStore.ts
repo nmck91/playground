@@ -510,13 +510,13 @@ export const usePlayerStore = create<PlayerStore>()(
       },
 
       // Add youth prospect
-      addYouthProspect: (player) => {
+      addYouthProspect: (_player) => {
         // TODO: youthAcademy not yet implemented in GameState
         console.warn('addYouthProspect: youthAcademy not yet implemented');
       },
 
       // Select youth players to promote to squad
-      selectYouthPlayers: (playerIds) => {
+      selectYouthPlayers: (_playerIds) => {
         // TODO: youthAcademy not yet implemented in GameState
         console.warn('selectYouthPlayers: youthAcademy not yet implemented');
       },

@@ -15,7 +15,7 @@ import type {
 import { ICupManager } from './interfaces/cup-manager.interface';
 
 // Re-export interface for convenience
-export { ICupManager };
+export type { ICupManager };
 
 /**
  * Cup round names mapping
@@ -30,10 +30,10 @@ const ROUND_NAMES: Record<number, string> = {
 };
 
 /**
- * Cup schedule: which week each round is played
+ * Cup schedules: which week each round is played
  * Strategically placed to avoid major league fixtures
  */
-const CUP_SCHEDULE: Record<number, number> = {
+const FA_CUP_SCHEDULE: Record<number, number> = {
   1: 10, // Round 1 - Week 10
   2: 15, // Round 2 - Week 15
   3: 20, // Round 3 - Week 20
@@ -42,10 +42,22 @@ const CUP_SCHEDULE: Record<number, number> = {
   6: 44, // Final - Week 44 (near end of season)
 };
 
+// Cup weeks - these weeks will have NO league fixtures
+const CUP_WEEKS = [13, 19, 26, 33, 40, 47];
+
+const LEAGUE_CUP_SCHEDULE: Record<number, number> = {
+  1: 13, // Round 1 - Week 13
+  2: 19, // Round 2 - Week 19
+  3: 26, // Round 3 - Week 26
+  4: 33, // Quarter-Finals - Week 33
+  5: 40, // Semi-Finals - Week 40
+  6: 47, // Final - Week 47
+};
+
 /**
- * Default prize money structure
+ * Default prize money structures
  */
-const DEFAULT_PRIZE_POOL: PrizeMoney = {
+const FA_CUP_PRIZE_POOL: PrizeMoney = {
   round1: 10000,
   round2: 25000,
   round3: 50000,
@@ -53,6 +65,16 @@ const DEFAULT_PRIZE_POOL: PrizeMoney = {
   semiFinal: 250000,
   runnerUp: 500000,
   winner: 1000000,
+};
+
+const LEAGUE_CUP_PRIZE_POOL: PrizeMoney = {
+  round1: 5000,
+  round2: 15000,
+  round3: 30000,
+  quarterFinal: 60000,
+  semiFinal: 150000,
+  runnerUp: 300000,
+  winner: 600000,
 };
 
 export class CupManager {
@@ -69,6 +91,10 @@ export class CupManager {
     season: number,
     cupName = 'FA Cup'
   ): CupCompetition {
+    // Select schedule and prize pool based on cup name
+    const schedule = cupName === 'League Cup' ? LEAGUE_CUP_SCHEDULE : FA_CUP_SCHEDULE;
+    const prizePool = cupName === 'League Cup' ? LEAGUE_CUP_PRIZE_POOL : FA_CUP_PRIZE_POOL;
+
     // Shuffle teams for random draw
     const shuffledTeams = [...teams].sort(() => Math.random() - 0.5);
 
@@ -82,14 +108,14 @@ export class CupManager {
     const round1Fixtures = this.generateRoundFixtures(
       round1Teams,
       1,
-      CUP_SCHEDULE[1]
+      schedule[1]
     );
 
     rounds.push({
       roundNumber: 1,
       roundName: ROUND_NAMES[1],
       fixtures: round1Fixtures,
-      weekNumber: CUP_SCHEDULE[1],
+      weekNumber: schedule[1],
       completed: false,
     });
 
@@ -97,12 +123,12 @@ export class CupManager {
     // This is because we don't know winners yet
 
     return {
-      id: `cup-${season}`,
+      id: `${cupName.toLowerCase().replace(/\s+/g, '-')}-${season}`,
       name: cupName,
       season,
       currentRound: 1,
       rounds,
-      prizePool: DEFAULT_PRIZE_POOL,
+      prizePool,
       completed: false,
     };
   }
@@ -163,6 +189,9 @@ export class CupManager {
       return this.completeCup(cup);
     }
 
+    // Select schedule based on cup name
+    const schedule = cup.name === 'League Cup' ? LEAGUE_CUP_SCHEDULE : FA_CUP_SCHEDULE;
+
     // Get winners from current round
     const winners: Team[] = [];
     for (const fixture of currentRound.fixtures) {
@@ -193,14 +222,14 @@ export class CupManager {
     const nextRoundFixtures = this.generateRoundFixtures(
       shuffledWinners,
       nextRoundNumber,
-      CUP_SCHEDULE[nextRoundNumber]
+      schedule[nextRoundNumber]
     );
 
     const nextRound: CupRound = {
       roundNumber: nextRoundNumber,
       roundName: ROUND_NAMES[nextRoundNumber],
       fixtures: nextRoundFixtures,
-      weekNumber: CUP_SCHEDULE[nextRoundNumber],
+      weekNumber: schedule[nextRoundNumber],
       completed: false,
     };
 
@@ -365,5 +394,50 @@ export class CupManager {
     }
 
     return cup;
+  }
+
+  // Instance method implementations that delegate to static methods
+  // These are needed to satisfy the ICupManager interface
+
+  generateCupCompetition(teams: Team[], season: number, cupName?: string): CupCompetition {
+    return CupManager.generateCupCompetition(teams, season, cupName);
+  }
+
+  advanceTournament(cup: CupCompetition, teams: Team[]): CupCompetition | null {
+    return CupManager.advanceTournament(cup, teams);
+  }
+
+  isCupComplete(cup: CupCompetition): boolean {
+    return CupManager.isCupComplete(cup);
+  }
+
+  getPrizeMoney(round: string, isWinner?: boolean): number {
+    // Convert round string to round number for static method
+    const roundMap: Record<string, number> = {
+      'round1': 1,
+      'round2': 2,
+      'round3': 3,
+      'quarterFinal': 4,
+      'semiFinal': 5,
+      'runnerUp': 6,
+      'winner': 6,
+    };
+    const roundNumber = roundMap[round] || 0;
+    // Use FA Cup prize pool as default (since this is instance method without cup reference)
+    const isRunnerUp = round === 'runnerUp';
+    const isWinnerFlag = round === 'winner' || isWinner;
+    return CupManager.getPrizeMoney(roundNumber, FA_CUP_PRIZE_POOL, isWinnerFlag, isRunnerUp);
+  }
+
+  hasCupFixturesThisWeek(cup: CupCompetition, currentWeek: number): boolean {
+    return CupManager.hasCupFixturesThisWeek(cup, currentWeek);
+  }
+
+  getCupFixturesForWeek(cup: CupCompetition, currentWeek: number): CupFixture[] {
+    return CupManager.getCupFixturesForWeek(cup, currentWeek);
+  }
+
+  updateCupProgress(cup: CupCompetition): CupCompetition {
+    return CupManager.updateCupProgress(cup);
   }
 }

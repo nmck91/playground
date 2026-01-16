@@ -18,6 +18,8 @@ import {
   Achievement,
   BoardStatus,
   DevelopmentReport,
+  CupResult,
+  CupCompetition,
 } from '../types';
 
 /**
@@ -48,6 +50,7 @@ export function createMockNewsEngine(
 
   const mock: INewsEngine = {
     generateMatchNews: (_results: MatchResult[], _playerTeamName: string, _leagueTable: LeagueTable[], _week: number, _season: number): NewsArticle[] => [mockArticle],
+    generateCupMatchNews: (_results: CupResult[], _playerTeamName: string, _cupCompetition: CupCompetition, _week: number, _season: number): NewsArticle[] => [mockArticle],
     generateTransferNews: (_listing: TransferListing, _buyerTeamName: string, _week: number, _season: number, _isSale?: boolean): NewsArticle => mockArticle,
     generateMilestoneNews: (_player: Player, _teamName: string, _week: number, _season: number): NewsArticle[] => [mockArticle],
     generateInjuryNews: (_player: Player, _injury: Injury, _teamName: string, _week: number, _season: number): NewsArticle => mockArticle,

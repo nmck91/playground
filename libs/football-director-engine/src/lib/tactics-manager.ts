@@ -19,7 +19,7 @@ import { getDefaultPlayerRoles, getDefaultTeamInstructions } from './migration';
 import { ITacticsManager } from './interfaces/tactics-manager.interface';
 
 // Re-export interface for convenience
-export { ITacticsManager };
+export type { ITacticsManager };
 
 export class TacticsManager implements ITacticsManager {
   /**

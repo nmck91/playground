@@ -23,6 +23,8 @@ import {
   type IAchievementManager,
   type INewsEngine,
   type IStaffManager,
+  type IPlayerStatsTracker,
+  CupManager,
   Team,
   Player,
   PlayerContract,
@@ -36,7 +38,7 @@ import { formatBytes } from './storage/compression';
 
 const OLD_SAVE_KEY = 'football-director-save'; // Legacy single-save key
 const SAVES_KEY = 'football-director-saves'; // Legacy multi-slot container (uncompressed)
-const ACTIVE_SLOT_KEY = 'football-director-active-slot'; // Active slot ID
+// const ACTIVE_SLOT_KEY = 'football-director-active-slot'; // Active slot ID (reserved for future use)
 
 export interface SaveSlotContainer {
   [slotId: number]: SaveSlot;
@@ -115,8 +117,9 @@ export class SaveService {
     const newsEngine = globalRegistry.get<INewsEngine>(ModuleKeys.NEWS_ENGINE);
     const welcomeNews = newsEngine.generateWelcomeNews(playerTeam.name, season.year);
 
-    // Generate cup competition
+    // Generate cup competitions
     const cupCompetition = CupManager.generateCupCompetition(allTeams, season.year, 'FA Cup');
+    const leagueCupCompetition = CupManager.generateCupCompetition(allTeams, season.year, 'League Cup');
 
     const gameState: GameState = {
       version: 2, // Story 1.5.2: GameState versioning
@@ -141,6 +144,7 @@ export class SaveService {
       newsFeed: [welcomeNews],
       matchPreviews: [], // Story 1.5.2: Now required field
       cupCompetition,
+      leagueCupCompetition,
       cupHistory: [],
     };
 

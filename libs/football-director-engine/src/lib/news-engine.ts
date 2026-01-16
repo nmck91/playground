@@ -18,11 +18,13 @@ import {
   PlayerContract,
   Achievement,
   DevelopmentReport,
+  CupResult,
+  CupCompetition,
 } from './types';
 import { INewsEngine } from './interfaces/news-engine.interface';
 
 // Re-export interface for convenience
-export { INewsEngine };
+export type { INewsEngine };
 
 /**
  * News Engine Implementation
@@ -99,6 +101,131 @@ export class NewsEngine implements INewsEngine {
         }
       }
     });
+
+    return news;
+  }
+
+  /**
+   * Generate news for cup matches
+   */
+  generateCupMatchNews(
+    results: CupResult[],
+    playerTeamName: string,
+    cupCompetition: CupCompetition,
+    week: number,
+    season: number
+  ): NewsArticle[] {
+    const news: NewsArticle[] = [];
+    const now = new Date();
+
+    // Get round name for the current round
+    const currentRound = cupCompetition.rounds.find(r => r.roundNumber === cupCompetition.currentRound);
+    const roundName = currentRound?.roundName || `Round ${cupCompetition.currentRound}`;
+
+    results.forEach((result) => {
+      const isPlayerMatch = result.homeTeam === playerTeamName || result.awayTeam === playerTeamName;
+      const margin = Math.abs(result.homeScore - result.awayScore);
+      const isBigWin = margin >= 4;
+      const wentToPenalties = result.wentToPenalties;
+      const wentToExtraTime = result.wentToExtraTime;
+
+      // Always generate news for player matches, and for dramatic cup matches
+      if (isPlayerMatch || wentToPenalties || isBigWin) {
+        const importance: NewsImportance = isPlayerMatch ? 'high' : wentToPenalties ? 'medium' : 'low';
+
+        let headline = '';
+        let body = '';
+
+        // Player team won
+        if (isPlayerMatch && result.winnerId === this.getTeamId(playerTeamName, result)) {
+          if (wentToPenalties) {
+            headline = `${cupCompetition.name}: ${playerTeamName} Win Dramatic Penalty Shootout`;
+            body = `${playerTeamName} edged past ${result.winnerId === this.getTeamId(result.homeTeam, result) ? result.awayTeam : result.homeTeam} in a thrilling ${roundName} tie. After the match finished ${result.homeScore}-${result.awayScore} following extra time, ${playerTeamName} held their nerve to win ${result.penaltyScore?.home}-${result.penaltyScore?.away} on penalties.`;
+          } else if (wentToExtraTime) {
+            headline = `${cupCompetition.name}: ${playerTeamName} Advance After Extra Time`;
+            body = `${playerTeamName} booked their place in the next round of the ${cupCompetition.name} with a ${result.homeScore}-${result.awayScore} victory over ${result.winnerId === this.getTeamId(result.homeTeam, result) ? result.awayTeam : result.homeTeam} in the ${roundName}. The match went to extra time before ${playerTeamName} secured their passage.`;
+          } else if (isBigWin) {
+            headline = `${cupCompetition.name}: ${playerTeamName} Cruise Into Next Round`;
+            body = `A dominant display from ${playerTeamName} in the ${roundName} of the ${cupCompetition.name} saw them thrash ${result.winnerId === this.getTeamId(result.homeTeam, result) ? result.awayTeam : result.homeTeam} ${result.homeScore}-${result.awayScore}. The ${margin}-goal victory sends a message to their cup rivals.`;
+          } else {
+            headline = `${cupCompetition.name}: ${playerTeamName} Progress to Next Round`;
+            body = `${playerTeamName} advanced in the ${cupCompetition.name} with a ${result.homeScore}-${result.awayScore} ${roundName} victory over ${result.winnerId === this.getTeamId(result.homeTeam, result) ? result.awayTeam : result.homeTeam}. ${this.generateCupMatchBody(result, playerTeamName)}`;
+          }
+        }
+        // Player team lost - eliminated
+        else if (isPlayerMatch && result.loserId === this.getTeamId(playerTeamName, result)) {
+          if (wentToPenalties) {
+            headline = `${cupCompetition.name}: ${playerTeamName} Crash Out on Penalties`;
+            body = `Heartbreak for ${playerTeamName} as they were eliminated from the ${cupCompetition.name} in the ${roundName}. After a ${result.homeScore}-${result.awayScore} draw following extra time, ${result.winnerName} won ${result.penaltyScore?.home}-${result.penaltyScore?.away} on penalties to end ${playerTeamName}'s cup run.`;
+          } else if (wentToExtraTime) {
+            headline = `${cupCompetition.name}: ${playerTeamName} Exit After Extra Time Heartbreak`;
+            body = `${playerTeamName}'s ${cupCompetition.name} journey came to an end in the ${roundName} as they lost ${result.homeScore}-${result.awayScore} to ${result.winnerName} after extra time. Despite their best efforts, ${playerTeamName} couldn't find the goals needed to progress.`;
+          } else {
+            headline = `${cupCompetition.name}: ${playerTeamName} Eliminated in ${roundName}`;
+            body = `${playerTeamName}'s ${cupCompetition.name} hopes were dashed in the ${roundName} with a ${result.homeScore}-${result.awayScore} defeat to ${result.winnerName}. ${this.generateCupMatchBody(result, playerTeamName)}`;
+          }
+        }
+        // Dramatic matches involving other teams
+        else if (wentToPenalties) {
+          headline = `${cupCompetition.name}: ${result.winnerName} Win on Penalties`;
+          body = `${result.winnerName} edged past ${result.loserName} on penalties in a dramatic ${roundName} encounter. The match finished ${result.homeScore}-${result.awayScore} after extra time before ${result.winnerName} prevailed ${result.penaltyScore?.home}-${result.penaltyScore?.away} in the shootout.`;
+        }
+        // Big wins
+        else if (isBigWin) {
+          headline = `${cupCompetition.name}: ${result.winnerName} Demolish ${result.loserName}`;
+          body = `${result.winnerName} put on a dominant display to thrash ${result.loserName} ${result.homeScore}-${result.awayScore} in the ${roundName} of the ${cupCompetition.name}.`;
+        }
+
+        if (headline) {
+          news.push({
+            id: `news-cup-${Date.now()}-${Math.random()}`,
+            date: now,
+            week,
+            season,
+            type: 'result',
+            headline,
+            body,
+            teams: [result.homeTeam, result.awayTeam],
+            importance,
+            read: false,
+          });
+        }
+      }
+    });
+
+    // Check if cup is complete and generate winner news
+    if (cupCompetition.completed && cupCompetition.winner) {
+      const isPlayerWinner = cupCompetition.winner.teamName === playerTeamName;
+      const isPlayerRunnerUp = cupCompetition.runnerUp?.teamName === playerTeamName;
+
+      if (isPlayerWinner) {
+        news.push({
+          id: `news-cup-winner-${Date.now()}`,
+          date: now,
+          week,
+          season,
+          type: 'result',
+          headline: `🏆 ${playerTeamName} Win the ${cupCompetition.name}!`,
+          body: `Congratulations! ${playerTeamName} have been crowned ${cupCompetition.name} champions! The trophy was secured with victory over ${cupCompetition.runnerUp?.teamName} in the final. This historic achievement will be remembered for years to come.`,
+          teams: [playerTeamName],
+          importance: 'high',
+          read: false,
+        });
+      } else if (isPlayerRunnerUp) {
+        news.push({
+          id: `news-cup-runnerup-${Date.now()}`,
+          date: now,
+          week,
+          season,
+          type: 'result',
+          headline: `${playerTeamName} Fall Short in ${cupCompetition.name} Final`,
+          body: `Despite a valiant effort, ${playerTeamName} were unable to lift the ${cupCompetition.name} trophy as they finished as runners-up. ${cupCompetition.winner.teamName} took the honors in the final. Nevertheless, reaching the final is a significant achievement for the club.`,
+          teams: [playerTeamName, cupCompetition.winner.teamName],
+          importance: 'high',
+          read: false,
+        });
+      }
+    }
 
     return news;
   }
@@ -625,6 +752,36 @@ export class NewsEngine implements INewsEngine {
       return `A strong display earned all three points with a ${teamScore}-${opponentScore} victory over ${opponent}.`;
     } else {
       return `Despite their best efforts, the team fell to a ${opponentScore}-${teamScore} defeat against ${opponent}. Work to do to get back to winning ways.`;
+    }
+  }
+
+  private getTeamId(teamName: string, result: CupResult): string {
+    if (result.homeTeam === teamName) {
+      return result.winnerId === result.homeTeam || result.loserId === result.homeTeam
+        ? (result.winnerId === result.homeTeam ? result.winnerId : result.loserId)
+        : '';
+    }
+    if (result.awayTeam === teamName) {
+      return result.winnerId === result.awayTeam || result.loserId === result.awayTeam
+        ? (result.winnerId === result.awayTeam ? result.winnerId : result.loserId)
+        : '';
+    }
+    return '';
+  }
+
+  private generateCupMatchBody(result: CupResult, playerTeamName: string): string {
+    const isHome = result.homeTeam === playerTeamName;
+    const isWin = result.winnerId === this.getTeamId(playerTeamName, result);
+
+    if (isWin) {
+      if (result.homeGoalScorers && result.homeGoalScorers.length > 0) {
+        const scorers = isHome ? result.homeGoalScorers : result.awayGoalScorers || [];
+        const scorersList = scorers.slice(0, 2).join(', ');
+        return `${scorersList} were among the scorers as the team secured their place in the next round.`;
+      }
+      return `A professional performance ensured safe passage to the next round.`;
+    } else {
+      return `The team's cup dreams are over for another year.`;
     }
   }
 }

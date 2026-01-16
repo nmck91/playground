@@ -12,7 +12,6 @@ import { useUIStore } from './uiStore';
 import {
   TransferMarket,
   type TransferListing,
-  type Player,
 } from '@playground/football-director-engine';
 
 /**
@@ -280,9 +279,7 @@ export const useTransferStore = create<TransferStore>()(
         if (!gameState) return;
 
         // Simplified AI transfer logic
-        // In a real implementation, this would be more sophisticated
-        const transferMarket = new TransferMarket();
-
+        // In a real implementation, this would use TransferMarket class more extensively
         gameState.aiTeams.forEach((team) => {
           // Random chance AI team makes a transfer
           if (Math.random() < 0.2) {

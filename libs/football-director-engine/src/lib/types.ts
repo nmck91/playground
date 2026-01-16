@@ -225,6 +225,7 @@ export interface MatchResult {
   homeTeam: string;
   awayTeam: string;
   result: 'home' | 'away' | 'draw';
+  matchType: MatchType; // friendly or competitive - determines if stats count toward league
   homeGoalScorers?: string[]; // Player names who scored for home team (truly optional - may be 0)
   awayGoalScorers?: string[]; // Player names who scored for away team (truly optional - may be 0)
   events?: MatchEvent[]; // Key match events (legacy matches may not have)
@@ -500,8 +501,9 @@ export interface GameState {
   seasonAwards: SeasonAward[]; // Season-by-season awards
   newsFeed: NewsArticle[]; // News articles (ordered by date DESC)
   matchPreviews: MatchPreview[]; // Pre-match previews (required in v2, empty array if none)
-  cupCompetition?: CupCompetition; // Current cup competition (truly optional - may not be in cup)
-  cupHistory: CupCompetition[]; // Past cup competitions
+  cupCompetition?: CupCompetition; // Current FA Cup competition (truly optional - may not be in cup)
+  leagueCupCompetition?: CupCompetition; // Current League Cup competition (truly optional - may not be in cup)
+  cupHistory: CupCompetition[]; // Past cup competitions (both FA Cup and League Cup)
 }
 
 export interface SaveMetadata {
@@ -621,6 +623,7 @@ export type AchievementCategory =
   | 'defense'
   | 'finance'
   | 'players'
+  | 'cup'
   | 'special';
 
 export interface Achievement {

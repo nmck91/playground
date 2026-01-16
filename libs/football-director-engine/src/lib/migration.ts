@@ -232,6 +232,7 @@ export function migrateTeam(
 export function migrateMatchResult(result: any): MatchResult {
   return {
     ...result,
+    matchType: result.matchType || 'competitive', // Default to competitive for old match results
     weather: result.weather || getDefaultMatchWeather(),
     stats: result.stats || getDefaultMatchStats(),
     playerRatings: result.playerRatings || [],
@@ -295,6 +296,7 @@ export function migrateGameStateV1toV2(oldState: GameStateV1): GameStateV2 {
     newsFeed: oldState.newsFeed || [],
     matchPreviews: oldState.matchPreviews || [], // Now required, default to empty array
     cupCompetition: oldState.cupCompetition, // Still optional
+    leagueCupCompetition: (oldState as any).leagueCupCompetition, // Still optional, added in v2
     cupHistory: oldState.cupHistory || [],
   };
 }

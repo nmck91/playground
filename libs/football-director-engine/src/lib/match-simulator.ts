@@ -4,7 +4,7 @@
  * Simulates football matches based on team strength
  */
 
-import { Team, Match, MatchResult, MatchStats, PlayerRating, ManOfMatch, Player, CupResult } from './types';
+import { Team, Match, MatchResult, MatchStats, PlayerRating, ManOfMatch, Player, CupResult, MatchType } from './types';
 import { ITacticsManager } from './interfaces/tactics-manager.interface';
 import { IInjuryManager } from './interfaces/injury-manager.interface';
 import { IMoraleManager } from './interfaces/morale-manager.interface';
@@ -21,7 +21,7 @@ import { getDefaultPostMatchAnalysis, getDefaultMatchWeather, getDefaultMatchSta
 import { IMatchSimulator } from './interfaces/match-simulator.interface';
 
 // Re-export interface for convenience
-export { IMatchSimulator };
+export type { IMatchSimulator };
 
 /**
  * Match Simulator Implementation
@@ -90,7 +90,7 @@ export class MatchSimulator implements IMatchSimulator {
   /**
    * Simulate a single match between two teams
    */
-  simulateMatch(match: Match, currentWeek = 1, seed?: number): MatchResult {
+  simulateMatch(match: Match, currentWeek = 1, seed?: number, matchType: MatchType = 'competitive'): MatchResult {
     const homeStrength = this.calculateTeamStrength(match.homeTeam, currentWeek);
     const awayStrength = this.calculateTeamStrength(match.awayTeam, currentWeek);
 
@@ -200,6 +200,7 @@ export class MatchSimulator implements IMatchSimulator {
       homeTeam: match.homeTeam.name,
       awayTeam: match.awayTeam.name,
       result,
+      matchType,
       homeGoalScorers,
       awayGoalScorers,
       events,
@@ -707,6 +708,7 @@ export class MatchSimulator implements IMatchSimulator {
       homeTeam: match.homeTeam.name,
       awayTeam: match.awayTeam.name,
       result,
+      matchType: 'competitive', // Penalty shootouts only occur in competitive matches
       homeGoalScorers: [],
       awayGoalScorers: [],
       events: [],

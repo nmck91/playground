@@ -17,87 +17,13 @@ Expand game depth and realism by adding:
 
 ---
 
-## Epic 2.1: Multi-League System
-
-**Epic Goal:** Implement configurable league pyramid with multiple tiers
-
-**Status:** 🔴 Not Started  
-**Estimated Complexity:** High  
-**Priority:** High
-
-**Key Features:**
-- League pyramid structure (Premier League, Championship, League One, League Two)
-- Realistic team distribution across tiers
-- League-specific finances (prize money, attendance, wages)
-- League navigation UI
-- Multi-league save/load support
-
-**Dependencies:** None (can start immediately)
-
-**User Value:**
-- Career progression across divisions
-- Realistic football pyramid
-- Long-term strategic planning
-
----
-
-## Epic 2.2: Promotion and Relegation System
-
-**Epic Goal:** Dynamic promotion/relegation with end-of-season transitions
-
-**Status:** 🔴 Not Started  
-**Estimated Complexity:** Medium-High  
-**Priority:** High
-
-**Key Features:**
-- Promotion/relegation rules (top 3 up, bottom 3 down)
-- End-of-season transition logic
-- Player career tracking across leagues
-- Celebration/commiseration screens
-- Edge case handling
-
-**Dependencies:** Epic 2.1 (Multi-League System)
-
-**User Value:**
-- Adds jeopardy and excitement
-- Realistic season consequences
-- Long-term career simulation
-
----
-
-## Epic 2.3: European Competitions
-
-**Epic Goal:** Champions League, Europa League, Conference League
-
-**Status:** 🔴 Not Started  
-**Estimated Complexity:** High  
-**Priority:** Medium
-
-**Key Features:**
-- European competition structures
-- Qualification based on league position
-- Multi-stage formats (group stage, knockout)
-- European fixture scheduling
-- Special match rules
-
-**Dependencies:** 
-- Epic 2.1 (Multi-League System) for qualification
-- Epic 2.4 (Cup system) for knockout mechanics
-
-**User Value:**
-- Prestigious competitions
-- European glory
-- Strategic depth (rotation, tactics)
-
----
-
 ## Epic 2.4: Domestic Cup Competitions
 
 **Epic Goal:** FA Cup and League Cup with knockout formats
 
-**Status:** 🟡 PARTIALLY COMPLETE  
-**Estimated Complexity:** Medium  
-**Priority:** Medium
+**Status:** 🟡 PARTIALLY COMPLETE
+**Estimated Complexity:** Medium
+**Priority:** High (Quick Win)
 
 **Current Implementation:**
 - ✅ Basic cup manager module exists
@@ -120,12 +46,60 @@ Expand game depth and realism by adding:
 
 ---
 
+## Epic 2.1: Multi-League System
+
+**Epic Goal:** Implement configurable league pyramid with multiple tiers
+
+**Status:** 🔴 Not Started
+**Estimated Complexity:** High
+**Priority:** High
+
+**Key Features:**
+- League pyramid structure (Premier League, Championship, League One, League Two)
+- Realistic team distribution across tiers
+- League-specific finances (prize money, attendance, wages)
+- League navigation UI
+- Multi-league save/load support
+
+**Dependencies:** None (can start immediately)
+
+**User Value:**
+- Career progression across divisions
+- Realistic football pyramid
+- Long-term strategic planning
+
+---
+
+## Epic 2.2: Promotion and Relegation System
+
+**Epic Goal:** Dynamic promotion/relegation with end-of-season transitions
+
+**Status:** 🔴 Not Started
+**Estimated Complexity:** Medium-High
+**Priority:** High
+
+**Key Features:**
+- Promotion/relegation rules (top 3 up, bottom 3 down)
+- End-of-season transition logic
+- Player career tracking across leagues
+- Celebration/commiseration screens
+- Edge case handling
+
+**Dependencies:** Epic 2.1 (Multi-League System)
+
+**User Value:**
+- Adds jeopardy and excitement
+- Realistic season consequences
+- Long-term career simulation
+
+---
+
 ## Epic 2.5: Comprehensive Happiness System
 
 **Epic Goal:** Multi-dimensional happiness for players, coaches, and fans
 
-**Status:** 🔴 Not Started  
-**Estimated Complexity:** Medium-High  
+**Status:** 🔴 Not Started
+**Estimated Complexity:** Medium-High
 **Priority:** Medium
 
 **Key Features:**
@@ -144,12 +118,38 @@ Expand game depth and realism by adding:
 
 ---
 
+## Epic 2.3: European Competitions
+
+**Epic Goal:** Champions League, Europa League, Conference League
+
+**Status:** 🔴 Not Started
+**Estimated Complexity:** High
+**Priority:** Medium
+
+**Key Features:**
+- European competition structures
+- Qualification based on league position
+- Multi-stage formats (group stage, knockout)
+- European fixture scheduling
+- Special match rules
+
+**Dependencies:**
+- Epic 2.1 (Multi-League System) for qualification
+- Epic 2.4 (Cup system) for knockout mechanics
+
+**User Value:**
+- Prestigious competitions
+- European glory
+- Strategic depth (rotation, tactics)
+
+---
+
 ## Epic 2.6: AI Insights and Recommendations
 
 **Epic Goal:** Intelligent insight engine with actionable recommendations
 
-**Status:** 🔴 Not Started  
-**Estimated Complexity:** High  
+**Status:** 🔴 Not Started
+**Estimated Complexity:** High
 **Priority:** Low
 
 **Key Features:**
@@ -171,37 +171,36 @@ Expand game depth and realism by adding:
 
 ---
 
-## Recommended Priority Order
+## Priority Order (Updated 2026-01-05)
 
-1. **Epic 2.4 (Complete):** Finish Domestic Cup Competitions
-   - Already partially done
-   - Low complexity to complete
-   - Quick win
+1. **Epic 2.4:** Domestic Cup Competitions 🟡 (PARTIAL - 60% done)
+   - Quick win, already partially implemented
+   - ~1-2 weeks to complete
+   - CURRENT FOCUS
 
-2. **Epic 2.1:** Multi-League System
+2. **Epic 2.1:** Multi-League System 🔴 (NOT STARTED)
+   - Big feature, high value
    - Foundation for promotion/relegation
-   - High user value
-   - Enables career progression
+   - ~3-4 weeks
 
-3. **Epic 2.2:** Promotion and Relegation
-   - Natural follow-up to Epic 2.1
-   - Core football simulation feature
-   - High excitement factor
+3. **Epic 2.2:** Promotion/Relegation 🔴 (NOT STARTED)
+   - Requires Epic 2.1 first
+   - ~2-3 weeks
 
-4. **Epic 2.5:** Comprehensive Happiness System
-   - Adds depth to management
-   - Independent of league structure
-   - Can be done in parallel
+4. **Epic 2.5:** Comprehensive Happiness System 🔴 (NOT STARTED)
+   - Adds management depth
+   - Can run parallel with 2.1
+   - ~2-3 weeks
 
-5. **Epic 2.3:** European Competitions
-   - Requires multi-league foundation
-   - High complexity
+5. **Epic 2.3:** European Competitions 🔴 (NOT STARTED)
    - Premium feature
+   - Requires 2.1 + 2.4
+   - ~3-4 weeks
 
-6. **Epic 2.6:** AI Insights and Recommendations
-   - Requires most other systems
-   - Nice-to-have feature
-   - Can be last
+6. **Epic 2.6:** AI Insights and Recommendations 🔴 (NOT STARTED)
+   - Nice-to-have
+   - Should be last
+   - ~2-3 weeks
 
 ---
 

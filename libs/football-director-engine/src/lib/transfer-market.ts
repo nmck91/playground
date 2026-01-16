@@ -7,7 +7,7 @@ import { Player, Team, TransferListing } from './types';
 import { ITransferMarket } from './interfaces/transfer-market.interface';
 
 // Re-export interface for convenience
-export { ITransferMarket };
+export type { ITransferMarket };
 
 // Transfer window periods
 const PRE_SEASON_TRANSFER_START = 1;

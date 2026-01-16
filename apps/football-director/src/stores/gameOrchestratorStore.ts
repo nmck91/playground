@@ -19,19 +19,21 @@ import {
   type ISeasonManager,
   type IPlayerStatsTracker,
   type IInjuryManager,
-  type IContractManager,
+  // type IContractManager, // Reserved for future use
   type IMoraleManager,
   type IAIContractManager,
-  type ITransferMarket,
-  type IBoardManager,
+  // type ITransferMarket, // Reserved for AI transfers feature
+  // type IBoardManager, // Reserved for board evaluation feature
   type INewsEngine,
-  type IPlayerDevelopment,
-  type IYouthAcademyManager,
-  type IRecordsManager,
+  // type IPlayerDevelopment, // Reserved for player development feature
+  // type IYouthAcademyManager, // Reserved for youth academy feature
+  // type IRecordsManager, // Reserved for club records feature
   type IAchievementManager,
-  type IMatchStoryGenerator,
+  // type IMatchStoryGenerator, // Reserved for match preview feature
   type ICupManager,
   type MatchResult,
+  type CupResult,
+  type Team,
   type DevelopmentReport,
   type Player,
   type Achievement,
@@ -90,7 +92,7 @@ interface GameOrchestratorActions {
   dismissAchievement: (id: string) => void;
 
   // Youth academy
-  selectYouthPlayers: (playerIds: string[]) => void;
+  selectYouthPlayers: (selectedPlayers: Player[]) => void;
 
   // Reset
   resetOrchestrator: () => void;
@@ -155,17 +157,17 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
           const seasonManager = globalRegistry.get<ISeasonManager>(ModuleKeys.SEASON_MANAGER);
           const statsTracker = globalRegistry.get<IPlayerStatsTracker>(ModuleKeys.PLAYER_STATS_TRACKER);
           const injuryManager = globalRegistry.get<IInjuryManager>(ModuleKeys.INJURY_MANAGER);
-          const contractManager = globalRegistry.get<IContractManager>(ModuleKeys.CONTRACT_MANAGER);
+          // const contractManager = globalRegistry.get<IContractManager>(ModuleKeys.CONTRACT_MANAGER);
           const moraleManager = globalRegistry.get<IMoraleManager>(ModuleKeys.MORALE_MANAGER);
           const aiContractManager = globalRegistry.get<IAIContractManager>(ModuleKeys.AI_CONTRACT_MANAGER);
-          const transferMarket = globalRegistry.get<ITransferMarket>(ModuleKeys.TRANSFER_MARKET);
-          const boardManager = globalRegistry.get<IBoardManager>(ModuleKeys.BOARD_MANAGER);
+          // const transferMarket = globalRegistry.get<ITransferMarket>(ModuleKeys.TRANSFER_MARKET);
+          // const boardManager = globalRegistry.get<IBoardManager>(ModuleKeys.BOARD_MANAGER);
           const newsEngine = globalRegistry.get<INewsEngine>(ModuleKeys.NEWS_ENGINE);
-          const playerDevelopment = globalRegistry.get<IPlayerDevelopment>(ModuleKeys.PLAYER_DEVELOPMENT);
-          const youthAcademyManager = globalRegistry.get<IYouthAcademyManager>(ModuleKeys.YOUTH_ACADEMY_MANAGER);
-          const recordsManager = globalRegistry.get<IRecordsManager>(ModuleKeys.RECORDS_MANAGER);
+          // const playerDevelopment = globalRegistry.get<IPlayerDevelopment>(ModuleKeys.PLAYER_DEVELOPMENT);
+          // const youthAcademyManager = globalRegistry.get<IYouthAcademyManager>(ModuleKeys.YOUTH_ACADEMY_MANAGER);
+          // const recordsManager = globalRegistry.get<IRecordsManager>(ModuleKeys.RECORDS_MANAGER);
           const achievementManager = globalRegistry.get<IAchievementManager>(ModuleKeys.ACHIEVEMENT_MANAGER);
-          const matchStoryGenerator = globalRegistry.get<IMatchStoryGenerator>(ModuleKeys.MATCH_STORY_GENERATOR);
+          // const matchStoryGenerator = globalRegistry.get<IMatchStoryGenerator>(ModuleKeys.MATCH_STORY_GENERATOR);
           const cupManager = globalRegistry.get<ICupManager>(ModuleKeys.CUP_MANAGER);
 
           const currentWeek = gameState.season.currentWeek;
@@ -212,8 +214,10 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
           let updatedFixtures = gameState.fixtures;
           let updatedLeagueTable = gameState.leagueTable;
           let updatedMatchHistory = gameState.matchHistory;
-          let cupResults: any[] = []; // TODO: Import CupResult type
+          // let cupResults: any[] = []; // Reserved for cup simulation
           let updatedCupCompetition = gameState.cupCompetition;
+          let updatedLeagueCupCompetition = gameState.leagueCupCompetition;
+          let cupPrizeTransactions: typeof gameState.finances.transactions = [];
 
           if (hasMatches) {
             // Get this week's fixtures
@@ -221,31 +225,31 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
               (f) => f.week === currentWeek && !f.played
             );
 
-            // Generate match previews
-            const previews = weekFixtures.map((fixture) => {
-              const homeTeam =
-                fixture.homeTeamId === updatedPlayerTeam.id
-                  ? updatedPlayerTeam
-                  : updatedAITeams.find((t) => t.id === fixture.homeTeamId);
-              const awayTeam =
-                fixture.awayTeamId === updatedPlayerTeam.id
-                  ? updatedPlayerTeam
-                  : updatedAITeams.find((t) => t.id === fixture.awayTeamId);
+            // Generate match previews (Reserved for match preview feature)
+            // const previews = weekFixtures.map((fixture) => {
+            //   const homeTeam =
+            //     fixture.homeTeamId === updatedPlayerTeam.id
+            //       ? updatedPlayerTeam
+            //       : updatedAITeams.find((t) => t.id === fixture.homeTeamId);
+            //   const awayTeam =
+            //     fixture.awayTeamId === updatedPlayerTeam.id
+            //       ? updatedPlayerTeam
+            //       : updatedAITeams.find((t) => t.id === fixture.awayTeamId);
 
-              if (!homeTeam || !awayTeam) {
-                throw new Error(`Missing team for preview: home=${fixture.homeTeamId}, away=${fixture.awayTeamId}`);
-              }
+            //   if (!homeTeam || !awayTeam) {
+            //     throw new Error(`Missing team for preview: home=${fixture.homeTeamId}, away=${fixture.awayTeamId}`);
+            //   }
 
-              return matchStoryGenerator.generatePreview(
-                fixture,
-                homeTeam,
-                awayTeam,
-                gameState.leagueTable,
-                gameState.fixtures,
-                currentWeek,
-                Date.now() + parseInt(fixture.id.slice(-4))
-              );
-            });
+            //   return matchStoryGenerator.generatePreview(
+            //     fixture,
+            //     homeTeam,
+            //     awayTeam,
+            //     gameState.leagueTable,
+            //     gameState.fixtures,
+            //     currentWeek,
+            //     Date.now() + parseInt(fixture.id.slice(-4))
+            //   );
+            // });
 
             // Simulate each match
             matchResults = weekFixtures.map((fixture) => {
@@ -272,27 +276,22 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
                 awayTeam,
               };
 
-              const result = simulator.simulateMatch(match, currentWeek);
-
-              // Add fixture metadata to result
-              return {
-                ...result,
-                homeTeamId: fixture.homeTeamId,
-                awayTeamId: fixture.awayTeamId,
-                fixtureId: fixture.id,
-              };
+              return simulator.simulateMatch(match, currentWeek, undefined, fixture.matchType);
             });
 
-            // Update player stats from match results
-            matchResults.forEach((result) => {
-              if (result.homeTeamId === updatedPlayerTeam.id) {
+            // Update player stats from COMPETITIVE match results only (league matches)
+            // Friendly matches don't count toward player stats
+            const competitiveResults = matchResults.filter(r => r.matchType === 'competitive');
+
+            competitiveResults.forEach((result) => {
+              if (result.homeTeam === updatedPlayerTeam.name) {
                 updatedPlayerTeam = statsTracker.processTeamMatchStats(
                   updatedPlayerTeam,
                   result,
                   result.events || [],
                   true
                 );
-              } else if (result.awayTeamId === updatedPlayerTeam.id) {
+              } else if (result.awayTeam === updatedPlayerTeam.name) {
                 updatedPlayerTeam = statsTracker.processTeamMatchStats(
                   updatedPlayerTeam,
                   result,
@@ -303,9 +302,9 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
 
               // Update AI team stats
               updatedAITeams = updatedAITeams.map((team) => {
-                if (team.id === result.homeTeamId) {
+                if (team.name === result.homeTeam) {
                   return statsTracker.processTeamMatchStats(team, result, result.events || [], true);
-                } else if (team.id === result.awayTeamId) {
+                } else if (team.name === result.awayTeam) {
                   return statsTracker.processTeamMatchStats(team, result, result.events || [], false);
                 }
                 return team;
@@ -314,45 +313,48 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
 
             // Process injuries from matches
             matchResults.forEach((result) => {
-              if (result.homeTeamId === updatedPlayerTeam.id) {
+              if (result.homeTeam === updatedPlayerTeam.name) {
                 const injuryResult = injuryManager.processMatchInjuries(
                   updatedPlayerTeam,
-                  result,
-                  'home'
+                  currentWeek
                 );
                 updatedPlayerTeam = injuryResult.team;
-              } else if (result.awayTeamId === updatedPlayerTeam.id) {
+              } else if (result.awayTeam === updatedPlayerTeam.name) {
                 const injuryResult = injuryManager.processMatchInjuries(
                   updatedPlayerTeam,
-                  result,
-                  'away'
+                  currentWeek
                 );
                 updatedPlayerTeam = injuryResult.team;
               }
 
               // Process AI team injuries
               updatedAITeams = updatedAITeams.map((team) => {
-                if (team.id === result.homeTeamId) {
-                  const injuryResult = injuryManager.processMatchInjuries(team, result, 'home');
+                if (team.name === result.homeTeam) {
+                  const injuryResult = injuryManager.processMatchInjuries(team, currentWeek);
                   return injuryResult.team;
-                } else if (team.id === result.awayTeamId) {
-                  const injuryResult = injuryManager.processMatchInjuries(team, result, 'away');
+                } else if (team.name === result.awayTeam) {
+                  const injuryResult = injuryManager.processMatchInjuries(team, currentWeek);
                   return injuryResult.team;
                 }
                 return team;
               });
             });
 
-            // Update league table
-            updatedLeagueTable = matchResults.reduce(
+            // Update league table with COMPETITIVE matches only (league matches)
+            // Friendly matches don't count toward league standings
+            updatedLeagueTable = competitiveResults.reduce(
               (table, result) => tableManager.updateTable(table, result),
               gameState.leagueTable
             );
 
-            // Mark fixtures as played
+            // Mark fixtures as played (ONLY for current week!)
+            const playedFixtureIds = new Set(weekFixtures.map(f => f.id));
             updatedFixtures = gameState.fixtures.map((fixture) => {
-              const played = matchResults.find((r) => r.fixtureId === fixture.id);
-              return played ? { ...fixture, played: true } : fixture;
+              // Only mark fixtures from this week as played
+              if (playedFixtureIds.has(fixture.id)) {
+                return { ...fixture, played: true };
+              }
+              return fixture;
             });
 
             // Add to match history (limit to 76 matches)
@@ -361,8 +363,8 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
             // Generate post-match news for player team matches
             const playerTeamResults = matchResults.filter(
               (result) =>
-                result.homeTeamId === updatedPlayerTeam.id ||
-                result.awayTeamId === updatedPlayerTeam.id
+                result.homeTeam === updatedPlayerTeam.name ||
+                result.awayTeam === updatedPlayerTeam.name
             );
 
             if (playerTeamResults.length > 0) {
@@ -376,11 +378,323 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
               allNews = [...postMatchNews, ...allNews];
             }
 
-            // Handle cup matches if any - TODO: Implement cup processing
-            // const cupFixtures = weekFixtures.filter((f) => f.matchType === 'cup');
-            // if (cupFixtures.length > 0) {
-            //   // Process cup results
-            // }
+            // Handle FA Cup matches if any
+            if (updatedCupCompetition && cupManager.hasCupFixturesThisWeek(updatedCupCompetition, currentWeek)) {
+              const cupFixtures = cupManager.getCupFixturesForWeek(updatedCupCompetition, currentWeek);
+
+              // Create array of all teams for lookups
+              const allTeams: Team[] = [updatedPlayerTeam, ...updatedAITeams];
+
+              // Simulate each cup match
+              const cupResults: CupResult[] = [];
+              for (const cupFixture of cupFixtures) {
+                const homeTeam = allTeams.find(t => t.id === cupFixture.homeTeamId);
+                const awayTeam = allTeams.find(t => t.id === cupFixture.awayTeamId);
+
+                if (!homeTeam || !awayTeam) {
+                  console.error(`Cup match teams not found: home=${cupFixture.homeTeamId}, away=${cupFixture.awayTeamId}`);
+                  continue;
+                }
+
+                // Simulate knockout match (includes extra time and penalties if needed)
+                const match = { homeTeam, awayTeam };
+                const cupResult = simulator.simulateKnockoutMatch(match, currentWeek);
+                cupResults.push(cupResult);
+
+                // Update player stats for cup matches
+                if (cupResult.homeTeam === updatedPlayerTeam.name) {
+                  updatedPlayerTeam = statsTracker.processTeamMatchStats(
+                    updatedPlayerTeam,
+                    cupResult,
+                    cupResult.events || [],
+                    true
+                  );
+                } else if (cupResult.awayTeam === updatedPlayerTeam.name) {
+                  updatedPlayerTeam = statsTracker.processTeamMatchStats(
+                    updatedPlayerTeam,
+                    cupResult,
+                    cupResult.events || [],
+                    false
+                  );
+                }
+
+                // Update AI team stats for cup matches
+                updatedAITeams = updatedAITeams.map((team) => {
+                  if (team.name === cupResult.homeTeam) {
+                    return statsTracker.processTeamMatchStats(
+                      team,
+                      cupResult,
+                      cupResult.events || [],
+                      true
+                    );
+                  } else if (team.name === cupResult.awayTeam) {
+                    return statsTracker.processTeamMatchStats(
+                      team,
+                      cupResult,
+                      cupResult.events || [],
+                      false
+                    );
+                  }
+                  return team;
+                });
+
+                // Update cup fixture with result
+                const currentRound = updatedCupCompetition!.rounds.find(
+                  r => r.roundNumber === updatedCupCompetition!.currentRound
+                );
+                if (currentRound) {
+                  const fixtureIndex = currentRound.fixtures.findIndex(
+                    f => f.id === cupFixture.id
+                  );
+                  if (fixtureIndex !== -1) {
+                    currentRound.fixtures[fixtureIndex] = {
+                      ...cupFixture,
+                      played: true,
+                      result: cupResult,
+                    };
+                  }
+                }
+              }
+
+              // Update cup progress (marks round as complete if all fixtures played)
+              updatedCupCompetition = cupManager.updateCupProgress(updatedCupCompetition!);
+
+              // Award prize money for eliminated teams
+              for (const cupResult of cupResults) {
+                // If player's team lost, award them prize money for reaching this round
+                if (cupResult.loserId === updatedPlayerTeam.id) {
+                  const roundNumber = updatedCupCompetition!.currentRound;
+                  const prizeAmount = cupManager.getPrizeMoney(
+                    `round${roundNumber}`,
+                    false
+                  );
+
+                  cupPrizeTransactions.push({
+                    id: `cup-prize-${updatedCupCompetition!.id}-r${roundNumber}-${Date.now()}`,
+                    date: new Date(),
+                    type: 'income',
+                    category: 'prize-money',
+                    amount: prizeAmount,
+                    description: `${updatedCupCompetition!.name} - Round ${roundNumber}`,
+                    weekNumber: currentWeek,
+                  });
+                }
+              }
+
+              // Advance tournament to next round if current round is complete
+              const currentRound = updatedCupCompetition!.rounds.find(
+                r => r.roundNumber === updatedCupCompetition!.currentRound
+              );
+              if (currentRound?.completed) {
+                updatedCupCompetition = cupManager.advanceTournament(
+                  updatedCupCompetition!,
+                  allTeams
+                ) || updatedCupCompetition;
+              }
+
+              // Award winner and runner-up prizes if cup is complete
+              if (cupManager.isCupComplete(updatedCupCompetition!) && updatedCupCompetition!.winner) {
+                // Award runner-up prize
+                if (updatedCupCompetition!.runnerUp?.teamId === updatedPlayerTeam.id) {
+                  const runnerUpPrize = cupManager.getPrizeMoney('runnerUp', false);
+                  cupPrizeTransactions.push({
+                    id: `cup-prize-${updatedCupCompetition!.id}-runnerUp-${Date.now()}`,
+                    date: new Date(),
+                    type: 'income',
+                    category: 'prize-money',
+                    amount: runnerUpPrize,
+                    description: `${updatedCupCompetition!.name} - Runner-up`,
+                    weekNumber: currentWeek,
+                  });
+                }
+
+                // Award winner prize
+                if (updatedCupCompetition!.winner.teamId === updatedPlayerTeam.id) {
+                  const winnerPrize = cupManager.getPrizeMoney('winner', true);
+                  cupPrizeTransactions.push({
+                    id: `cup-prize-${updatedCupCompetition!.id}-winner-${Date.now()}`,
+                    date: new Date(),
+                    type: 'income',
+                    category: 'prize-money',
+                    amount: winnerPrize,
+                    description: `${updatedCupCompetition!.name} - Winners!`,
+                    weekNumber: currentWeek,
+                  });
+                }
+              }
+
+              // Cup prize transactions will be added to finances in the weekly finances section below
+
+              // Generate cup match news
+              if (cupResults.length > 0) {
+                const cupNews = newsEngine.generateCupMatchNews(
+                  cupResults,
+                  updatedPlayerTeam.name,
+                  updatedCupCompetition!,
+                  currentWeek,
+                  gameState.season.year
+                );
+                allNews = [...cupNews, ...allNews];
+
+                // Also add to match history for consistency
+                updatedMatchHistory = [...cupResults, ...updatedMatchHistory].slice(0, 76);
+              }
+            }
+
+            // Handle League Cup matches if any
+            if (updatedLeagueCupCompetition && cupManager.hasCupFixturesThisWeek(updatedLeagueCupCompetition, currentWeek)) {
+              const leagueCupFixtures = cupManager.getCupFixturesForWeek(updatedLeagueCupCompetition, currentWeek);
+
+              // Create array of all teams for lookups
+              const allTeams: Team[] = [updatedPlayerTeam, ...updatedAITeams];
+
+              // Simulate each League Cup match
+              const leagueCupResults: CupResult[] = [];
+              for (const cupFixture of leagueCupFixtures) {
+                const homeTeam = allTeams.find(t => t.id === cupFixture.homeTeamId);
+                const awayTeam = allTeams.find(t => t.id === cupFixture.awayTeamId);
+
+                if (!homeTeam || !awayTeam) {
+                  console.error(`League Cup match teams not found: home=${cupFixture.homeTeamId}, away=${cupFixture.awayTeamId}`);
+                  continue;
+                }
+
+                // Simulate knockout match
+                const match = { homeTeam, awayTeam };
+                const cupResult = simulator.simulateKnockoutMatch(match, currentWeek);
+                leagueCupResults.push(cupResult);
+
+                // Update player stats for League Cup matches
+                if (cupResult.homeTeam === updatedPlayerTeam.name) {
+                  updatedPlayerTeam = statsTracker.processTeamMatchStats(
+                    updatedPlayerTeam,
+                    cupResult,
+                    cupResult.events || [],
+                    true
+                  );
+                } else if (cupResult.awayTeam === updatedPlayerTeam.name) {
+                  updatedPlayerTeam = statsTracker.processTeamMatchStats(
+                    updatedPlayerTeam,
+                    cupResult,
+                    cupResult.events || [],
+                    false
+                  );
+                }
+
+                // Update AI team stats for League Cup matches
+                updatedAITeams = updatedAITeams.map((team) => {
+                  if (team.name === cupResult.homeTeam) {
+                    return statsTracker.processTeamMatchStats(
+                      team,
+                      cupResult,
+                      cupResult.events || [],
+                      true
+                    );
+                  } else if (team.name === cupResult.awayTeam) {
+                    return statsTracker.processTeamMatchStats(
+                      team,
+                      cupResult,
+                      cupResult.events || [],
+                      false
+                    );
+                  }
+                  return team;
+                });
+
+                // Update League Cup fixture with result
+                const currentRound = updatedLeagueCupCompetition!.rounds.find(
+                  r => r.roundNumber === updatedLeagueCupCompetition!.currentRound
+                );
+                if (currentRound) {
+                  const fixtureIndex = currentRound.fixtures.findIndex(
+                    f => f.id === cupFixture.id
+                  );
+                  if (fixtureIndex !== -1) {
+                    currentRound.fixtures[fixtureIndex] = {
+                      ...cupFixture,
+                      played: true,
+                      result: cupResult,
+                    };
+                  }
+                }
+              }
+
+              // Update League Cup progress
+              updatedLeagueCupCompetition = cupManager.updateCupProgress(updatedLeagueCupCompetition!);
+
+              // Award League Cup prize money
+              for (const cupResult of leagueCupResults) {
+                if (cupResult.loserId === updatedPlayerTeam.id) {
+                  const roundNumber = updatedLeagueCupCompetition!.currentRound;
+                  const prizeAmount = cupManager.getPrizeMoney(`round${roundNumber}`, false);
+
+                  cupPrizeTransactions.push({
+                    id: `league-cup-prize-${updatedLeagueCupCompetition!.id}-r${roundNumber}-${Date.now()}`,
+                    date: new Date(),
+                    type: 'income',
+                    category: 'prize-money',
+                    amount: prizeAmount,
+                    description: `${updatedLeagueCupCompetition!.name} - Round ${roundNumber}`,
+                    weekNumber: currentWeek,
+                  });
+                }
+              }
+
+              // Advance League Cup to next round if current round is complete
+              const currentRound = updatedLeagueCupCompetition!.rounds.find(
+                r => r.roundNumber === updatedLeagueCupCompetition!.currentRound
+              );
+              if (currentRound?.completed) {
+                updatedLeagueCupCompetition = cupManager.advanceTournament(
+                  updatedLeagueCupCompetition!,
+                  allTeams
+                ) || updatedLeagueCupCompetition;
+              }
+
+              // Award League Cup winner and runner-up prizes
+              if (cupManager.isCupComplete(updatedLeagueCupCompetition!) && updatedLeagueCupCompetition!.winner) {
+                if (updatedLeagueCupCompetition!.runnerUp?.teamId === updatedPlayerTeam.id) {
+                  const runnerUpPrize = cupManager.getPrizeMoney('runnerUp', false);
+                  cupPrizeTransactions.push({
+                    id: `league-cup-prize-${updatedLeagueCupCompetition!.id}-runnerUp-${Date.now()}`,
+                    date: new Date(),
+                    type: 'income',
+                    category: 'prize-money',
+                    amount: runnerUpPrize,
+                    description: `${updatedLeagueCupCompetition!.name} - Runner-up`,
+                    weekNumber: currentWeek,
+                  });
+                }
+
+                if (updatedLeagueCupCompetition!.winner.teamId === updatedPlayerTeam.id) {
+                  const winnerPrize = cupManager.getPrizeMoney('winner', true);
+                  cupPrizeTransactions.push({
+                    id: `league-cup-prize-${updatedLeagueCupCompetition!.id}-winner-${Date.now()}`,
+                    date: new Date(),
+                    type: 'income',
+                    category: 'prize-money',
+                    amount: winnerPrize,
+                    description: `${updatedLeagueCupCompetition!.name} - Winners!`,
+                    weekNumber: currentWeek,
+                  });
+                }
+              }
+
+              // Generate League Cup match news
+              if (leagueCupResults.length > 0) {
+                const leagueCupNews = newsEngine.generateCupMatchNews(
+                  leagueCupResults,
+                  updatedPlayerTeam.name,
+                  updatedLeagueCupCompetition!,
+                  currentWeek,
+                  gameState.season.year
+                );
+                allNews = [...leagueCupNews, ...allNews];
+
+                // Also add to match history
+                updatedMatchHistory = [...leagueCupResults, ...updatedMatchHistory].slice(0, 76);
+              }
+            }
           }
 
           // Weekly finances
@@ -408,13 +722,14 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
           );
 
           // Construct updated finances object from result
+          const cupPrizeIncome = cupPrizeTransactions.reduce((sum, t) => sum + t.amount, 0);
           const updatedFinances = {
-            budget: financeResult.newBudget,
+            budget: financeResult.newBudget + cupPrizeIncome,
             weeklyIncome: gameState.finances.weeklyIncome,
             weeklyExpenses: gameState.finances.weeklyExpenses,
-            totalIncome: gameState.finances.totalIncome + financeResult.transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0),
+            totalIncome: gameState.finances.totalIncome + financeResult.transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0) + cupPrizeIncome,
             totalExpenses: gameState.finances.totalExpenses + financeResult.transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0),
-            transactions: [...gameState.finances.transactions, ...financeResult.transactions],
+            transactions: [...gameState.finances.transactions, ...financeResult.transactions, ...cupPrizeTransactions],
           };
 
           // AI contract renewals and transfers during transfer windows
@@ -456,19 +771,38 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
           // Calculate season top performers (updated every week, not just at end of season)
           const playersWithGoals = updatedPlayerTeam.players.filter(p => p.stats.goals > 0);
           const playersWithAssists = updatedPlayerTeam.players.filter(p => p.stats.assists > 0);
+          const playersWithAppearances = updatedPlayerTeam.players.filter(p => p.stats.appearances > 0);
+          const goalkeepersWithCleanSheets = updatedPlayerTeam.players.filter(p => p.position === 'GK' && p.stats.cleanSheets > 0);
+
+          const topScorer = playersWithGoals.length > 0
+            ? playersWithGoals.reduce((prev, current) =>
+                current.stats.goals > prev.stats.goals ? current : prev
+              )
+            : null;
+
+          const topAssister = playersWithAssists.length > 0
+            ? playersWithAssists.reduce((prev, current) =>
+                current.stats.assists > prev.stats.assists ? current : prev
+              )
+            : null;
+
+          const mostAppearances = playersWithAppearances.length > 0
+            ? playersWithAppearances.reduce((prev, current) =>
+                current.stats.appearances > prev.stats.appearances ? current : prev
+              )
+            : null;
+
+          const cleanSheetKing = goalkeepersWithCleanSheets.length > 0
+            ? goalkeepersWithCleanSheets.reduce((prev, current) =>
+                current.stats.cleanSheets > prev.stats.cleanSheets ? current : prev
+              )
+            : null;
 
           const newSeasonTopPerformers: SeasonTopPerformers = {
-            topScorer: playersWithGoals.length > 0
-              ? playersWithGoals.reduce((prev, current) =>
-                  current.stats.goals > prev.stats.goals ? current : prev
-                )
-              : updatedPlayerTeam.players[0],
-            topAssister: playersWithAssists.length > 0
-              ? playersWithAssists.reduce((prev, current) =>
-                  current.stats.assists > prev.stats.assists ? current : prev
-                )
-              : updatedPlayerTeam.players[0],
-            playerOfSeason: updatedPlayerTeam.players[0], // TODO: Implement rating system
+            topScorer: topScorer ? { player: topScorer, goals: topScorer.stats.goals } : null,
+            topAssists: topAssister ? { player: topAssister, assists: topAssister.stats.assists } : null,
+            mostAppearances: mostAppearances ? { player: mostAppearances, appearances: mostAppearances.stats.appearances } : null,
+            cleanSheetKing: cleanSheetKing ? { player: cleanSheetKing, cleanSheets: cleanSheetKing.stats.cleanSheets } : null,
           };
 
           if (isEndOfSeason) {
@@ -476,11 +810,20 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
             // Season evaluation
             const finalPosition =
               updatedLeagueTable.findIndex((t) => t.teamId === updatedPlayerTeam.id) + 1;
-            // TODO: Implement proper board evaluation with objectives
-            const satisfied = finalPosition <= 10; // Simple placeholder: top half = satisfied
+            const targetPosition = gameState.boardStatus.currentObjective?.target || 10;
+            const satisfied = finalPosition <= targetPosition;
+
+            const boardObjective: BoardObjective = {
+              id: `season-${gameState.season.year}-objective`,
+              season: gameState.season.year,
+              type: 'league-position',
+              target: targetPosition,
+              description: `Finish in top ${targetPosition}`,
+              status: satisfied ? 'achieved' : 'failed',
+            };
 
             newSeasonEvaluation = {
-              objective: `Finish in top ${gameState.boardStatus.minimumLeaguePosition || 10}`,
+              objective: boardObjective,
               satisfied,
               sacked: false, // TODO: Implement job security system
               message: satisfied
@@ -541,6 +884,7 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
             leagueTable: updatedLeagueTable,
             matchHistory: updatedMatchHistory,
             cupCompetition: updatedCupCompetition,
+            leagueCupCompetition: updatedLeagueCupCompetition,
             finances: updatedFinances,
             newsFeed: allNews.slice(0, 100), // Limit news feed to 100 items
           }));
@@ -566,9 +910,9 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
         if (!gameState) return;
 
         try {
-          // Initialize managers
-          const seasonManager = new SeasonManager();
-          const contractManager = new ContractManager();
+          // Get managers from registry
+          const seasonManager = globalRegistry.get<ISeasonManager>(ModuleKeys.SEASON_MANAGER);
+          // const contractManager = globalRegistry.get<IContractManager>(ModuleKeys.CONTRACT_MANAGER);
 
           // 1. Archive current season to season records
           const currentPosition = gameState.leagueTable
@@ -594,6 +938,9 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
                 goalsFor: playerTableEntry.goalsFor,
                 goalsAgainst: playerTableEntry.goalsAgainst,
                 goalDifference: playerTableEntry.goalDifference,
+                longestWinStreak: 0, // TODO: Track win streaks during season
+                longestUnbeatenStreak: 0, // TODO: Track unbeaten streaks during season
+                cleanSheets: 0, // TODO: Track team clean sheets during season
               }
             : undefined;
 
@@ -607,7 +954,7 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
 
           // Auto-renew contracts for player team to ensure minimum 11 players
           const renewedPlayerTeamPlayers = gameState.playerTeam.players.map((player) => {
-            if (player.contract.endYear < nextYear) {
+            if (player.contract.expiryYear < nextYear) {
               // Contract expired - auto-renew for 1 year
               return {
                 ...player,
@@ -624,7 +971,7 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
           const updatedAITeams = gameState.aiTeams.map((team) => ({
             ...team,
             players: team.players.map((player) => {
-              if (player.contract.endYear < nextYear) {
+              if (player.contract.expiryYear < nextYear) {
                 // Contract expired - auto-renew for 1 year
                 return {
                   ...player,
@@ -643,13 +990,18 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
             players.map((player) => ({
               ...player,
               stats: {
-                matches: 0,
+                // Reset current season stats
+                appearances: 0,
                 goals: 0,
                 assists: 0,
                 yellowCards: 0,
                 redCards: 0,
-                minutesPlayed: 0,
                 cleanSheets: 0,
+                // Preserve career stats
+                careerAppearances: player.stats.careerAppearances || 0,
+                careerGoals: player.stats.careerGoals || 0,
+                careerAssists: player.stats.careerAssists || 0,
+                careerCleanSheets: player.stats.careerCleanSheets || 0,
               },
             }));
 
@@ -773,8 +1125,8 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
           'orchestrator/dismissAchievement'
         ),
 
-      selectYouthPlayers: (playerIds: string[]) => {
-        if (playerIds.length === 0) {
+      selectYouthPlayers: (selectedPlayers: Player[]) => {
+        if (selectedPlayers.length === 0) {
           // Just clear youth prospects if no players selected
           set({ youthProspects: [] }, false, 'orchestrator/selectYouthPlayers');
           return;
@@ -783,11 +1135,6 @@ export const useGameOrchestratorStore = create<GameOrchestratorStore>()(
         // Add selected players to squad (handled by player store or game state update)
         const gameState = useGameStore.getState().gameState;
         if (!gameState) return;
-
-        // Get selected players BEFORE clearing the array
-        const selectedPlayers = get().youthProspects.filter((p) =>
-          playerIds.includes(p.id)
-        );
 
         useGameStore.getState().updateGameState((state) => ({
           ...state,

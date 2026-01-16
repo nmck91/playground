@@ -91,8 +91,55 @@ export default function FixturesPage() {
     );
   };
 
+  // Combine league fixtures with cup fixtures for display
+  type DisplayFixture = Fixture & { competitionType?: 'league' | 'fa-cup' | 'league-cup' };
+
+  const getAllFixtures = (): DisplayFixture[] => {
+    const allFixtures: DisplayFixture[] = [...gameState.fixtures.map(f => ({ ...f, competitionType: 'league' as const }))];
+
+    // Add FA Cup fixtures
+    if (gameState.cupCompetition) {
+      for (const round of gameState.cupCompetition.rounds) {
+        for (const cupFixture of round.fixtures) {
+          allFixtures.push({
+            id: cupFixture.id,
+            week: cupFixture.weekNumber,
+            homeTeamId: cupFixture.homeTeamId,
+            awayTeamId: cupFixture.awayTeamId,
+            played: cupFixture.played,
+            matchType: 'competitive',
+            competitionType: 'fa-cup',
+            result: cupFixture.result,
+          });
+        }
+      }
+    }
+
+    // Add League Cup fixtures
+    if (gameState.leagueCupCompetition) {
+      for (const round of gameState.leagueCupCompetition.rounds) {
+        for (const cupFixture of round.fixtures) {
+          allFixtures.push({
+            id: cupFixture.id,
+            week: cupFixture.weekNumber,
+            homeTeamId: cupFixture.homeTeamId,
+            awayTeamId: cupFixture.awayTeamId,
+            played: cupFixture.played,
+            matchType: 'competitive',
+            competitionType: 'league-cup',
+            result: cupFixture.result,
+          });
+        }
+      }
+    }
+
+    return allFixtures;
+  };
+
+  const allFixtures = getAllFixtures();
+
   // Filter fixtures
-  const filteredFixtures = gameState.fixtures.filter(fixture => {
+  const filteredFixtures = allFixtures.filter(fixture => {
     if (filterType === 'all') return true;
     return fixture.matchType === filterType;
   });
@@ -248,8 +295,22 @@ export default function FixturesPage() {
                         <div className="text-sm font-semibold text-slate-600 dark:text-dark-text-secondary min-w-[80px]">
                           Week {fixture.week}
                         </div>
-                        <div className="text-xs px-2 py-1 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 font-medium">
-                          {fixture.matchType === 'friendly' ? '⚽ Friendly' : '🏆 League'}
+                        <div className={`text-xs px-2 py-1 rounded font-medium ${
+                          fixture.competitionType === 'fa-cup'
+                            ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+                            : fixture.competitionType === 'league-cup'
+                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                            : fixture.matchType === 'friendly'
+                            ? 'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-400'
+                            : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
+                        }`}>
+                          {fixture.competitionType === 'fa-cup'
+                            ? '🏆 FA Cup'
+                            : fixture.competitionType === 'league-cup'
+                            ? '🏆 League Cup'
+                            : fixture.matchType === 'friendly'
+                            ? '⚽ Friendly'
+                            : '🏆 League'}
                         </div>
                       </div>
                       <div className="flex items-center gap-4 flex-1 justify-end flex-wrap md:flex-nowrap">
@@ -310,8 +371,22 @@ export default function FixturesPage() {
                         <div className="text-sm font-semibold text-slate-600 dark:text-dark-text-secondary min-w-[80px]">
                           Week {fixture.week}
                         </div>
-                        <div className="text-xs px-2 py-1 rounded bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400 font-medium">
-                          {fixture.matchType === 'friendly' ? '⚽ Friendly' : '🏆 League'}
+                        <div className={`text-xs px-2 py-1 rounded font-medium ${
+                          fixture.competitionType === 'fa-cup'
+                            ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+                            : fixture.competitionType === 'league-cup'
+                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+                            : fixture.matchType === 'friendly'
+                            ? 'bg-gray-100 dark:bg-gray-900/30 text-gray-700 dark:text-gray-400'
+                            : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400'
+                        }`}>
+                          {fixture.competitionType === 'fa-cup'
+                            ? '🏆 FA Cup'
+                            : fixture.competitionType === 'league-cup'
+                            ? '🏆 League Cup'
+                            : fixture.matchType === 'friendly'
+                            ? '⚽ Friendly'
+                            : '🏆 League'}
                         </div>
                       </div>
                       <div className="flex items-center gap-4 flex-1 justify-end flex-wrap md:flex-nowrap">

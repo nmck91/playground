@@ -45,6 +45,7 @@ export function AchievementToast({ achievements, onDismiss }: AchievementToastPr
 
       return () => clearTimeout(timer);
     }
+    return undefined;
   }, [currentAchievement, queue]);
 
   const handleDismiss = () => {

@@ -7,7 +7,7 @@ import { Team, LeagueTable, MatchResult } from './types';
 import { ILeagueTableManager } from './interfaces/league-table-manager.interface';
 
 // Re-export interface for convenience
-export { ILeagueTableManager };
+export type { ILeagueTableManager };
 
 /**
  * League Table Manager Implementation

@@ -8,7 +8,7 @@ import { StaffManager } from './staff-manager';
 import { IPlayerDevelopment } from './interfaces/player-development.interface';
 
 // Re-export interface for convenience
-export { IPlayerDevelopment };
+export type { IPlayerDevelopment };
 
 /**
  * Player Development Implementation

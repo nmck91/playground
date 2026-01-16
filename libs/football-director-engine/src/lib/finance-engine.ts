@@ -8,7 +8,7 @@ import { StaffManager } from './staff-manager';
 import { IFinanceEngine } from './interfaces/finance-engine.interface';
 
 // Re-export interface for convenience
-export { IFinanceEngine };
+export type { IFinanceEngine };
 
 const PRE_SEASON_WEEKS = 7;
 const COMPETITIVE_START = 8;

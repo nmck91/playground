@@ -7,7 +7,7 @@ import { BoardObjective, BoardStatus, LeagueTable, Team } from './types';
 import { IBoardManager } from './interfaces/board-manager.interface';
 
 // Re-export interface for convenience
-export { IBoardManager };
+export type { IBoardManager };
 
 /**
  * Board Manager Implementation

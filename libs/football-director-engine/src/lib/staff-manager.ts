@@ -7,7 +7,7 @@ import { Staff, StaffRole, Team, ManagerStyle } from './types';
 import { IStaffManager } from './interfaces/staff-manager.interface';
 
 // Re-export interface for convenience
-export { IStaffManager };
+export type { IStaffManager };
 
 /**
  * Staff Manager Implementation

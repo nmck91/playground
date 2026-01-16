@@ -9,7 +9,7 @@ import { Team, Player, PlayerContract, ContractStatus, FreeAgent } from './types
 import { IContractManager } from './interfaces/contract-manager.interface';
 
 // Re-export interface for convenience
-export { IContractManager };
+export type { IContractManager };
 
 /**
  * Contract Manager Implementation
