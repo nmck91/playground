@@ -73,7 +73,7 @@ The Reward Chart is an **Angular 18+ standalone component application** built fo
 - **App Location**: `apps/reward-chart/`
 - **Shared Libraries**: `libs/tailwind-preset/` (custom Tailwind tokens)
 - **Package Manager**: npm
-- **Notable**: Part of multi-app workspace (family-calendar, last-player-standing, reward-chart)
+- **Notable**: Part of multi-app workspace (family-calendar, reward-chart, football-director, math-quest, dadai-dev)
 
 ## Source Tree and Module Organization
 

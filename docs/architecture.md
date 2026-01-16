@@ -47,16 +47,6 @@ This document captures the **CURRENT STATE** of the Playground Nx monorepo codeb
 - **Styles**: `src/styles.css` - Global styles with CSS custom properties
 - **Build**: `tailwind.config.js` - Tailwind configuration using shared preset
 
-**Last Player Standing Application (`apps/last-player-standing/`):**
-- **Main Entry**: `src/main.ts` - Angular bootstrap (NgModule architecture)
-- **App Module**: `src/app/app-module.ts` - PrimeNG Aura theme configuration
-- **Core Services**: `src/app/core/services/` - Auth, Supabase, Payment (Stripe)
-- **Guards**: `src/app/core/guards/` - Auth guard, Admin guard
-- **Features**: `src/app/features/` - Public (home, login, register), Dashboard, Admin
-- **Components**: `src/app/shared/components/header.component.ts` - Navigation header
-- **Environments**: `src/environments/` - Supabase and Stripe configuration
-- **Docs**: `docs/last-player-standing/` - Setup guide, database schema, Supabase fixes
-
 **Shared Libraries (`libs/`):**
 - **Tailwind Preset**: `libs/tailwind-preset/src/index.ts` - Shared design system tokens
 
@@ -85,9 +75,8 @@ This document captures the **CURRENT STATE** of the Playground Nx monorepo codeb
 - **Frontend**: Deployed to Vercel via GitHub integration (CI-gated release branch)
   - `family-calendar` → Production (Vercel)
   - `reward-chart` → Production (Vercel)
-  - `last-player-standing` → Development (not yet deployed)
+  - `football-director` → Development (not yet deployed)
 - **Backend**: Supabase (managed PostgreSQL + Auth + Real-time)
-- **Payments**: Stripe (Last Player Standing only)
 - **CI/CD**: GitHub Actions for testing, auto-merge to release branch, Vercel for deployment
 
 ### Actual Tech Stack
@@ -168,29 +157,10 @@ playground/
 │   │   ├── src/                      # E2E test specs
 │   │   └── playwright.config.ts     # Playwright configuration
 │   │
-│   ├── last-player-standing/         # Football competition app (NgModule)
-│   │   ├── src/
-│   │   │   ├── app/
-│   │   │   │   ├── core/
-│   │   │   │   │   ├── guards/      # Auth guard, Admin guard
-│   │   │   │   │   └── services/    # AuthService, SupabaseService, PaymentService
-│   │   │   │   ├── features/
-│   │   │   │   │   ├── public/      # HomeComponent, LoginComponent, RegisterComponent
-│   │   │   │   │   ├── dashboard/   # User dashboard
-│   │   │   │   │   └── admin/       # Admin panel
-│   │   │   │   ├── shared/
-│   │   │   │   │   └── components/  # HeaderComponent
-│   │   │   │   ├── app-module.ts    # NgModule with PrimeNG Aura theme
-│   │   │   │   └── app.routes.ts    # Route configuration
-│   │   │   ├── environments/        # Supabase and Stripe config
-│   │   │   ├── main.ts              # Angular bootstrap
-│   │   │   └── styles.css           # Global styles + Tailwind imports
-│   │   ├── project.json             # Nx build/serve/test targets
-│   │   ├── tailwind.config.js       # Tailwind config (uses libs/tailwind-preset)
-│   │   ├── vercel.json              # Vercel deployment config (release branch only)
-│   │   └── tsconfig.app.json        # App-specific TypeScript config
+│   ├── football-director/           # Football management game
+│   │   └── src/                      # Game source code
 │   │
-│   └── last-player-standing-e2e/    # Playwright E2E tests
+│   └── football-director-e2e/       # Playwright E2E tests
 │       ├── src/                      # E2E test specs
 │       └── playwright.config.ts     # Playwright configuration
 │
@@ -706,11 +676,10 @@ npx nx g @nx/js:library my-lib --directory=libs/my-lib --bundler=none --unitTest
 
 **This codebase is**:
 - ✅ Nx monorepo with Angular 18-20.3 + Supabase
-- ✅ Three SPAs: reward-chart, family-calendar (production), last-player-standing (development)
+- ✅ Multiple SPAs: family-calendar, reward-chart (production), football-director, math-quest, dadai-dev (development)
 - ✅ CI-gated release branch strategy with auto-merge
-- ✅ Uses modern Angular patterns (standalone, Signals, inject(), NgModule)
+- ✅ Uses modern Angular patterns (standalone, Signals, inject())
 - ✅ Shared Tailwind design system in libs/
-- ✅ Stripe payments integration (Last Player Standing)
 
 **Key characteristics**:
 - Personal playground for AI-assisted development

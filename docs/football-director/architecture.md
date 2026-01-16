@@ -89,7 +89,6 @@ This document captures the **CURRENT STATE** of the Football Director applicatio
 - **Roadmap**: `apps/football-director/ROADMAP.md` - Feature roadmap with completed/planned features
 - **Mobile Plan**: `apps/football-director/MOBILE-FIRST-PLAN.md` - Mobile-first design approach
 - **Football Director Brief**: `docs/football-director-brief.md` - Original project brief
-- **Spike Report**: `docs/football-director-spike-report.md` - Initial prototype analysis
 
 ---
 

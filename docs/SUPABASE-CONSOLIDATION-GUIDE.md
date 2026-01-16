@@ -98,38 +98,12 @@ export const environment = {
 };
 ```
 
-#### Last Player Standing
-
-**File:** `apps/last-player-standing/src/environments/environment.development.ts`
-```typescript
-export const environment = {
-  production: false,
-  supabaseUrl: 'YOUR_PLAYGROUND_PROJECT_URL',  // ← Update this
-  supabaseKey: 'YOUR_PLAYGROUND_ANON_KEY',      // ← Update this
-  stripePublishableKey: 'pk_test_51KGqgQHv4xthOZIwyqdpwk3UYnCWa5is0aSrzjrCV7q5ysNga30ubMAzZuD3bFnHSUJ65x51hyqAa7QBMmfcLByh00px3u24t6',
-  stripeSuccessUrl: 'http://localhost:4200/payment/success',
-  stripeCancelUrl: 'http://localhost:4200/payment/cancel'
-};
-```
-
-**File:** `apps/last-player-standing/src/environments/environment.ts`
-```typescript
-export const environment = {
-  production: true,
-  supabaseUrl: 'YOUR_PLAYGROUND_PROJECT_URL',  // ← Update this
-  supabaseKey: 'YOUR_PLAYGROUND_ANON_KEY',      // ← Update this
-  stripePublishableKey: 'pk_test_51KGqgQHv4xthOZIwyqdpwk3UYnCWa5is0aSrzjrCV7q5ysNga30ubMAzZuD3bFnHSUJ65x51hyqAa7QBMmfcLByh00px3u24t6',
-  stripeSuccessUrl: 'https://last-player-standing.dadai.dev/payment/success',
-  stripeCancelUrl: 'https://last-player-standing.dadai.dev/payment/cancel'
-};
-```
-
 ### 5. Update Vercel Environment Variables (If Deployed)
 
 If your apps are deployed to Vercel, update the environment variables:
 
 1. Go to your Vercel dashboard
-2. For **each app** (family-calendar, reward-chart, last-player-standing):
+2. For **each app** (family-calendar, reward-chart):
    - Go to **Settings** > **Environment Variables**
    - Update `SUPABASE_URL` to your new playground URL
    - Update `SUPABASE_ANON_KEY` to your new playground anon key
@@ -149,9 +123,9 @@ npx nx serve family-calendar
 npx nx serve reward-chart
 # Visit http://localhost:4300 and test star tracking
 
-# Test Last Player Standing
-npx nx serve last-player-standing
-# Visit http://localhost:4200 and test registration/login
+# Test Football Director
+npx nx serve football-director
+# Visit http://localhost:4200
 ```
 
 ### 7. Optional: Migrate Existing Data

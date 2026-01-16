@@ -157,7 +157,7 @@ All quality gates must pass before code can be merged to main.
 
 ### Gate 1: Build
 
-**Command**: `npx nx run-many -t build --exclude=football-director-spike,football-director-spike-e2e`
+**Command**: `npx nx run-many -t build`
 
 **Purpose**: Ensure all TypeScript compiles without errors
 
@@ -181,7 +181,7 @@ npx nx build <project-name> --verbose
 
 ### Gate 2: Lint
 
-**Command**: `npx nx run-many -t lint --exclude=football-director-spike,football-director-spike-e2e`
+**Command**: `npx nx run-many -t lint`
 
 **Purpose**: Enforce code quality and style standards
 
@@ -312,7 +312,7 @@ npx nx test football-director --watch
 
 ### Gate 6: Other Projects
 
-**Command**: `npx nx run-many -t test --exclude=football-director-spike,football-director-spike-e2e,football-director,football-director-engine --run`
+**Command**: `npx nx run-many -t test --exclude=football-director,football-director-engine --run`
 
 **Purpose**: Ensure all other projects pass tests
 
