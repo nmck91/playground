@@ -20,10 +20,10 @@ Kids reward tracking system with star-based achievements
 - **State:** RxJS BehaviorSubject
 - **Status:** ✅ Production
 
-### Last Player Standing
-Football competition app for school PTA fundraiser
-- **Tech:** Angular 18, PrimeNG with Aura theme, Tailwind CSS, Supabase, Stripe
-- **State:** Angular Signals + inject()
+### Football Director
+Football management simulation game
+- **Tech:** Angular 20.3, TypeScript game engine
+- **State:** Angular Signals
 - **Status:** 🚧 Development
 
 ## 🔄 CI/CD Workflow
@@ -79,22 +79,22 @@ npm install
 # Serve an application
 npx nx serve family-calendar    # Port 4200
 npx nx serve reward-chart         # Port 4300
-npx nx serve last-player-standing # Port 4200
+npx nx serve football-director    # Port 4200
 
 # Build for production
 npx nx build family-calendar --configuration=production
 npx nx build reward-chart --configuration=production
-npx nx build last-player-standing --configuration=production
+npx nx build football-director --configuration=production
 
 # Run tests
 npx nx test family-calendar
 npx nx test reward-chart
-npx nx test last-player-standing
+npx nx test football-director
 
 # Run E2E tests
 npx nx e2e family-calendar-e2e
 npx nx e2e reward-chart-e2e
-npx nx e2e last-player-standing-e2e
+npx nx e2e football-director-e2e
 
 # Lint
 npx nx lint family-calendar
@@ -125,7 +125,6 @@ npx nx list
 - **UI Library:** PrimeNG with Aura theme
 - **Styling:** Tailwind CSS with shared preset (`libs/tailwind-preset`)
 - **Backend:** Supabase (PostgreSQL, Auth, Real-time)
-- **Payments:** Stripe (Last Player Standing only)
 
 ### Tooling
 - **Package Manager:** npm
@@ -144,13 +143,18 @@ playground/
 │   ├── family-calendar-e2e/      # E2E tests
 │   ├── reward-chart/             # Star tracking app
 │   ├── reward-chart-e2e/         # E2E tests
-│   ├── last-player-standing/     # Football competition app
-│   └── last-player-standing-e2e/ # E2E tests
+│   ├── football-director/        # Football management game
+│   ├── football-director-e2e/    # E2E tests
+│   ├── math-quest/               # Kids math game
+│   ├── math-quest-e2e/           # E2E tests
+│   ├── dadai-dev/                # Landing page
+│   └── dadai-dev-e2e/            # E2E tests
 ├── libs/
-│   └── tailwind-preset/          # Shared design system
+│   ├── tailwind-preset/          # Shared design system
+│   └── football-director-engine/ # Game engine library
 ├── docs/
 │   ├── architecture/             # System documentation
-│   ├── last-player-standing/     # LPS app docs
+│   ├── football-director/        # Football Director docs
 │   └── stories/                  # Completed work docs
 └── .github/workflows/
     └── ci.yml                    # CI/CD pipeline

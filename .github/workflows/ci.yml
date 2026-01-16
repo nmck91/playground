@@ -46,11 +46,11 @@ jobs:
 
       # Build all projects (required to pass)
       - name: Build all projects
-        run: npx nx run-many -t build --exclude=football-director-spike,football-director-spike-e2e
+        run: npx nx run-many -t build
 
-      # Lint all projects except spikes (required to pass)
+      # Lint all projects (required to pass)
       - name: Lint all projects
-        run: npx nx run-many -t lint --exclude=football-director-spike,football-director-spike-e2e
+        run: npx nx run-many -t lint
 
       # Test football-director-engine with coverage (required to pass)
       - name: Test football-director-engine
@@ -66,7 +66,7 @@ jobs:
 
       # Test all other projects (required to pass)
       - name: Test all other projects
-        run: npx nx run-many -t test --exclude=football-director-spike,football-director-spike-e2e,football-director,football-director-engine --run
+        run: npx nx run-many -t test --exclude=football-director,football-director-engine --run
 
       # Upload coverage reports
       - name: Upload engine coverage to Codecov
