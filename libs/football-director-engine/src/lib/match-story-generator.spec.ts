@@ -224,9 +224,11 @@ describe('MatchStoryGenerator', () => {
       const awayTeam = createMockTeam({ id: 'team-b', name: 'Team B' });
 
       const manOfMatch: ManOfMatch = {
-        name: 'Star Player',
+        playerId: 'player-1',
+        playerName: 'Star Player',
         rating: 8.5,
         team: 'home',
+        reason: 'Outstanding performance',
       };
 
       const matchResult: MatchResult = {
@@ -252,8 +254,8 @@ describe('MatchStoryGenerator', () => {
 
       expect(analysis.homeManagerQuote).toBeDefined();
       expect(analysis.awayManagerQuote).toBeDefined();
-      expect(analysis.homeManagerQuote.sentiment).toBe('positive');
-      expect(analysis.awayManagerQuote.sentiment).toBe('negative');
+      expect(analysis.homeManagerQuote.sentiment).toBe('happy');
+      expect(analysis.awayManagerQuote.sentiment).toBe('frustrated');
       expect(analysis.playerInterview).toBeDefined();
       expect(analysis.playerInterview?.playerName).toBe('Star Player');
       expect(analysis.keyStats).toBeDefined();
@@ -284,8 +286,8 @@ describe('MatchStoryGenerator', () => {
         12345
       );
 
-      expect(analysis.homeManagerQuote.sentiment).toBe('negative');
-      expect(analysis.awayManagerQuote.sentiment).toBe('positive');
+      expect(analysis.homeManagerQuote.sentiment).toBe('frustrated');
+      expect(analysis.awayManagerQuote.sentiment).toBe('happy');
     });
 
     it('should generate post-match analysis for draw', () => {
@@ -356,9 +358,11 @@ describe('MatchStoryGenerator', () => {
       const awayTeam = createMockTeam({ id: 'team-b', name: 'Team B' });
 
       const manOfMatch: ManOfMatch = {
-        name: 'Best Player',
+        playerId: 'player-1',
+        playerName: 'Best Player',
         rating: 9.0,
         team: 'home',
+        reason: 'Outstanding performance',
       };
 
       const matchResult: MatchResult = {
@@ -384,26 +388,26 @@ describe('MatchStoryGenerator', () => {
 
       expect(analysis.keyStats).toBeDefined();
 
-      // Check final score stat
-      const scoreStat = analysis.keyStats.find((s) => s.label === 'Final Score');
+      // Check final score stat (keyStats are strings, not objects)
+      const scoreStat = analysis.keyStats.find((s) => s.startsWith('Final Score:'));
       expect(scoreStat).toBeDefined();
-      expect(scoreStat?.value).toBe('3-1');
+      expect(scoreStat).toBe('Final Score: 3-1');
 
       // Check scorers
-      const homeScorers = analysis.keyStats.find((s) => s.label === 'Team A Scorers');
+      const homeScorers = analysis.keyStats.find((s) => s.startsWith('Team A Scorers:'));
       expect(homeScorers).toBeDefined();
-      expect(homeScorers?.value).toContain('Player 1');
+      expect(homeScorers).toContain('Player 1');
 
       // Check man of match
-      const motm = analysis.keyStats.find((s) => s.label === 'Man of the Match');
+      const motm = analysis.keyStats.find((s) => s.startsWith('Man of the Match:'));
       expect(motm).toBeDefined();
-      expect(motm?.value).toContain('Best Player');
-      expect(motm?.value).toContain('9.0');
+      expect(motm).toContain('Best Player');
+      expect(motm).toContain('9.0');
 
       // Check attendance
-      const attendance = analysis.keyStats.find((s) => s.label === 'Attendance');
+      const attendance = analysis.keyStats.find((s) => s.startsWith('Attendance:'));
       expect(attendance).toBeDefined();
-      expect(attendance?.value).toBe('50,000');
+      expect(attendance).toContain('50,000');
     });
 
     it('should not generate player interview if no man of match', () => {
