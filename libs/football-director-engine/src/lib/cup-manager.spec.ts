@@ -20,7 +20,7 @@ describe('CupManager', () => {
     it('should create a valid cup competition', () => {
       const cup = CupManager.generateCupCompetition(teams, 2024);
 
-      expect(cup.id).toBe('cup-2024');
+      expect(cup.id).toBe('fa-cup-2024');
       expect(cup.name).toBe('FA Cup');
       expect(cup.season).toBe(2024);
       expect(cup.currentRound).toBe(1);
