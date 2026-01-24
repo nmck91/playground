@@ -1,11 +1,11 @@
 export const environment = {
   production: true,
   supabase: {
-    url: '__SUPABASE_URL__',
-    anonKey: '__SUPABASE_ANON_KEY__',
+    url: 'https://wubtjfchjivrfrmtppeh.supabase.co',
+    anonKey: 'sb_publishable_cVR-nboIZaav1B2WQD_33w_hmkEy6xz',
   },
   app: {
     name: 'Session Stash',
-    version: '__APP_VERSION__',
+    version: '0.0.1',
   },
 };
