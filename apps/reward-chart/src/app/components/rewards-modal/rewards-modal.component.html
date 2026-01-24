@@ -14,17 +14,17 @@
       <!-- Kids Rewards -->
       <div class="mb-24 md:mb-16">
         <div class="flex justify-between items-center mb-12">
-          <h3 class="text-xl md:text-base font-semibold text-teal-500">🧒 Kids' Rewards</h3>
+          <h3 class="text-xl md:text-base font-semibold text-dadai-cyan">🧒 Kids' Rewards</h3>
           <button
             *ngIf="!addingReward || addingReward.type !== 'kids'"
-            class="px-12 py-6 bg-teal-500 text-white rounded-base text-sm font-medium hover:bg-teal-600 transition-colors border-0 cursor-pointer"
+            class="px-12 py-6 bg-dadai-cyan text-white rounded-base text-sm font-medium hover:bg-dadai-navy-light transition-colors border-0 cursor-pointer"
             (click)="startAdd('kids')">
             + Add Reward
           </button>
         </div>
 
         <!-- Add New Reward Form -->
-        <div *ngIf="addingReward?.type === 'kids'" class="p-12 mb-8 bg-teal-50 rounded-base border-2 border-teal-500">
+        <div *ngIf="addingReward?.type === 'kids'" class="p-12 mb-8 bg-dadai-cyan/10 rounded-base border-2 border-dadai-cyan">
           <div class="mb-8">
             <label for="new-reward-name-kids" class="block text-sm font-medium mb-4">Reward Name</label>
             <input
@@ -45,7 +45,7 @@
           </div>
           <div class="flex gap-8">
             <button
-              class="px-12 py-6 bg-teal-500 text-white rounded-base text-sm font-medium hover:bg-teal-600 transition-colors border-0 cursor-pointer"
+              class="px-12 py-6 bg-dadai-cyan text-white rounded-base text-sm font-medium hover:bg-dadai-navy-light transition-colors border-0 cursor-pointer"
               (click)="saveAdd()">
               Save
             </button>
@@ -58,14 +58,14 @@
         </div>
 
         <div class="grid gap-8">
-          <div *ngFor="let reward of kidsRewards; let i = index; trackBy: trackByIndex" class="p-12 md:p-8 bg-cream-50 rounded-base border-l-4 border-teal-500">
+          <div *ngFor="let reward of kidsRewards; let i = index; trackBy: trackByIndex" class="p-12 md:p-8 bg-cream-50 rounded-base border-l-4 border-dadai-cyan">
             <!-- View Mode -->
             <div *ngIf="!isEditing(i, 'kids')" class="flex justify-between items-center gap-8">
               <div class="flex-1">
                 <div class="font-medium md:text-sm" [innerHTML]="reward.name"></div>
               </div>
               <div class="flex items-center gap-8">
-                <div class="font-bold text-teal-500 whitespace-nowrap">{{ reward.stars }} ⭐</div>
+                <div class="font-bold text-dadai-cyan whitespace-nowrap">{{ reward.stars }} ⭐</div>
                 <button
                   class="px-8 py-4 bg-transparent text-slate-500 rounded-base text-xs hover:bg-slate-200 transition-colors border border-slate-300 cursor-pointer"
                   (click)="startEdit(reward, i, 'kids')">
@@ -100,7 +100,7 @@
               </div>
               <div class="flex gap-8">
                 <button
-                  class="px-12 py-6 bg-teal-500 text-white rounded-base text-sm font-medium hover:bg-teal-600 transition-colors border-0 cursor-pointer"
+                  class="px-12 py-6 bg-dadai-cyan text-white rounded-base text-sm font-medium hover:bg-dadai-navy-light transition-colors border-0 cursor-pointer"
                   (click)="saveEdit()">
                   Save
                 </button>
@@ -118,17 +118,17 @@
       <!-- Parents Rewards -->
       <div class="mb-24 md:mb-16">
         <div class="flex justify-between items-center mb-12">
-          <h3 class="text-xl md:text-base font-semibold text-teal-500">👨‍👩‍👧‍👦 Parents' Rewards</h3>
+          <h3 class="text-xl md:text-base font-semibold text-dadai-cyan">👨‍👩‍👧‍👦 Parents' Rewards</h3>
           <button
             *ngIf="!addingReward || addingReward.type !== 'parents'"
-            class="px-12 py-6 bg-teal-500 text-white rounded-base text-sm font-medium hover:bg-teal-600 transition-colors border-0 cursor-pointer"
+            class="px-12 py-6 bg-dadai-cyan text-white rounded-base text-sm font-medium hover:bg-dadai-navy-light transition-colors border-0 cursor-pointer"
             (click)="startAdd('parents')">
             + Add Reward
           </button>
         </div>
 
         <!-- Add New Reward Form -->
-        <div *ngIf="addingReward?.type === 'parents'" class="p-12 mb-8 bg-teal-50 rounded-base border-2 border-teal-500">
+        <div *ngIf="addingReward?.type === 'parents'" class="p-12 mb-8 bg-dadai-cyan/10 rounded-base border-2 border-dadai-cyan">
           <div class="mb-8">
             <label for="new-reward-name-parents" class="block text-sm font-medium mb-4">Reward Name</label>
             <input
@@ -149,7 +149,7 @@
           </div>
           <div class="flex gap-8">
             <button
-              class="px-12 py-6 bg-teal-500 text-white rounded-base text-sm font-medium hover:bg-teal-600 transition-colors border-0 cursor-pointer"
+              class="px-12 py-6 bg-dadai-cyan text-white rounded-base text-sm font-medium hover:bg-dadai-navy-light transition-colors border-0 cursor-pointer"
               (click)="saveAdd()">
               Save
             </button>
@@ -162,14 +162,14 @@
         </div>
 
         <div class="grid gap-8">
-          <div *ngFor="let reward of parentsRewards; let i = index; trackBy: trackByIndex" class="p-12 md:p-8 bg-cream-50 rounded-base border-l-4 border-teal-500">
+          <div *ngFor="let reward of parentsRewards; let i = index; trackBy: trackByIndex" class="p-12 md:p-8 bg-cream-50 rounded-base border-l-4 border-dadai-cyan">
             <!-- View Mode -->
             <div *ngIf="!isEditing(i, 'parents')" class="flex justify-between items-center gap-8">
               <div class="flex-1">
                 <div class="font-medium md:text-sm" [innerHTML]="reward.name"></div>
               </div>
               <div class="flex items-center gap-8">
-                <div class="font-bold text-teal-500 whitespace-nowrap">{{ reward.stars }} ⭐</div>
+                <div class="font-bold text-dadai-cyan whitespace-nowrap">{{ reward.stars }} ⭐</div>
                 <button
                   class="px-8 py-4 bg-transparent text-slate-500 rounded-base text-xs hover:bg-slate-200 transition-colors border border-slate-300 cursor-pointer"
                   (click)="startEdit(reward, i, 'parents')">
@@ -204,7 +204,7 @@
               </div>
               <div class="flex gap-8">
                 <button
-                  class="px-12 py-6 bg-teal-500 text-white rounded-base text-sm font-medium hover:bg-teal-600 transition-colors border-0 cursor-pointer"
+                  class="px-12 py-6 bg-dadai-cyan text-white rounded-base text-sm font-medium hover:bg-dadai-navy-light transition-colors border-0 cursor-pointer"
                   (click)="saveEdit()">
                   Save
                 </button>
