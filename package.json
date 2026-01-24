@@ -2,7 +2,12 @@
   "name": "@playground/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "session-stash:set-env": "node scripts/set-env.js",
+    "session-stash:serve": "node scripts/set-env.js && nx serve session-stash",
+    "session-stash:build": "node scripts/set-env.js && nx build session-stash --configuration=production",
+    "session-stash:gen-types": "npx supabase gen types typescript --project-id $SUPABASE_PROJECT_ID > apps/session-stash/src/app/models/database.types.ts"
+  },
   "private": true,
   "dependencies": {
     "@angular/common": "~20.3.0",
@@ -70,6 +75,7 @@
     "angular-eslint": "^20.3.0",
     "autoprefixer": "^10.4.23",
     "babel-jest": "^29.7.0",
+    "dotenv": "^17.2.3",
     "eslint": "^9.8.0",
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-playwright": "^1.6.2",
